@@ -1,0 +1,9 @@
+Create by: Nguy?n Qu?n Tr?
+Customer Name: sdfsdfs
+Item 	| UnitPrice 	| Qty 
+---------------------------
+---------------------------
+Total: 0 VND
+VAT(10%): 0 VND
+Sum: 0 VND
+---------------------------

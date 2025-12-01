@@ -1,0 +1,7 @@
+Create by: Lan Manager
+Customer Name: Alice Nguyen
+Table: A1
+Ingredient 	| Quantity 
+---------------------------
+House Marinade	| 0.0
+---------------------------

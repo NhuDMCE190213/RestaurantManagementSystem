@@ -1,0 +1,10 @@
+Create by: Lan Manager
+Customer Name: Alice Nguyen
+Item 	| UnitPrice 	| Qty 
+---------------------------
+Black Coffee	| 30.000 VND	| 12
+---------------------------
+Total: 306.000 VND
+VAT(10%): 30.600 VND
+Sum: 336.600 VND
+---------------------------

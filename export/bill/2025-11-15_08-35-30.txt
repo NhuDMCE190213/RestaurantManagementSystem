@@ -1,0 +1,12 @@
+Create by: Son Cashier
+Customer Name: Alice Nguyen
+Item 	| UnitPrice 	| Qty 
+---------------------------
+Grilled Beef Plate	| 180.000 VND	| 2
+Fresh Salad Roll	| 45.000 VND	| 3
+Black Coffee	| 30.000 VND	| 2
+---------------------------
+Total: 471.750 VND
+VAT(10%): 47.175 VND
+Sum: 518.925 VND
+---------------------------

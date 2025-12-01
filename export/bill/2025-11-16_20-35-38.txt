@@ -1,0 +1,10 @@
+Create by: Lan Manager
+Customer Name: KhachABCEDF
+Item 	| UnitPrice 	| Qty 
+---------------------------
+Black Coffee	| 30.000 VND	| 3
+---------------------------
+Total: 76.500 VND
+VAT(10%): 7.650 VND
+Sum: 84.150 VND
+---------------------------

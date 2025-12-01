@@ -1,0 +1,7 @@
+Create by: Nhu
+Customer Name: Tr?n V?n A
+Table: A03
+Ingredient 	| Quantity 
+---------------------------
+S?a t??i	| 0.2
+---------------------------

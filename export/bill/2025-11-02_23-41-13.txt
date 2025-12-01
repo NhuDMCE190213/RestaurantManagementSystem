@@ -1,0 +1,10 @@
+Create by: Nguy?n Qu?n Tr?
+Customer Name: Tr?n V?n A
+Item 	 UnitPrice 	 Qty 
+---------------------------
+Black Coffee	30.000 VND	2
+---------------------------
+Total: 60.000 VND
+VAT(10%): 6.000 VND
+Remain: 66.000 VND
+---------------------------

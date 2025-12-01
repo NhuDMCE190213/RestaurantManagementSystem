@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/SWP391_RMS">
+<!--    <Resources>
+        <PreResources 
+            base="D:\[AAA]source code[AAA]\Restaurant_Management_System\upload_files\menu" 
+            webAppMount="/images/menu" 
+            className="org.apache.catalina.webresources.DirResourceSet" />
+    </Resources>-->
+</Context>

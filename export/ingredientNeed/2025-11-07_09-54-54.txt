@@ -1,0 +1,6 @@
+Create by: Nguy?n Qu?n Tr?
+Customer Name: sdfsdfs
+Table: A03
+Ingredient 	 Quantity 
+---------------------------
+---------------------------

@@ -1,0 +1,10 @@
+Create by: Nguy?n Qu?n Tr?
+Customer Name: sdfsdfs
+Item 	| UnitPrice 	| Qty 
+---------------------------
+Black Coffee	| 30.000 VND	| 10
+---------------------------
+Total: 300.000 VND
+VAT(10%): 30.000 VND
+Sum: 330.000 VND
+---------------------------

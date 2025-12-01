@@ -1,0 +1,8 @@
+Create by: Nguy?n Qu?n Tr?
+Customer Name: sdfsdfs
+Table: A03
+Ingredient 	| Quantity 
+---------------------------
+Bò t??i	| 0.4
+N??c m?m	| 0.03
+---------------------------

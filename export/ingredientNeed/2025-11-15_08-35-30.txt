@@ -1,0 +1,10 @@
+Create by: Son Cashier
+Customer Name: Alice Nguyen
+Table: A1
+Ingredient 	| Quantity 
+---------------------------
+Beef Ribeye	| 0.9
+Tiger Shrimp	| 0.36
+Romaine Lettuce	| 0.6
+House Marinade	| 0.1
+---------------------------

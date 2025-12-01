@@ -1,0 +1,101 @@
+          
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(
+                    180deg,
+                    rgb(240, 250, 247) 0%,
+                    rgb(230, 255, 249) 50%,
+                    rgb(255, 255, 255) 100%
+                    );
+            }
+
+            /* Sidebar */
+            .sidebar {
+                width: 15vw;
+                background: linear-gradient(
+                    135deg,
+                    rgba(29, 130, 112, 0.9),
+                    rgba(15, 76, 64, 0.95)
+                    );
+                color: #f0f9f7;
+                min-height: 100vh;
+            }
+
+            .sidebar-logo {
+                text-align: center;
+                padding: 20px 0;
+            }
+
+            .sidebar-logo img {
+                width: 70px;
+                border-radius: 50%;
+                border: 2px solid #fff;
+            }
+
+            .nav-item-custom {
+                color: #f0f9f7;
+                padding: 12px 20px;
+             
+                display: flex;
+                align-items: center;
+                text-decoration: none;
+                transition: all 0.2s;
+            }
+
+            .nav-item-custom:hover,
+            .nav-item-custom.active {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: #fff;
+            }
+
+            .nav-item-custom i {
+                margin-right: 10px;
+            }
+
+            /* Main content */
+            .main-content {
+                flex-grow: 1;
+                background: linear-gradient(180deg, #e8fdf6 0%, #ffffff 100%);
+                padding: 2rem;
+                min-height: 100vh;
+            }
+
+            /* Table */
+            .table thead {
+                background-color: #d1f2eb;
+            }
+
+            .table tbody tr:hover {
+                background-color: #f1faf7 !important;
+            }
+
+            /* Pagination */
+            .page-link {
+                border-color: #26a69a;
+                color: #26a69a;
+            }
+
+            .page-item.active .page-link {
+                background-color: #26a69a !important;
+                border-color: #26a69a !important;
+                color: #fff !important;
+            }
+
+            /* Buttons */
+            .btn-outline-primary:hover,
+            .btn-outline-warning:hover,
+            .btn-outline-danger:hover {
+                color: #fff !important;
+            }
+
+            @media (max-width: 992px) {
+                .sidebar {
+                    width: 100%;
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                }
+                .dashboard-container {
+                    flex-direction: column;
+                }
+            }

@@ -1,0 +1,14 @@
+Create by: Tr?n Ph?c V?
+Customer Name: Tr?n V?n A
+Item 	| UnitPrice 	| Qty 
+---------------------------
+Grilled Chicken Plate	| 120.000 VND	| 2
+Spring Roll (G?i cu?n)	| 45.000 VND	| 3
+Black Coffee	| 300.000 VND	| 2
+Black Coffee	| 300.000 VND	| 10
+Black Coffee	| 300.000 VND	| 1
+---------------------------
+Total: 1.035.000 VND
+VAT(10%): 103.500 VND
+Sum: 1.138.500 VND
+---------------------------

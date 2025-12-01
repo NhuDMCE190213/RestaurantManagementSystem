@@ -1,0 +1,8 @@
+Create by: Nguy?n Qu?n Tr?
+Customer Name: Tr?n V?n A
+Table: A04
+Ingredient 	 Quantity 
+---------------------------
+Bò t??i	96000.0
+N??c m?m	7200.0
+---------------------------

@@ -1,0 +1,10 @@
+Create by: Nhu
+Customer Name: Tr?n V?n A
+Item 	| UnitPrice 	| Qty 
+---------------------------
+Black Coffee	| 300.000 VND	| 2
+---------------------------
+Total: 540.000 VND
+VAT(10%): 54.000 VND
+Sum: 594.000 VND
+---------------------------

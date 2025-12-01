@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Admin Listings - Yummy Restaurant</title>
+  <meta name="description" content="Administrative listing page for managing orders and employees at Yummy Restaurant.">
+  <meta name="keywords" content="admin dashboard, restaurant orders, employee management">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <!-- Main Site CSS -->
+  <link href="assets/css/main.css" rel="stylesheet">
+
+  <!-- Admin Listing CSS -->
+  <link href="assets/css/dashboard.css" rel="stylesheet">
+</head>
+
+<body class="admin-list-page">
+  <header class="admin-header shadow-sm">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+      <div class="brand d-flex align-items-center gap-3">
+        <div class="brand-info">
+          <h2 class="brand-name mb-0">Dashboard</h2>
+          <p class="brand-subtitle mb-0">Staff &amp; Operations</p>
+        </div>
+      </div>
+      <div class="header-actions d-flex align-items-center gap-3">
+        
+        <div class="profile-chip d-flex align-items-center gap-2">
+          <div class="avatar">A</div>
+          <div>
+            <p class="mb-0 fw-semibold">Alex Morgan</p>
+            <span class="role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-layout">
+    <div class="container-fluid">
+      <div class="row">
+        <aside class="col-12 col-lg-3 col-xxl-2 left-menu" aria-label="Admin navigation">
+          <nav class="menu-panel">
+            <h1 class="menu-title">Browse Lists</h1>
+            <ul class="menu-links list-unstyled mb-0">
+              <li><a href="#"><i class="bi bi-receipt"></i> Order List</a></li>
+              <li><a href="#"><i class="bi bi-calendar-check"></i> Reservation List</a></li>
+              <li><a href="#"><i class="bi bi-grid-3x3"></i> Table List</a></li>
+              <li><a href="#"><i class="bi bi-tags"></i> Category List</a></li>
+              <li><a href="#"><i class="bi bi-list-ul"></i> Menu Item List</a></li>
+              <li><a href="#"><i class="bi bi-diagram-2"></i> Type List</a></li>
+              <li><a href="#"><i class="bi bi-basket"></i> Ingredient List</a></li>
+              <li><a href="#"><i class="bi bi-book"></i> Recipe List</a></li>
+              <li><a href="#"><i class="bi bi-download"></i> Import List</a></li>
+              <li><a href="#"><i class="bi bi-truck"></i> Supplier List</a></li>
+              <li><a href="#"><i class="bi bi-person-badge"></i> Account List</a></li>
+              <li><a href="#"><i class="bi bi-shield-lock"></i> Role List</a></li>
+              <li><a href="#"><i class="bi bi-ticket-perforated"></i> Voucher List</a></li>
+            </ul>
+          </nav>
+        </aside>
+
+        <section class="col-12 col-lg-9 col-xxl-10 table-section" aria-label="Listing table">
+          <div class="content-card shadow-sm">
+            <div class="card-header border-0 px-4 py-3 d-flex flex-column flex-md-row gap-3 gap-md-0 justify-content-between align-items-md-center">
+              <div>
+                <h1 class="section-title mb-1">Order List</h1>
+              </div>
+              <div class="actions d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-md-end">
+                <div class="filters d-flex flex-wrap gap-2 justify-content-end">
+                  <div class="search-box input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="search" class="form-control" placeholder="Search by customer or ID">
+                  </div>
+                  <select class="form-select">
+                    <option selected>All statuses</option>
+                    <option>Pending</option>
+                    <option>Preparing</option>
+                    <option>Completed</option>
+                    <option>Cancelled</option>
+                  </select>
+                  <a class="btn btn-primary add-btn" href="#"><i class="bi bi-plus-circle"></i> Add</a>
+                  
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive px-4 pb-2">
+              <table class="table align-middle admin-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Order ID</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Order Date</th>
+                    <th scope="col">Items</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>#ORD-1024</td>
+                    <td>Minh Nguyen</td>
+                    <td>Oct 10, 2025</td>
+                    <td>3</td>
+                    <td class="text-danger fw-semibold">1,250,000 VND</td>
+                    <td><span class="badge status-pill status-preparing">Preparing</span></td>
+                    <td class="text-end">
+                      <div class="action-button-group d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-view" title="View details" aria-label="View details">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-edit" title="Edit order" aria-label="Edit order">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-delete" title="Delete order" aria-label="Delete order">
+                          <i class="bi bi-x-circle"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>#ORD-1018</td>
+                    <td>Lan Pham</td>
+                    <td>Oct 09, 2025</td>
+                    <td>5</td>
+                    <td class="text-danger fw-semibold">2,480,000 VND</td>
+                    <td><span class="badge status-pill status-completed">Completed</span></td>
+                    <td class="text-end">
+                      <div class="action-button-group d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-view" title="View details" aria-label="View details">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-edit" title="Edit order" aria-label="Edit order">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-delete" title="Delete order" aria-label="Delete order">
+                          <i class="bi bi-x-circle"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>#ORD-1013</td>
+                    <td>Hoang Le</td>
+                    <td>Oct 09, 2025</td>
+                    <td>2</td>
+                    <td class="text-danger fw-semibold">560,000 VND</td>
+                    <td><span class="badge status-pill status-pending">Pending</span></td>
+                    <td class="text-end">
+                      <div class="action-button-group d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-view" title="View details" aria-label="View details">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-edit" title="Edit order" aria-label="Edit order">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-delete" title="Delete order" aria-label="Delete order">
+                          <i class="bi bi-x-circle"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>#ORD-1009</td>
+                    <td>Diep Tran</td>
+                    <td>Oct 08, 2025</td>
+                    <td>4</td>
+                    <td class="text-danger fw-semibold">980,000 VND</td>
+                    <td><span class="badge status-pill status-cancelled">Cancelled</span></td>
+                    <td class="text-end">
+                      <div class="action-button-group d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-view" title="View details" aria-label="View details">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-edit" title="Edit order" aria-label="Edit order">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-icon btn-delete" title="Delete order" aria-label="Delete order">
+                          <i class="bi bi-x-circle"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card-footer border-0 px-4 py-3 d-flex flex-column flex-md-row gap-3 gap-md-0 justify-content-between align-items-md-center">
+              <p class="mb-0 text-muted">Showing <strong>1-4</strong> of <strong>32</strong> orders</p>
+              <nav aria-label="Order pagination">
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1" aria-disabled="true">Prev</a></li>
+                  <li class="page-item active" aria-current="page"><a class="page-link" href="#">1</a></li>
+                  <li class="page-item"><a class="page-link" href="#">2</a></li>
+                  <li class="page-item"><a class="page-link" href="#">3</a></li>
+                  <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+
+  <!-- Main JS File -->
+  <script src="assets/js/main.js"></script>
+</body>
+
+</html>

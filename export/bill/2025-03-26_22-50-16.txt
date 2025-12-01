@@ -1,0 +1,12 @@
+Create by: Nguy?n Qu?n Tr?
+Customer Name: sdfsdfs
+Item 	| UnitPrice 	| Qty 
+---------------------------
+Grilled Chicken Plate	| 120.000 VND	| 2
+Spring Roll (G?i cu?n)	| 45.000 VND	| 3
+Black Coffee	| 30.000 VND	| 2
+---------------------------
+Total: 435.000 VND
+VAT(10%): 43.500 VND
+Sum: 478.500 VND
+---------------------------
