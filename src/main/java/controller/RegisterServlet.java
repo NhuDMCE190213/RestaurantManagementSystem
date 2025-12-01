@@ -106,6 +106,10 @@ public class RegisterServlet extends HttpServlet {
 
                 registerSuccess = false;
                 errorMessage = "Password and Confirm Password don't match.";
+            } else if (password.length() < 6) {
+
+                registerSuccess = false;
+                errorMessage = "Password must be at least 6 characters long.";
             } else if (!isValidEmail(email)) {
                 registerSuccess = false;
                 errorMessage = "Invalid email format.";

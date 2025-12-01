@@ -151,7 +151,20 @@ body {
     position: relative;
     z-index: 1;
 }
-
+.forgot-password-link {
+                text-align: center; 
+                margin-top: -10px; 
+                margin-bottom: 10px; 
+                font-size: 0.9em;
+               
+            }
+            .forgot-password-link a {
+             color:#c92a2a;
+                font-weight: 600;
+            }
+            .forgot-password-link a:hover {
+                text-decoration: underline;
+            }
 
 
 .brand-name a {

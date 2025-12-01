@@ -4,6 +4,7 @@
  */
 package dao;
 
+import static constant.CommonFunction.checkErrorSQL;
 import db.DBContext;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import model.Employee;
 
 /**
@@ -346,4 +348,46 @@ public class EmployeeDAO extends DBContext {
         }
         return null;
     }
+     //FORGET PASSWORD
+    public Employee getElementByEmail(String email) {
+    try {
+        String query = "SELECT emp_id, emp_account, password, emp_name, "
+                + "gender, dob, phone_number, email, address, role_id, status "
+                + "FROM employee "
+                + "WHERE LOWER(status) <> 'deleted' AND email = ?";
+        ResultSet rs = this.executeSelectionQuery(query, new Object[]{email});
+        if (rs.next()) {
+            int empId = rs.getInt(1);
+            String account = rs.getString(2);
+            String password = rs.getString(3);
+            String empName = rs.getString(4);
+            String gender = rs.getString(5);
+            Date dob = rs.getDate(6);
+            String phoneNumber = rs.getString(7);
+            String foundEmail = rs.getString(8);
+            String address = rs.getString(9);
+            int roleId = rs.getInt(10);
+            String status = rs.getString(11);
+            
+               return new Employee(empId, account, password, empName, gender, dob, phoneNumber, foundEmail, address, roleDAO.getElementByID(roleId), status);
+        }
+    } catch (SQLException ex) {
+        Logger.getLogger(EmployeeDAO.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return null;
+}
+
+public int updatePassword(int empId, String newHashedPassword) {
+    try {
+        String query = "UPDATE employee SET password = ? WHERE emp_id = ?";
+        return this.executeQuery(query, new Object[]{newHashedPassword, empId});
+    } catch (SQLException ex) {
+              int sqlError = checkErrorSQL(ex);
+        if (sqlError != 0) {
+            return sqlError;
+        }
+        Logger.getLogger(EmployeeDAO.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return -1;
+}
 }

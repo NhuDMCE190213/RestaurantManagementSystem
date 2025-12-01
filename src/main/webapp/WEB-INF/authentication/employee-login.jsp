@@ -75,7 +75,9 @@
 
 
                     <button type="submit" class="btn-login">Log In</button>
-
+<div class="forgot-password-link">
+                        Forget password? <a href="forgetPassword"> Click here to reset.</a>
+                    </div>
                  <div class="divider">
                         <span>OR</span>
                     </div>
