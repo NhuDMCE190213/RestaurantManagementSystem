@@ -131,10 +131,7 @@ public class EmployeeServlet extends HttpServlet {
 
                 try {
                     roleId = Integer.parseInt(request.getParameter("roleId"));
-                    if (roleDAO.isRoleDeleted(roleId)) {
-                        throw new Exception();
-                    }
-                } catch (Exception ex) {
+                } catch (NumberFormatException ex) {
                     roleId = -1;
                 }
 
@@ -170,11 +167,7 @@ public class EmployeeServlet extends HttpServlet {
                 try {
                     empId = Integer.parseInt(request.getParameter("id"));
                     roleId = Integer.parseInt(request.getParameter("roleId"));
-
-                    if (roleDAO.isRoleDeleted(roleId)) {
-                        throw new Exception();
-                    }
-                } catch (Exception e) {
+                } catch (NumberFormatException e) {
                     empId = -1;
                     roleId = -1;
                 }
