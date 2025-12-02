@@ -75,37 +75,6 @@ public class RoleDAO extends DBContext {
         return list;
     }
 
-    public List<Role> getAll(int page, int maxElement, String keyword) {
-        List<Role> list = new ArrayList<>();
-
-        try {
-            String query = "SELECT role_id, role_name, description\n"
-                    + "FROM     role\n"
-                    + "AND (LOWER(role_name) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?))\n"
-                    + "ORDER BY role_id\n"
-                    + "OFFSET ? ROWS \n"
-                    + "FETCH NEXT ? ROWS ONLY;";
-
-            keyword = "%" + keyword + "%";
-
-            ResultSet rs = this.executeSelectionQuery(query, new Object[]{keyword, keyword, (page - 1) * maxElement, maxElement});
-
-            while (rs.next()) {
-                int id = rs.getInt(1);
-                String name = rs.getString(2);
-                String description = rs.getString(3);
-
-                Role role = new Role(id, name, description);
-
-                list.add(role);
-            }
-        } catch (SQLException ex) {
-            System.out.println("Can't not load list");
-        }
-
-        return list;
-    }
-
     public Role getElementByID(int id) {
 
         try {

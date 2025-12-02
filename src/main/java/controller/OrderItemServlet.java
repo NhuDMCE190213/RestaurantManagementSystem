@@ -197,13 +197,6 @@ public class OrderItemServlet extends HttpServlet {
                 } else {
                     popupMessage = "The object added successfull.";
                 }
-                if (popupStatus) {
-                    String stockError = validateIngredientAvailability(menuItem, quantity);
-                    if (stockError != null) {
-                        popupStatus = false;
-                        popupMessage = stockError;
-                    }
-                }
 //end
                 if (popupStatus == true) {
                     try {
@@ -245,13 +238,6 @@ public class OrderItemServlet extends HttpServlet {
                     popupMessage = "The edit action is NOT successfull. The input has some error.";
                 } else {
                     popupMessage = "The object edited successfull.";
-                }
-                if (popupStatus) {
-                    String stockError = validateIngredientAvailability(menuItem, quantity);
-                    if (stockError != null) {
-                        popupStatus = false;
-                        popupMessage = stockError;
-                    }
                 }
 //end
                 if (popupStatus == true) {
@@ -377,46 +363,6 @@ public class OrderItemServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         session.removeAttribute("popupStatus");
         session.removeAttribute("popupMessage");
-    }
-
-
-    private String validateIngredientAvailability(MenuItem menuItem, int quantity) {
-        if (menuItem == null || menuItem.getRecipe() == null || menuItem.getRecipe().getItems() == null
-                || menuItem.getRecipe().getItems().isEmpty()) {
-            return "Selected menu item has no recipe configuration.";
-        }
-
-
-        for (RecipeItem recipeItem : menuItem.getRecipe().getItems()) {
-            Ingredient ingredient = ingredientDAO.getElementByID(recipeItem.getIngredientId());
-            if (ingredient == null) {
-                String name = recipeItem.getIngredientName() != null ? recipeItem.getIngredientName() : ("ID " + recipeItem.getIngredientId());
-                return "Ingredient " + name + " is unavailable.";
-            }
-
-
-            double available = Math.max(ingredient.getTotalQuantity(), 0);
-            double required = recipeItem.getQuantity() * quantity;
-
-
-            if (available + 1e-9 < required) {
-                String unit = ingredient.getUnit() != null ? ingredient.getUnit() : recipeItem.getUnit();
-                return "Not enough " + ingredient.getIngredientName() + " in stock. Required "
-                        + formatQuantity(required) + (unit != null ? " " + unit : "")
-                        + ", available " + formatQuantity(available) + ".";
-            }
-        }
-
-
-        return null;
-    }
-
-
-    private String formatQuantity(double value) {
-        if (Math.abs(value - Math.rint(value)) < 1e-6) {
-            return String.valueOf((long) Math.rint(value));
-        }
-        return String.format(java.util.Locale.US, "%.2f", value);
     }
 }
 
