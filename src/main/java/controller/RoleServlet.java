@@ -100,7 +100,7 @@ public class RoleServlet extends HttpServlet {
         }
 
         request.setAttribute("totalPages", totalPages);
-        request.setAttribute("rolesList", roleDAO.getAll(page, MAX_ELEMENTS_PER_PAGE, keyword));
+        request.setAttribute("rolesList", roleDAO.getAll(page, MAX_ELEMENTS_PER_PAGE));
 
         request.getRequestDispatcher("/WEB-INF/role/" + namepage + ".jsp").forward(request, response);
         removePopup(request);
