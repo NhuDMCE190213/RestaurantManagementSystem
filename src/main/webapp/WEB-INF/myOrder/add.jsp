@@ -35,7 +35,7 @@
                             <select name="reservationId" class="form-select">                                
                                 <c:forEach var="reservation" items="${reservationsList}">
                                     <option value="${reservation.reservationId}" class="form-options">
-                                        <c:out value="(Date: ${reservation.reservationDate} - Time: ${reservation.reservationTime})"/>
+                                        <c:out value="(Date: ${reservation.reservationDate} - Time: ${reservation.timeStart} ~ ${reservation.timeEnd} )"/>
                                     </option>
                                 </c:forEach>
                             </select>

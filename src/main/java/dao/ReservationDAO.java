@@ -110,7 +110,7 @@ public class ReservationDAO extends DBContext {
         List<Reservation> list = new ArrayList<>();
 
         try {
-            String sql = "SELECT reservation_id, customer_id, table_id, reservation_date, r.time_start, r.time_end, status\n"
+            String sql = "SELECT reservation_id, customer_id, table_id, reservation_date, time_start, time_end, status\n"
                     + "FROM     reservation\n"
                     + "WHERE  (customer_id = ?) AND (LOWER(status) = 'pending' OR\n"
                     + "LOWER(status) = 'approved')\n"
