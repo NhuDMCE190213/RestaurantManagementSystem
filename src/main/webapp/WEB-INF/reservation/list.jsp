@@ -6,6 +6,7 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%@include file="/WEB-INF/include/headerDashboard.jsp" %>
 
@@ -50,7 +51,11 @@
                                     <td><c:out value="${r.customer.customerName}"/></td>
                                     <td><c:out value="${r.table.number}"/></td>
                                     <td><c:out value="${r.reservationDate}"/></td>
-                                    <td><c:out value="${r.reservationTime}"/></td>
+                                    <td>
+                                        ${fn:substring(r.timeStart, 0, 5)} - ${fn:substring(r.timeEnd, 0, 5)}
+                                    </td>
+
+
                                     <td>
                                         <span class="badge
                                               ${r.status == 'Approved' ? 'bg-success' : 

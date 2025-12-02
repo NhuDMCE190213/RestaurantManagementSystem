@@ -17,17 +17,36 @@ public class Reservation {
     private Customer customer;
     private Table table;
     private Date reservationDate;
-    private Time reservationTime;
+    private Time timeStart;
+    private Time timeEnd;
     private String Status;
 
-    public Reservation(int reservationId, Customer customer, Table table, Date reservationDate, Time reservationTime, int partySize, String Status) {
+    public Reservation(int reservationId, Customer customer, Table table, Date reservationDate, Time timeStart, Time timeEnd, String Status) {
         this.reservationId = reservationId;
         this.customer = customer;
         this.table = table;
         this.reservationDate = reservationDate;
-        this.reservationTime = reservationTime;
+        this.timeStart = timeStart;
+        this.timeEnd = timeEnd;
         this.Status = Status;
     }
+    
+    public Time getTimeStart() {
+        return timeStart;
+    }
+
+    public void setTimeStart(Time timeStart) {
+        this.timeStart = timeStart;
+    }
+
+    public Time getTimeEnd() {
+        return timeEnd;
+    }
+
+    public void setTimeEnd(Time timeEnd) {
+        this.timeEnd = timeEnd;
+    }
+
 
     public int getReservationId() {
         return reservationId;
@@ -59,14 +78,6 @@ public class Reservation {
 
     public void setReservationDate(Date reservationDate) {
         this.reservationDate = reservationDate;
-    }
-
-    public Time getReservationTime() {
-        return reservationTime;
-    }
-
-    public void setReservationTime(Time reservationTime) {
-        this.reservationTime = reservationTime;
     }
 
     public String getStatus() {

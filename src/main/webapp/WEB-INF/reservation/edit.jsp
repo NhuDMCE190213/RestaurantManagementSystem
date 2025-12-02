@@ -16,7 +16,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Book Table <%= (selected != null) ? selected.getNumber() : ""%></title>
+        <title>Edit Reservation - Table <%= (selected != null) ? selected.getNumber() : ""%></title>
 
         <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
         <style>
@@ -48,7 +48,7 @@
     <body>
         <div class="booking-container">
             <h4 class="text-center mb-4">
-                Book Table <%= (selected != null) ? selected.getNumber() : ""%>
+                Edit Reservation - Table <%= (selected != null) ? selected.getNumber() : ""%>
             </h4>
 
             <form id="bookingForm" action="<c:url value='/my-reservation'/>" method="post">
@@ -57,26 +57,33 @@
                 <input type="hidden" name="customerId" value="${sessionScope.customerSession.customerId}">
                 <input type="hidden" name="from" value="mylist">
 
-                <div class="md-3">
-                    <label class="form-label">Table</label>  
-                    <input type="number" name="tableId" class="form-control" required
-                           value="${currentReservation.table.id}" readonly  >
+                <!-- FIXED Duplicate tableId -->
+                <div class="mb-3">
+                    <label class="form-label">Table</label>
+                    <input type="number" class="form-control" value="${currentReservation.table.id}" readonly>
                     <input type="hidden" name="tableId" value="${currentReservation.table.id}">
-                    <small class="text-muted">Current: ${currentReservation.table.number}</small>
+                    <small class="text-muted">Current Table Number: ${currentReservation.table.number}</small>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Date</label>
-                    <input type="date" name="reservationDate" id="reservationDate" class="form-control" required
-                           value="${currentReservation.reservationDate}">
+                    <input type="date" name="reservationDate" id="reservationDate" class="form-control"
+                           required value="${currentReservation.reservationDate}">
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label">Time</label>
-                    <input type="time" name="reservationTime" id="reservationTime" class="form-control" required
-                           value="${currentReservation.reservationTime}">
-                    <p class="text-muted mb-1">Cannot book table a time between 05:00 and 22:00</p>
+                    <label class="form-label">Start Time</label>
+                    <input type="time" name="timeStart" id="timeStart" class="form-control"
+                           required value="${currentReservation.timeStart}">
                 </div>
+
+                <div class="mb-4">
+                    <label class="form-label">End Time</label>
+                    <input type="time" name="timeEnd" id="timeEnd" class="form-control"
+                           required value="${currentReservation.timeEnd}">
+                    <p class="text-muted mb-1">End time must be after start time.</p>
+                </div>
+
 
                 <c:if test="${not empty reservedRanges}">
                     <div class="alert alert-warning mt-3">
@@ -89,19 +96,19 @@
                     </div>
                 </c:if>
 
-
                 <div id="availabilityMsg" class="mb-3"></div>
 
                 <div class="d-flex justify-content-between">
                     <button type="submit" id="btnSubmit" class="btn btn-confirm">Confirm</button>
-                    <li>
-                        <a class="btn btn-outline-secondary" href="<c:url value='/my-reservation'>
-                               <c:param name='view' value='mylist'/>
-                               <c:param name='customerId' value='${sessionScope.customerSession.customerId}'/>
-                           </c:url>">
-                            Cancel
-                        </a>
-                    </li>
+
+                    <!-- FIXED: không dùng <li> -->
+                    <a class="btn btn-outline-secondary"
+                       href="<c:url value='/my-reservation'>
+                           <c:param name='view' value='mylist'/>
+                           <c:param name='customerId' value='${sessionScope.customerSession.customerId}'/>
+                       </c:url>">
+                        Cancel
+                    </a>
                 </div>
             </form>
         </div>
@@ -113,7 +120,7 @@
             <c:forEach var="r" items="${existingReservations}" varStatus="loop">
             {
             date: '${r.reservationDate}',
-                    time: '${r.reservationTime}'
+                    timeStart: '${r.timeStart}'
             }<c:if test="${!loop.last}">,</c:if>
             </c:forEach>
             ];
@@ -126,7 +133,7 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const today = new Date().toISOString().split('T')[0];
                 const dateEl = document.getElementById('reservationDate');
-                const timeEl = document.getElementById('reservationTime');
+                const timeEl = document.getElementById('timeStart');
                 const btnSubmit = document.getElementById('btnSubmit');
                 const availMsg = document.getElementById('availabilityMsg');
 
@@ -155,7 +162,7 @@
                     const selectedMins = toMinutes(selectedTime);
                     for (const r of existingReservations) {
                         if (r.date === selectedDate) {
-                            const existingMins = toMinutes(r.time);
+                            const existingMins = toMinutes(r.timeStart);
                             const diff = Math.abs(selectedMins - existingMins);
                             if (diff <= 195)
                                 return true; // trong 3h15p
@@ -176,7 +183,7 @@
 
                     const hour = parseInt(time.split(':')[0]);
                     if (hour < 5 || hour >= 22) {
-                        showMessage('Cannot book table between 22:00 - 05:00.', 'danger');
+                        showMessage('Không thể đặt trong khoảng 22:00 - 05:00.', 'danger');
                         btnSubmit.disabled = true;
                         return;
                     }

@@ -1,6 +1,6 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+     * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+     * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
 package controller;
 
@@ -160,18 +160,38 @@ public class MyReservationServlet extends HttpServlet {
         if ("edit".equalsIgnoreCase(action)) {
             int id, tableId;
             Date date;
-            Time time;
+            Time timeStart, timeEnd;
 
             try {
                 id = Integer.parseInt(request.getParameter("reservationId"));
                 tableId = Integer.parseInt(request.getParameter("tableId"));
                 date = Date.valueOf(request.getParameter("reservationDate"));
 
-                String t = request.getParameter("reservationTime");
-                if (t.length() == 5) {
-                    t += ":00"; // HH:mm → HH:mm:ss
+                String sStart = request.getParameter("timeStart");
+                String sEnd = request.getParameter("timeEnd");
+
+                if (sStart.length() == 5) {
+                    sStart += ":00";
                 }
-                time = Time.valueOf(t);
+                if (sEnd.length() == 5) {
+                    sEnd += ":00";
+                }
+
+                timeStart = Time.valueOf(sStart);
+                timeEnd = Time.valueOf(sEnd);
+
+// Validation: end must be after start
+                if (!timeEnd.after(timeStart)) {
+                    popupStatus = false;
+                    popupMessage = "End time must be later than start time.";
+
+                    request.getSession().setAttribute("popupMessage", popupMessage);
+                    request.getSession().setAttribute("popupStatus", popupStatus);
+                    request.getSession().setAttribute("popupPage", "my-reservation");
+
+                    response.sendRedirect("my-reservation?customerId=" + request.getParameter("customerId"));
+                    return;
+                }
 
             } catch (Exception e) {
                 popupStatus = false;
@@ -185,7 +205,7 @@ public class MyReservationServlet extends HttpServlet {
                 return;
             }
 
-            int check = reservationDAO.edit(id, tableId, date, time);
+            int check = reservationDAO.edit(id, tableId, date, timeStart, timeEnd);
             if (check < 1) {
                 popupStatus = false;
                 popupMessage = "Edit failed. SQL: " + getSqlErrorCode(check);
@@ -202,16 +222,25 @@ public class MyReservationServlet extends HttpServlet {
         }
 
         if (action.equalsIgnoreCase("add")) {
-            // Add Reservation cho customer
             int customerId, tableId;
             Date date;
-            Time time;
+            Time timeStart, timeEnd;
 
             try {
                 customerId = Integer.parseInt(request.getParameter("customerId"));
                 tableId = Integer.parseInt(request.getParameter("tableId"));
                 date = Date.valueOf(request.getParameter("reservationDate"));
-                time = Time.valueOf(request.getParameter("reservationTime") + ":00");
+
+                String t = request.getParameter("reservationTime");
+                if (t.length() == 5) {
+                    t += ":00";
+                }
+
+                timeStart = Time.valueOf(t);
+                timeEnd = Time.valueOf(
+                        timeStart.toLocalTime().plusHours(3).toString()
+                );
+
             } catch (Exception e) {
                 popupStatus = false;
                 popupMessage = "Invalid input for Add Reservation.";
@@ -229,19 +258,16 @@ public class MyReservationServlet extends HttpServlet {
                 popupStatus = false;
                 popupMessage = "Table not found.";
             } else if (selectedTable.getStatus().equalsIgnoreCase("Reserved")) {
-                // Reserved thì không cho đặt
                 popupStatus = false;
                 popupMessage = "This table is currently reserved and not available.";
             } else {
-                // Cho phép đặt kể cả khi đang Occupied
-                int check = reservationDAO.add(customerId, tableId, date, time);
+                int check = reservationDAO.add(customerId, tableId, date, timeStart, timeEnd);
                 if (check < 1) {
                     popupStatus = false;
                     popupMessage = "Add failed. SQL error: " + getSqlErrorCode(check);
                 } else {
                     if (selectedTable.getStatus().equalsIgnoreCase("Occupied")) {
-                        popupMessage = "Bàn hiện đang ở trạng thái Occupied, "
-                                + "yêu cầu đặt bàn của bạn đã được gửi và có khả năng sẽ không được chấp nhận. (Status = Pending)";
+                        popupMessage = "Bàn hiện đang ở trạng thái Occupied, yêu cầu đã gửi (Pending).";
                     } else {
                         popupMessage = "Reservation created successfully (Pending).";
                     }
