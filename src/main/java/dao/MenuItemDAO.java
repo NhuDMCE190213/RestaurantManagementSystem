@@ -431,7 +431,6 @@ public int countItem(String keyword) {
         try {
             return this.executeQuery(query, new Object[]{
                 item.getCategory().getCategoryId(),
-                item.getRecipe().getRecipeId(),
                 item.getItemName(),
                 item.getImageUrl(),
                 item.getPrice(),
@@ -458,7 +457,6 @@ public int countItem(String keyword) {
         try {
             return this.executeQuery(query, new Object[]{
                 item.getCategory().getCategoryId(),
-                item.getRecipe().getRecipeId(),
                 item.getItemName(),
                 item.getImageUrl(),
                 item.getPrice(),

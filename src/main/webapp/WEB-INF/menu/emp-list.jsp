@@ -65,7 +65,26 @@
                                             /></td>
                                     <td><c:out value="${item.itemName}"/></td>
                                     <td><c:out value="${item.category.categoryName}"/></td>
-                                    <td><c:out value="${item.recipe.recipeName}"/></td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div>
+                                                <c:choose>
+                                                    <c:when test="${not empty item.recipe}">
+                                                        <c:out value="${item.recipe.recipeName}"/>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="text-muted">No recipe</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                            <div>
+                                                <a class="btn btn-sm btn-outline-primary" href="<c:url value='/recipe'>
+                                                       <c:param name='view' value='view'/>
+                                                       <c:param name='id' value='${item.menuItemId}'/>
+                                                   </c:url>">View Recipe</a>
+                                            </div>
+                                        </div>
+                                    </td>
                                     <td><c:out value="${item.priceVND}"/></td>
                                     <td><c:out value="${item.description}"/></td>
 

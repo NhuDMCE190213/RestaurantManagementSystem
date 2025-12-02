@@ -149,7 +149,7 @@
         <h4>Add Item</h4>
         <form method="post" action="${pageContext.request.contextPath}/recipe" class="row g-2">
             <input type="hidden" name="action" value="add_item" />
-            <input type="hidden" name="recipe_id" value="${currentRecipe.recipeId}" />
+            <input type="hidden" name="menu_item_id" value="${currentRecipe.recipeId}" />
             <div class="form-row-box row">
                 <div class="col-md-3 form-label-col">
                     <label class="form-label mb-0">Ingredient Name</label>
@@ -199,7 +199,7 @@
                 <div class="modal-body">
                     <input type="hidden" name="action" value="edit_item"/>
                     <input type="hidden" id="edit_recipe_item_id" name="recipe_item_id" value=""/>
-                    <input type="hidden" id="edit_recipe_id" name="recipe_id" value="${currentRecipe.recipeId}" />
+                    <input type="hidden" id="edit_recipe_id" name="menu_item_id" value="${currentRecipe.recipeId}" />
                     <div class="form-row-box row">
                         <div class="col-md-3 form-label-col">
                             <label class="form-label mb-0">Ingredient Name</label>
@@ -248,7 +248,7 @@
                 <div class="modal-body text-danger">
                     <p>Are you sure to delete this item?</p>
                     <input type="hidden" id="hiddenDeleteRecipeItemId" name="recipe_item_id" value=""/>
-                    <input type="hidden" name="recipe_id" value="${currentRecipe.recipeId}">
+                    <input type="hidden" name="menu_item_id" value="${currentRecipe.recipeId}">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

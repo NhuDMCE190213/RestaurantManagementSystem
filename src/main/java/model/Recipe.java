@@ -14,46 +14,50 @@ import java.util.List;
 public class Recipe {
 
     private int recipeId;
+    private int recipeItemId;   // recipe_item_id (PK)
     private int menuItemId;
     private String menuItemName;
+    private int ingredientId;
+    private String ingredientName;
+    private double quantity;
+    private String unit;
+    private String note;
     private String status;
-    private String recipeName;
-    private List<RecipeItem> items;
 
     public Recipe() {
-        items = new ArrayList<>();
     }
 
-//    public Recipe(int recipeId, int menuItemId, String status) {
-//        this.recipeId = recipeId;
-//        this.menuItemId = menuItemId;
-//        this.status = status;
-//
-//    }
-//
-//    public Recipe(int recipeId, int menuItemId, String menuItemName, String status) {
-//        this.recipeId = recipeId;
-//        this.menuItemId = menuItemId;
-//        this.menuItemName = menuItemName;
-//        this.status = status;
-//        this.items = new ArrayList<>();
-//    }
-
-    public Recipe(int recipeId, String recipeName, String status) {
-        this.recipeId = recipeId;
-        this.recipeName = recipeName;
+    // Full constructor (including display names)
+    public Recipe(int recipeItemId, int menuItemId, String menuItemName, int ingredientId, String ingredientName, double quantity, String unit, String note, String status) {
+        this.recipeItemId = recipeItemId;
+        this.menuItemId = menuItemId;
+        this.menuItemName = menuItemName;
+        this.ingredientId = ingredientId;
+        this.ingredientName = ingredientName;
+        this.quantity = quantity;
+        this.unit = unit;
+        this.note = note;
         this.status = status;
-        this.items = new ArrayList<>();
-    }
-    
-
-    // getters & setters
-    public int getRecipeId() {
-        return recipeId;
     }
 
-    public void setRecipeId(int recipeId) {
-        this.recipeId = recipeId;
+    // Constructor without display names
+    public Recipe(int recipeItemId, int menuItemId, int ingredientId, double quantity, String unit, String note, String status) {
+        this.recipeItemId = recipeItemId;
+        this.menuItemId = menuItemId;
+        this.ingredientId = ingredientId;
+        this.quantity = quantity;
+        this.unit = unit;
+        this.note = note;
+        this.status = status;
+    }
+
+    // getters / setters
+    public int getRecipeItemId() {
+        return recipeItemId;
+    }
+
+    public void setRecipeItemId(int recipeItemId) {
+        this.recipeItemId = recipeItemId;
     }
 
     public int getMenuItemId() {
@@ -72,35 +76,52 @@ public class Recipe {
         this.menuItemName = menuItemName;
     }
 
+    public int getIngredientId() {
+        return ingredientId;
+    }
+
+    public void setIngredientId(int ingredientId) {
+        this.ingredientId = ingredientId;
+    }
+
+    public String getIngredientName() {
+        return ingredientName;
+    }
+
+    public void setIngredientName(String ingredientName) {
+        this.ingredientName = ingredientName;
+    }
+
+    public double getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(double quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
     public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public List<RecipeItem> getItems() {
-        return items;
-    }
-
-    public void setItems(List<RecipeItem> items) {
-        this.items = items;
-    }
-
-    public void addItem(RecipeItem item) {
-        if (items == null) {
-            items = new ArrayList<>();
-        }
-        items.add(item);
-    }
-
-    public String getRecipeName() {
-        return recipeName;
-    }
-
-    public void setRecipeName(String recipeName) {
-        this.recipeName = recipeName;
     }
 
 }
