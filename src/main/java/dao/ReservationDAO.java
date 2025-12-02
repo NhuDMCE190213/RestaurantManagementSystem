@@ -26,7 +26,7 @@ public class ReservationDAO extends DBContext {
 
     public Reservation getElementByTableId(int id) {
         try {
-            String sql = "SELECT r.reservation_id, r.customer_id, r.table_id, r.reservation_date, r.reservation_time, r.status "
+            String sql = "SELECT r.reservation_id, r.customer_id, r.table_id, r.reservation_date, r.time_start, r.time_end, r.status "
                     + "FROM reservation AS r INNER JOIN [table] AS t ON r.table_id = t.table_id "
                     + "WHERE t.table_id = ? AND LOWER(r.status) = LOWER('Approved') "
                     + "ORDER BY r.reservation_id DESC";
@@ -43,7 +43,7 @@ public class ReservationDAO extends DBContext {
     public List<Reservation> getAllSeated() {
         List<Reservation> list = new ArrayList<>();
         try {
-            String sql = "SELECT reservation_id, customer_id, table_id, reservation_date, reservation_time, status "
+            String sql = "SELECT reservation_id, customer_id, table_id, reservation_date, r.time_start, r.time_end, status "
                     + "FROM reservation WHERE LOWER(status) = LOWER('Seated') "
                     + "ORDER BY reservation_id DESC";
             ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
@@ -66,7 +66,7 @@ public class ReservationDAO extends DBContext {
 
         try {
             String sql = "SELECT r.reservation_id, r.customer_id, r.table_id, "
-                    + "r.reservation_date, r.reservation_time, r.status "
+                    + "r.reservation_date, r.time_start, r.time_end, r.status "
                     + "FROM reservation AS r "
                     + "WHERE (CAST(r.reservation_id AS VARCHAR) LIKE ? OR "
                     + "CAST(r.customer_id AS VARCHAR) LIKE ? OR "
@@ -110,10 +110,10 @@ public class ReservationDAO extends DBContext {
         List<Reservation> list = new ArrayList<>();
 
         try {
-            String sql = "SELECT reservation_id, customer_id, table_id, reservation_date, reservation_time, status\n"
+            String sql = "SELECT reservation_id, customer_id, table_id, reservation_date, r.time_start, r.time_end, status\n"
                     + "FROM     reservation\n"
                     + "WHERE  (customer_id = ?) AND (LOWER(status) = 'pending' OR\n"
-                    + "                  LOWER(status) = 'approved')\n"
+                    + "LOWER(status) = 'approved')\n"
                     + "ORDER BY reservation_id DESC";
             ResultSet rs = this.executeSelectionQuery(sql,
                     new Object[]{customerId});
@@ -135,7 +135,7 @@ public class ReservationDAO extends DBContext {
         String kw = "%" + keyword + "%";
         try {
             String sql = "SELECT r.reservation_id, r.customer_id, r.table_id, "
-                    + "r.reservation_date, r.reservation_time, r.status "
+                    + "r.reservation_date, r.time_start, r.time_end, r.status "
                     + "FROM reservation AS r "
                     + "WHERE r.customer_id = ? "
                     + "AND (CAST(r.table_id AS VARCHAR) LIKE ? OR LOWER(r.status) LIKE LOWER(?)) "
@@ -175,7 +175,7 @@ public class ReservationDAO extends DBContext {
     public Reservation getElementByID(int id) {
         try {
             String sql = "SELECT r.reservation_id, r.customer_id, r.table_id, "
-                    + "r.reservation_date, r.reservation_time, r.status "
+                    + "r.reservation_date, r.time_start, r.time_end, r.status "
                     + "FROM reservation r WHERE r.reservation_id = ?";
             ResultSet rs = this.executeSelectionQuery(sql, new Object[]{id});
             if (rs.next()) {
@@ -187,11 +187,11 @@ public class ReservationDAO extends DBContext {
         return null;
     }
 
-    public int add(int customerId, int tableId, Date date, Time time) {
+    public int add(int customerId, int tableId, Date date, Time time_start, Time time_end) {
         try {
-            String sql = "INSERT INTO reservation (customer_id, table_id, reservation_date, reservation_time, status) "
-                    + "VALUES (?, ?, ?, ?, ?)";
-            return this.executeQuery(sql, new Object[]{customerId, tableId, date, time, "Pending"});
+            String sql = "INSERT INTO reservation (customer_id, table_id, reservation_date, time_start, time_end, status) "
+                    + "VALUES (?, ?, ?, ?, ?, ?)";
+            return this.executeQuery(sql, new Object[]{customerId, tableId, date, time_start, time_end, "Pending"});
         } catch (SQLException ex) {
             int err = checkErrorSQL(ex);
             if (err != 0) {
@@ -202,12 +202,12 @@ public class ReservationDAO extends DBContext {
         return -1;
     }
 
-    public int edit(int reservationId, int tableId, Date date, Time time) {
+    public int edit(int reservationId, int tableId, Date date, Time time_start, Time time_end) {
         try {
             String sql = "UPDATE reservation "
-                    + "SET table_id = ?, reservation_date = ?, reservation_time = ? "
+                    + "SET table_id = ?, reservation_date = ?, time_start = ?, time_end = ? "
                     + "WHERE reservation_id = ?";
-            return this.executeQuery(sql, new Object[]{tableId, date, time, reservationId});
+            return this.executeQuery(sql, new Object[]{tableId, date, time_start, time_end, reservationId});
         } catch (SQLException ex) {
             int err = checkErrorSQL(ex);
             if (err != 0) {
@@ -253,7 +253,8 @@ public class ReservationDAO extends DBContext {
         int customerId = rs.getInt("customer_id");
         int tableId = rs.getInt("table_id");
         Date date = rs.getDate("reservation_date");
-        Time time = rs.getTime("reservation_time");
+        Time timeStart = rs.getTime("time_start");
+        Time timeEnd = rs.getTime("time_end");
         String status = rs.getString("status");
 
         CustomerDAO customerDAO = new CustomerDAO();
@@ -262,7 +263,7 @@ public class ReservationDAO extends DBContext {
         Customer customer = customerDAO.getElementByID(customerId);
         Table table = tableDAO.getElementByID(tableId);
 
-        return new Reservation(id, customer, table, date, time, 0, status);
+        return new Reservation(id, customer, table, date, timeStart, timeEnd, status);
     }
 
     public boolean hasActiveReservationForTable(int tableId) {
@@ -282,11 +283,11 @@ public class ReservationDAO extends DBContext {
     public List<Reservation> getReservationsByTable(int tableId) {
         List<Reservation> list = new ArrayList<>();
         try {
-            String sql = "SELECT reservation_date, reservation_time FROM reservation "
+            String sql = "SELECT reservation_date, time_start, time_end FROM reservation "
                     + "WHERE table_id = ? AND status IN ('Approved')";
             ResultSet rs = this.executeSelectionQuery(sql, new Object[]{tableId});
             while (rs.next()) {
-                list.add(new Reservation(0, null, null, rs.getDate("reservation_date"), rs.getTime("reservation_time"), 0, null));
+                list.add(new Reservation(0, null, null, rs.getDate("reservation_date"), rs.getTime("time_start"), rs.getTime("time_end"), null));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -298,8 +299,8 @@ public class ReservationDAO extends DBContext {
         List<Time[]> list = new ArrayList<>();
         try {
             String sql = "SELECT "
-                    + "DATEADD(MINUTE, -15, reservation_time) AS start_time, "
-                    + "DATEADD(HOUR, 3, reservation_time) AS end_time "
+                    + "DATEADD(MINUTE, -15, time_start) AS start_time, "
+                    + "DATEADD(HOUR, 3, time_start) AS end_time "
                     + "FROM reservation "
                     + "WHERE table_id = ? AND reservation_date = ? "
                     + "AND LOWER(status) IN ('approved') "
