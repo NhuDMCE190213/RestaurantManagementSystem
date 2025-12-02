@@ -20,7 +20,7 @@
                               <c:param name="page" value="1"/>
                           </c:url>" method="get" class="search-box input-group">
                         <input type="hidden" name="view" value="list"/>
-                          <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
                         <input type="search" name="keyword" class="form-control" placeholder="Search by name" value="${param.keyword}">
                     </form>
 
@@ -64,33 +64,16 @@
                                             /></td>
                                     <td><c:out value="${item.itemName}"/></td>
                                     <td><c:out value="${item.category.categoryName}"/></td>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div>
-                                                <c:choose>
-                                                    <c:when test="${not empty item.recipe}">
-                                                        <c:out value="${item.recipe.recipeName}"/>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="text-muted">No recipe</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </div>
-                                            <div>
-                                                <a class="btn btn-sm btn-outline-primary" href="<c:url value='/recipe'>
-                                                       <c:param name='view' value='view'/>
-                                                       <c:param name='id' value='${item.menuItemId}'/>
-                                                   </c:url>">View Recipe</a>
-                                            </div>
-                                        </div>
-                                    </td>
+
                                     <td><c:out value="${item.priceVND}"/></td>
                                     <td><c:out value="${item.description}"/></td>
 
 
                                     <td class="text-end">
                                         <div class="action-button-group d-flex justify-content-end gap-2">
-
+                                            <a class="btn btn-outline-success btn-icon btn-view" title="View" aria-label="View" href="${pageContext.request.contextPath}/recipe?view=view&id=${item.menuItemId}">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
                                             <a class="btn btn-outline-secondary btn-icon btn-edit"
                                                title="Edit" aria-label="Edit"
                                                href="<c:url value="menuitem">
