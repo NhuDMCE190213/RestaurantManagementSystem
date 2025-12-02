@@ -31,12 +31,12 @@
             <table class="table align-middle admin-table">
                 <thead>
                     <tr>
-                        <th scope="col" width="10%">No.</th>
-                        <th scope="col" width="20%">Name</th>
+                        <th scope="col" width="5%">Id</th>
+                        <th scope="col" width="30%">Name</th>
+                        <th scope="col" width="10%">Quantity</th>
+                        <th scope="col" width="5%">Unit</th>
                         <th scope="col" width="15%">Type</th>
-                        <th scope="col" width="15%">Unit</th>
-                        <th scope="col" width="20%">Expiration date</th>
-                        <th scope="col" width="10%">Total Quantity</th>
+                        <th scope="col" width="15%">Status</th>
                         <th scope="col" width="10%" class="text-end">Actions</th>
                     </tr>
                 </thead>
@@ -44,43 +44,18 @@
                     <c:choose>
                         <c:when test="${ingredientsList == null || empty ingredientsList}">
                             <tr>
-                                <td colspan="7" style="color:red;">
-                                    <c:choose>
-                                        <c:when test="${searchKeyword != null && !searchKeyword.isEmpty()}">
-                                            No ingredients found matching "<c:out value="${searchKeyword}"/>".
-                                        </c:when>
-                                        <c:otherwise>
-                                            No data to display.
-                                        </c:otherwise>
-                                    </c:choose>
-                                </td>
-                            </tr>
+                                <td colspan="11" style="color:red;">No data to display</td>
+                            </tr> 
                         </c:when>
                         <c:otherwise>
-                            <c:forEach var="ing" items="${ingredientsList}" varStatus="loop">
-                                <c:set var="rowClass" value="${ing.expired ? 'table-danger' : (ing.expiringSoon ? 'table-warning' : '')}"/>
-                                <tr class="${rowClass}">
-                                    <td><c:out value="${loop.index + 1}"/></td>
-                                    <td><c:out value="${ing.ingredientName}"/></td>
-                                    <td><c:out value="${ing.typeName}"/></td>
-                                    <td><c:out value='${ing.unit}'/></td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${ing.expirationDate != null}">
-                                                <span class="fw-semibold"><c:out value='${ing.expirationDate}'/></span>
-                                                <c:if test="${ing.expired}">
-                                                    <span class="badge bg-danger ms-2">Expired</span>
-                                                </c:if>
-                                                <c:if test="${not ing.expired && ing.expiringSoon}">
-                                                    <span class="badge bg-warning text-dark ms-2">Expiring soon</span>
-                                                </c:if>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="text-muted">Not set</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td><c:out value='${ing.totalQuantity}'/></td>
+                            <c:forEach var="ingredient" items="${ingredientsList}" varStatus="loop">
+                                <tr>
+                                    <td><c:out value="${ingredient.ingredientId}"/></td>
+                                    <td><c:out value="${ingredient.ingredientName}"/></td>
+                                    <td><c:out value="${ingredient.quantity}"/></td>
+                                    <td><c:out value="${ingredient.unit}"/></td>
+                                    <td><c:out value="${ingredient.type.typeName}"/></td>
+                                    <td><c:out value="${ingredient.status}"/></td>
                                     <td class="text-end">
                                         <div class="action-button-group d-flex justify-content-end gap-2">
                                             <c:url var="edit" value="ingredient">

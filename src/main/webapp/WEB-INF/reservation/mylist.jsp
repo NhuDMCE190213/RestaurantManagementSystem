@@ -5,6 +5,7 @@
 --%>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>  
 <%@include file="/WEB-INF/include/headerCustomer.jsp" %>
 <c:if test="${sessionScope.popupPage == 'my-reservation'}">
     <div class="alert ${sessionScope.popupStatus ? 'alert-success' : 'alert-danger'}
@@ -68,7 +69,9 @@
                                     <tr>
                                         <td><c:out value="${r.table.number}"/></td>
                                         <td><c:out value="${r.reservationDate}"/></td>
-                                        <td><c:out value="${r.reservationTime}"/></td>
+                                        <td>
+                                            ${fn:substring(r.timeStart, 0, 5)} - ${fn:substring(r.timeEnd, 0, 5)}
+                                        </td>
                                         <td>
                                             <span class="badge
                                                   ${r.status == 'Approved' ? 'bg-success' : 

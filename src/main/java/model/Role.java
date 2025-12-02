@@ -13,13 +13,11 @@ public class Role {
     private int id;
     private String name;
     private String description;
-    private String status;
 
-    public Role(int id, String name, String description, String status) {
+    public Role(int id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.status = status;
     }
 
     public int getId() {
@@ -45,14 +43,4 @@ public class Role {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-    
-    
 }

@@ -100,7 +100,7 @@ public class RoleServlet extends HttpServlet {
         }
 
         request.setAttribute("totalPages", totalPages);
-        request.setAttribute("rolesList", roleDAO.getAll(page, MAX_ELEMENTS_PER_PAGE, keyword));
+        request.setAttribute("rolesList", roleDAO.getAll(page, MAX_ELEMENTS_PER_PAGE));
 
         request.getRequestDispatcher("/WEB-INF/role/" + namepage + ".jsp").forward(request, response);
         removePopup(request);
@@ -117,94 +117,6 @@ public class RoleServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action");
-
-        boolean popupStatus = true;
-        String popupMessage = "";
-
-//        boolean passValidation = true;
-        if (action != null && !action.isEmpty()) {
-
-            if (action.equalsIgnoreCase("add")) {
-                String name = request.getParameter("role_name");
-                String description = request.getParameter("description");
-
-//validate
-                if (name == null || name.isBlank()) {
-                    popupStatus = false;
-                    popupMessage = "The add action is NOT successfull. The input has some error.";
-                } else {
-                    popupMessage = "The object with name=" + name + " added successfull.";
-                }
-//end
-                if (popupStatus == true) {
-                    int checkError = roleDAO.add(name, description);
-                    if (checkError >= 1) {
-                    } else {
-                        popupStatus = false;
-                        popupMessage = "The add action is NOT successfull. Check the information again.";
-                    }
-                }
-
-            } else if (action.equalsIgnoreCase("edit")) {
-                int id;
-                String name = request.getParameter("name");
-                String description = request.getParameter("description");
-
-                try {
-                    id = Integer.parseInt(request.getParameter("id"));
-                } catch (NumberFormatException e) {
-                    id = -1;
-                }
-
-//validate
-                if (name == null || name.isBlank() || id <= 0) {
-                    popupStatus = false;
-                    popupMessage = "The edit action is NOT successfull. The input has some error.";
-                } else {
-                    popupMessage = "The object with id=" + id + " edited successfull.";
-                }
-//end
-                if (popupStatus == true) {
-                    int checkError = roleDAO.edit(id, name, description);
-
-                    if (checkError >= 1) {
-                    } else {
-                        popupStatus = false;
-                        popupMessage = "The edit action is NOT successfull. Check the information again.";
-                    }
-                }
-            } else if (action.equalsIgnoreCase("delete")) {
-
-                int id;
-
-                try {
-                    id = Integer.parseInt(request.getParameter("id"));
-                } catch (NumberFormatException e) {
-                    id = -1;
-                }
-
-//validate
-                if (id <= 0) {
-                    popupStatus = false;
-                    popupMessage = "The delete action is NOT successfull.";
-                } else {
-                    popupMessage = "The object with id=" + id + " deleted successfull.";
-                }
-//end
-                if (popupStatus == true) {
-                    int checkError = roleDAO.delete(id);
-
-                    if (checkError >= 1) {
-
-                    } else {
-                        popupStatus = false;
-                        popupMessage = "The delete action is NOT successfull.  Check the information again.";
-                    }
-                }
-            }
-        }
-        setPopup(request, popupStatus, popupMessage);
         response.sendRedirect(request.getContextPath() + "/role");
 
     }

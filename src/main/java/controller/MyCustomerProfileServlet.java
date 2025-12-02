@@ -239,7 +239,11 @@ public class MyCustomerProfileServlet extends HttpServlet {
                 errorMessage = "New password and confirmation do not match.";
             }
         }
-
+    if (errorMessage == null) {
+            if (newPassword.length() < 6) {
+                errorMessage = "Password must be at least 6 characters long.";
+            }
+        }
         if (errorMessage != null) {
             setErrorPopup(request, errorMessage);
             request.getRequestDispatcher("/WEB-INF/profile/changepassword.jsp").forward(request, response);

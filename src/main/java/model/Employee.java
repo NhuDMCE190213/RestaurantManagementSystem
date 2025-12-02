@@ -37,7 +37,6 @@ public class Employee {
         this.role = role;
         this.status = status;
     }
-    
 
     public Employee(int empId, String empAccount, String password, String empName, String gender, Date dob, String phoneNumber, String email, String address) {
         this.empId = empId;
@@ -50,8 +49,6 @@ public class Employee {
         this.email = email;
         this.address = address;
     }
-    
-    
 
     public int getEmpId() {
         return empId;
@@ -141,5 +138,4 @@ public class Employee {
         this.status = status;
     }
 
-    
 }

@@ -12,20 +12,15 @@ public class MenuItem {
 
     private int menuItemId;
     private Category category;
-    private Recipe recipe;
     private String itemName;
     private String imageUrl;
     private int price;
     private String description;
     private String status;
 
-    public MenuItem() {
-    }
-
-    public MenuItem(int menuItemId, Category category, Recipe recipe, String itemName, String imageUrl, int price, String description, String status) {
+    public MenuItem(int menuItemId, Category category, String itemName, String imageUrl, int price, String description, String status) {
         this.menuItemId = menuItemId;
         this.category = category;
-        this.recipe = recipe;
         this.itemName = itemName;
         this.imageUrl = imageUrl;
         this.price = price;
@@ -47,14 +42,6 @@ public class MenuItem {
 
     public void setCategory(Category category) {
         this.category = category;
-    }
-
-    public Recipe getRecipe() {
-        return recipe;
-    }
-
-    public void setRecipe(Recipe recipe) {
-        this.recipe = recipe;
     }
 
     public String getItemName() {
@@ -96,6 +83,8 @@ public class MenuItem {
     public void setStatus(String status) {
         this.status = status;
     }
+    
+    
 
     public String getPriceVND() {
         String str = "";

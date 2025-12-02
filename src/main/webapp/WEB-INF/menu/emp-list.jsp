@@ -40,7 +40,6 @@
                         <th width="10%" scope="col">Image</th>
                         <th width="15%" scope="col">Name</th>
                         <th width="15%" scope="col">Category</th>
-                        <th width="15%" scope="col">Recipe</th>
                         <th width="10%" scope="col">Price(VND)</th>
                         <th width="20%" scope="col">Description</th>
                         <th width="20%" scope="col" class="text-end">Actions</th>

@@ -120,10 +120,12 @@ public class BookTableServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         request.setCharacterEncoding("UTF-8");
 
         HttpSession session = request.getSession(false);
         Customer customer = null;
+
         if (session != null) {
             customer = (Customer) session.getAttribute("customerSession");
         }
@@ -140,26 +142,45 @@ public class BookTableServlet extends HttpServlet {
         try {
             int tableId = Integer.parseInt(request.getParameter("tableId"));
             Date date = Date.valueOf(request.getParameter("reservationDate"));
-            String timeStr = request.getParameter("reservationTime");
 
-            Time time;
-            if (timeStr != null && timeStr.contains("T")) {
-                String[] parts = timeStr.split("T");
-                time = Time.valueOf(parts[1] + ":00");
-            } else {
-                time = Time.valueOf(timeStr + ":00");
+            // Lấy timeStart từ form (đã đổi tên input thành timeStart)
+            String startStr = request.getParameter("timeStart");
+
+            if (startStr == null) {
+                throw new Exception("Missing timeStart");
             }
 
-            // Lấy trạng thái bàn hiện tại
+            // Xử lý trường hợp input type="datetime-local"
+            Time timeStart;
+            if (startStr.contains("T")) {
+                timeStart = Time.valueOf(startStr.split("T")[1] + ":00");
+            } else {
+                timeStart = Time.valueOf(startStr + ":00");
+            }
+
+            // Tạo timeEnd = timeStart + 3 giờ
+            long endMillis = timeStart.getTime() + 3 * 60 * 60 * 1000;
+            Time timeEnd = new Time(endMillis);
+
+            // Lấy trạng thái bàn
             model.Table selectedTable = tableDAO.getElementByID(tableId);
 
-            int check = reservationDAO.add(customer.getCustomerId(), tableId, date, time);
+            // GỌI DAO MỚI — truyền đủ 5 tham số
+            int check = reservationDAO.add(
+                    customer.getCustomerId(),
+                    tableId,
+                    date,
+                    timeStart,
+                    timeEnd
+            );
+
             if (check < 1) {
                 popupStatus = false;
                 popupMessage = "Booking failed. SQL error: " + getSqlErrorCode(check);
             } else {
                 if (selectedTable != null
                         && "occupied".equalsIgnoreCase(selectedTable.getStatus())) {
+
                     popupMessage = "Table is currently in Occupied state, "
                             + "Your reservation request has been submitted and will likely not be accepted. "
                             + "(Reservation status = Pending)";
@@ -167,9 +188,11 @@ public class BookTableServlet extends HttpServlet {
                     popupMessage = "Reservation created successfully! Status = Pending.";
                 }
             }
+
         } catch (Exception e) {
             popupStatus = false;
             popupMessage = "Invalid input. Please check your booking information.";
+            System.out.println("Error: " + e.getMessage());
         }
 
         session.setAttribute("popupMessage", popupMessage);

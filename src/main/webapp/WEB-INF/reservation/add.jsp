@@ -61,7 +61,7 @@
 
                 <div class="mb-4">
                     <label class="form-label">Time</label>
-                    <input type="time" name="reservationTime" id="reservationTime" class="form-control" required>
+                    <input type="time" name="timeStart" id="timeStart" class="form-control" required>
                     <p class="text-muted mb-1">Cannot book table a time between 05:00 and 22:00</p>
                 </div>
 
@@ -93,7 +93,7 @@
             <c:forEach var="r" items="${existingReservations}" varStatus="loop">
             {
             date: '${r.reservationDate}',
-                    time: '${r.reservationTime}'
+                    timeStart: '${r.timeStart}'
             }<c:if test="${!loop.last}">,</c:if>
             </c:forEach>
             ];
@@ -106,7 +106,7 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const today = new Date().toISOString().split('T')[0];
                 const dateEl = document.getElementById('reservationDate');
-                const timeEl = document.getElementById('reservationTime');
+                const timeEl = document.getElementById('timeStart');
                 const btnSubmit = document.getElementById('btnSubmit');
                 const availMsg = document.getElementById('availabilityMsg');
 
@@ -135,7 +135,7 @@
                     const selectedMins = toMinutes(selectedTime);
                     for (const r of existingReservations) {
                         if (r.date === selectedDate) {
-                            const existingMins = toMinutes(r.time);
+                            const existingMins = toMinutes(r.timeStart);
                             const diff = Math.abs(selectedMins - existingMins);
                             if (diff <= 195)
                                 return true; // trong 3h15p

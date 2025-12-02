@@ -69,20 +69,6 @@
                             </tr>
 
                             <tr>
-                                <th><label for="recipeId" class="form-label">Recipe</label></th>
-                                <td>
-                                    <select name="recipeId" id="recipeId" class="form-select" required>
-                                        <c:forEach var="recipe" items="${recipes}">
-                                            <option value="${recipe.recipeId}" class="form-options" 
-                                                    ${(menuItem.recipe.recipeId eq recipe.recipeId) ? 'selected' : ''}>
-                                                <c:out value="${recipe.recipeName}"/>
-                                            </option>
-                                        </c:forEach>
-                                    </select>
-                                </td>
-                            </tr>
-
-                            <tr>
                                 <th><label for="price" class="form-label">Price(VND)</label></th>
                                 <td><input type="number" id="price" name="price" class="form-control" step="1" min="1" value="<c:out value="${menuItem.price}"/>" required></td>
                             </tr>
