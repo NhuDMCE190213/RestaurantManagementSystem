@@ -9,7 +9,7 @@
 
 <%@include file="/WEB-INF/include/headerCustomer.jsp" %>
 
-<main class="d-flex justify-content-center align-items-center vh-100 bg-light">
+<main class="d-flex justify-content-center align-items-center bg-light">
     <section class="col-12 col-lg-9 col-xxl-10 table-section" aria-label="Listing table">
         <div class="content-card shadow-sm">
             <div class="card-header border-0 px-4 py-3 d-flex flex-column flex-md-row gap-3 gap-md-0 justify-content-between align-items-md-center">
