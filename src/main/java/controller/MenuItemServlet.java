@@ -26,11 +26,11 @@ public class MenuItemServlet extends HttpServlet {
     private final int MAX_ELEMENTS_PER_PAGE = 10;
     private final MenuItemDAO menuItemDAO = new MenuItemDAO();
     private final CategoryDAO categoryDAO = new CategoryDAO();
-    private final RecipeDAO recipeDAO = new RecipeDAO();
 
 //use absolute path
-private static final String EXTERNAL_UPLOAD_DIR_PATH = "../../upload_files/menu";
-private static final String UPLOAD_URL_PREFIX = "images/menu/";
+    private static final String EXTERNAL_UPLOAD_DIR_PATH = "../../upload_files/menu";
+    private static final String UPLOAD_URL_PREFIX = "images/menu/";
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -40,7 +40,7 @@ private static final String UPLOAD_URL_PREFIX = "images/menu/";
 
         if (view == null || view.isBlank() || view.equalsIgnoreCase("list")) {
             namepage = "emp-list";
-                } else if (view.equalsIgnoreCase("add")) {
+        } else if (view.equalsIgnoreCase("add")) {
             namepage = "add";
             loadFormData(request);
         } else if (view.equalsIgnoreCase("edit")) {
@@ -63,24 +63,24 @@ private static final String UPLOAD_URL_PREFIX = "images/menu/";
             page = 1;
         }
 //search
-   String keyword = request.getParameter("keyword");
-   int totalItems;
-    List<MenuItem> menuItemsList;
-    
-      if (keyword != null && !keyword.trim().isEmpty()) {
-              menuItemsList = menuItemDAO.searchAll(keyword, page, MAX_ELEMENTS_PER_PAGE);
-        totalItems = menuItemDAO.countItem(keyword);
-        request.setAttribute("keyword", keyword); 
-    } else {
-               menuItemsList = menuItemDAO.getAll(page, MAX_ELEMENTS_PER_PAGE);
-        totalItems = menuItemDAO.countItem();
-    }
+        String keyword = request.getParameter("keyword");
+        int totalItems;
+        List<MenuItem> menuItemsList;
 
-    int totalPages = getTotalPages(totalItems);
-    
-    request.setAttribute("menuItemsList", menuItemsList);
-    request.setAttribute("totalPages", totalPages);
-    request.setAttribute("currentPage", page);
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            menuItemsList = menuItemDAO.searchAll(keyword, page, MAX_ELEMENTS_PER_PAGE);
+            totalItems = menuItemDAO.countItem(keyword);
+            request.setAttribute("keyword", keyword);
+        } else {
+            menuItemsList = menuItemDAO.getAll(page, MAX_ELEMENTS_PER_PAGE);
+            totalItems = menuItemDAO.countItem();
+        }
+
+        int totalPages = getTotalPages(totalItems);
+
+        request.setAttribute("menuItemsList", menuItemsList);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("currentPage", page);
 
         request.getRequestDispatcher("/WEB-INF/menu/" + namepage + ".jsp").forward(request, response);
         removePopup(request);
@@ -109,7 +109,6 @@ private static final String UPLOAD_URL_PREFIX = "images/menu/";
                 String existingImageUrl = request.getParameter("existingImageUrl");
 
                 int categoryId = parseIntOrDefault(request.getParameter("categoryId"), -1);
-                int recipeId = parseIntOrDefault(request.getParameter("recipeId"), -1);
 
                 if (itemName == null || itemName.isBlank() || itemName.matches(".*\\d.*")) {
                     popupStatus = false;
@@ -139,38 +138,37 @@ private static final String UPLOAD_URL_PREFIX = "images/menu/";
                     } else {
                         String tempWebAppPath = request.getServletContext().getRealPath("/");
 // 2. Nối đường dẫn tương đối và chuyển nó thành đường dẫn tuyệt đối chuẩn tắc.
-String uploadPath = new File(tempWebAppPath, EXTERNAL_UPLOAD_DIR_PATH).getCanonicalPath();
+                        String uploadPath = new File(tempWebAppPath, EXTERNAL_UPLOAD_DIR_PATH).getCanonicalPath();
                         String newImageUrl = existingImageUrl;
                         Part filePart = request.getPart("imageFile");
                         String fileName = (filePart != null && filePart.getSubmittedFileName() != null)
                                 ? Paths.get(filePart.getSubmittedFileName()).getFileName().toString()
                                 : "";
                         if (!fileName.isEmpty()) {
-                                                    // Đảm bảo thư mục vật lý vĩnh viễn tồn tại
+                            // Đảm bảo thư mục vật lý vĩnh viễn tồn tại
                             File uploadDir = new File(uploadPath);
                             if (!uploadDir.exists()) {
                                 if (!uploadDir.mkdirs()) {
                                     throw new IOException("Failed to create directory: " + uploadPath + ". Check permissions.");
                                 }
                             }
-                           String uniqueFileName = System.currentTimeMillis() + "_" + fileName;
-                           String fullFilePath = uploadPath + File.separator + uniqueFileName;
-               
-                           filePart.write(fullFilePath); 
-                                                   newImageUrl = UPLOAD_URL_PREFIX + uniqueFileName;
+                            String uniqueFileName = System.currentTimeMillis() + "_" + fileName;
+                            String fullFilePath = uploadPath + File.separator + uniqueFileName;
+
+                            filePart.write(fullFilePath);
+                            newImageUrl = UPLOAD_URL_PREFIX + uniqueFileName;
                         }
 
                         Category category = categoryDAO.getElementByID(categoryId);
-                        Recipe recipe = recipeDAO.getElementByID(recipeId);
 
-                        if (category == null || recipe == null) {
+                        if (category == null) {
                             popupStatus = false;
                             popupMessage = "Invalid category or recipe.";
                         } else {
                             if (status == null || status.isBlank()) {
                                 status = "Active";
                             }
-                            MenuItem item = new MenuItem(id, category, recipe, itemName, newImageUrl, price, description, status);
+                            MenuItem item = new MenuItem(id, category, itemName, newImageUrl, price, description, status);
 
                             int result;
 
@@ -208,7 +206,6 @@ String uploadPath = new File(tempWebAppPath, EXTERNAL_UPLOAD_DIR_PATH).getCanoni
     // Utility Methods
     private void loadFormData(HttpServletRequest request) {
         request.setAttribute("categories", categoryDAO.getAll());
-        request.setAttribute("recipes", recipeDAO.getAll());
     }
 
     private int parseIntOrDefault(String s, int def) {
