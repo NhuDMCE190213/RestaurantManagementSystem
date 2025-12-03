@@ -17,7 +17,7 @@ public class RecipeItem {
     private String unit;
     private String note;
     private String status;
-    
+
     private String ingredientName;
 
     public RecipeItem() {
@@ -44,7 +44,6 @@ public class RecipeItem {
         this.ingredientName = ingredientName;
     }
 
-    
     // getters & setters
     public int getRecipeItemId() {
         return recipeItemId;
@@ -109,4 +108,5 @@ public class RecipeItem {
     public void setIngredientName(String ingredientName) {
         this.ingredientName = ingredientName;
     }
+
 }

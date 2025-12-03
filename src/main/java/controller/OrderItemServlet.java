@@ -190,6 +190,7 @@ public class OrderItemServlet extends HttpServlet {
 
 
 //validate
+
                 if (order == null || menuItem == null
                         || (quantity < 1) || !order.getStatus().equalsIgnoreCase("Pending")) {
                     popupStatus = false;
@@ -232,6 +233,7 @@ public class OrderItemServlet extends HttpServlet {
 
 
 //validate
+
                 if (order == null || menuItem == null
                         || (quantity < 1) || (id < 1) || !order.getStatus().equalsIgnoreCase("Pending")) {
                     popupStatus = false;
@@ -239,6 +241,7 @@ public class OrderItemServlet extends HttpServlet {
                 } else {
                     popupMessage = "The object edited successfull.";
                 }
+
 //end
                 if (popupStatus == true) {
                     int checkError = orderItemDAO.edit(id, order.getOrderId(), menuItem.getMenuItemId(), menuItem.getPrice(), quantity);
@@ -364,6 +367,16 @@ public class OrderItemServlet extends HttpServlet {
         session.removeAttribute("popupStatus");
         session.removeAttribute("popupMessage");
     }
+
+
+
+    private String formatQuantity(double value) {
+        if (Math.abs(value - Math.rint(value)) < 1e-6) {
+            return String.valueOf((long) Math.rint(value));
+        }
+        return String.format(java.util.Locale.US, "%.2f", value);
+    }
+
 }
 
 
