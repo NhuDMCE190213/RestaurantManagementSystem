@@ -138,6 +138,44 @@ public class OrderDAO extends DBContext {
         return list;
     }
 
+    public List<Order> getAllByCustomerIdAndReservationId(int customerId, int reservationId, int page, int maxElement) {
+
+        List<Order> list = new ArrayList<>();
+
+        try {
+            String query = "SELECT o.order_id, o.reservation_id, o.emp_id, o.voucher_id, o.order_date, o.order_time, o.payment_method, o.status\n"
+                    + "FROM     [order] AS o INNER JOIN\n"
+                    + "                  reservation AS r ON o.reservation_id = r.reservation_id\n"
+                    + "WHERE  (LOWER(o.status) <> LOWER('Deleted')) AND (r.customer_id = ?) AND (o.reservation_id = ?)\n"
+                    + "ORDER BY o.order_id DESC\n"
+                    + "OFFSET ? ROWS \n"
+                    + "FETCH NEXT ? ROWS ONLY;";
+
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{customerId, reservationId, (page - 1) * maxElement, maxElement});
+
+            while (rs.next()) {
+                int orderId = rs.getInt(1);
+                int empId = rs.getInt(3);
+                int voucherId = rs.getInt(4);
+                Date orderDate = rs.getDate(5);
+                Time orderTime = rs.getTime(6);
+                String paymentMethod = rs.getString(7);
+                String status = rs.getString(8);
+
+                Order order = new Order(orderId, reservationDAO.getElementByID(reservationId),
+                        employeeDAO.getElementByID(empId), voucherDAO.getById(voucherId),
+                        orderDate, orderTime, paymentMethod, status);
+
+                list.add(order);
+            }
+
+        } catch (SQLException ex) {
+            System.out.println("Can't not load object");
+        }
+
+        return list;
+    }
+
     public Order getElementByID(int id) {
 
         try {
@@ -248,25 +286,25 @@ public class OrderDAO extends DBContext {
 
         return 0;
     }
-    
+
     public boolean validateApprove(int id) {
         Order order = getElementByID(id);
-        
+
         if (order.getVoucher() == null) {
             return true;
         } else {
             Voucher voucher = order.getVoucher();
-            
+
             if (voucherDAO.decrease1Quantity(voucher.getVoucherId()) <= 0) {
                 return false;
             }
         }
-        
+
         return true;
     }
 
     public int approve(int id) {
-        
+
         try {
             String query = "UPDATE [order]\n"
                     + "SET status = 'Approved'\n"
@@ -325,7 +363,7 @@ public class OrderDAO extends DBContext {
 
             if (order.getVoucher() != null) {
                 if (order.getVoucher().getDiscountType().equalsIgnoreCase("percent")) {
-                    discount = (int)((float)order.getVoucher().getDiscountValue() / (float)100 * (float)sum);
+                    discount = (int) ((float) order.getVoucher().getDiscountValue() / (float) 100 * (float) sum);
                 } else {
                     discount = order.getVoucher().getDiscountValue();
                 }

@@ -34,7 +34,7 @@
                                             <c:out value='${currentOrder.emp.empName}'/>
                                         </c:when>
                                         <c:otherwise>
-                                            Not Approve Yet!
+                                            By Customer
                                         </c:otherwise>
                                     </c:choose>
                                 </p>
