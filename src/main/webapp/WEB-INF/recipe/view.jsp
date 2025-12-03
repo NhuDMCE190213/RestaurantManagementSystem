@@ -58,14 +58,14 @@
                 <div class="row g-3 g-md-4 mb-3 info-row">
                     <div class="col-12 col-md-4">
                         <div class="info-card border rounded-3">
-                            <small class="text-uppercase text-muted fw-semibold">Recipe ID</small>
+                            <small class="text-uppercase text-muted fw-semibold">Menu Item ID</small>
                             <p class="fs-5 fw-semibold">#<c:out value='${currentRecipe.recipeId}'/></p>
                         </div>
                     </div>
 
                     <div class="col-12 col-md-4">
                         <div class="info-card border rounded-3">
-                            <small class="text-uppercase text-muted fw-semibold">Recipe Name</small>
+                            <small class="text-uppercase text-muted fw-semibold">Menu Item Name</small>
                             <p class="mb-0 fw-semibold"><c:out value='${currentRecipe.recipeName}'/></p>
                         </div>
                     </div>
@@ -146,15 +146,16 @@
     </div>
 
     <div class="mt-4">
-        <h4>Add Item</h4>
-        <form method="post" action="${pageContext.request.contextPath}/recipe" class="row g-2">
-            <input type="hidden" name="action" value="add_item" />
-            <input type="hidden" name="recipe_id" value="${currentRecipe.recipeId}" />
-            <div class="form-row-box row">
-                <div class="col-md-3 form-label-col">
-                    <label class="form-label mb-0">Ingredient Name</label>
-                </div>
-                <div class="col-md-9 form-input-col">
+        <h4 class="mb-2">Add Item</h4>
+
+        <div class="add-item-card">
+            <form method="post" action="${pageContext.request.contextPath}/recipe" class="row g-3 add-item-row align-items-end">
+                <input type="hidden" name="action" value="add_item" />
+                <input type="hidden" name="menu_item_id" value="${currentRecipe.recipeId}" />
+
+                <!-- Ingredient select: full width -->
+                <div class="col-12">
+                    <label class="form-label mb-1">Ingredient Name</label>
                     <select name="ingredient_id" class="form-select" required>
                         <option value="">-- Select ingredient --</option>
                         <c:forEach var="ing" items="${ingredients}">
@@ -162,26 +163,33 @@
                         </c:forEach>
                     </select>
                     <c:if test="${empty ingredients}">
-                        <div class="form-note">No ingredients available. Please add ingredients first.</div>
+                        <div class="form-note small mt-1">No ingredients available. Please add ingredients first.</div>
                     </c:if>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Quantity</label>
-                <input name="quantity" type="number" min="0.01" step="0.01" class="form-control" required />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Unit</label>
-                <input name="unit" type="text" class="form-control" />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Note</label>
-                <input name="note" type="text" class="form-control" />
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button class="btn btn-outline-success" type="submit">Add Item</button>
-            </div>
-        </form>
+
+                <!-- Row: Quantity | Unit | Note | Button -->
+                <div class="col-12 col-md-2">
+                    <label class="form-label">Quantity</label>
+                    <input name="quantity" type="number" min="0.01" step="0.01" class="form-control" placeholder="e.g. 1.5" required />
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <label class="form-label">Unit</label>
+                    <input name="unit" type="text" class="form-control" placeholder="pcs / g / ml" />
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Note</label>
+                    <input name="note" type="text" class="form-control" placeholder="Optional note (e.g. chopped, diced...)" />
+                </div>
+
+                <div class="col-12 col-md-2 d-flex justify-content-md-end">
+                    <button class="btn btn-success btn-add-item" type="submit">
+                        <i class="bi bi-plus-circle me-1"></i> Add Item
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
 </div>
@@ -189,50 +197,58 @@
 
 <!-- Edit item modal -->
 <div class="modal fade" id="editItemModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="editItemForm" method="post" action="${pageContext.request.contextPath}/recipe">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Item</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title">Edit Recipe Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
                 <div class="modal-body">
                     <input type="hidden" name="action" value="edit_item"/>
                     <input type="hidden" id="edit_recipe_item_id" name="recipe_item_id" value=""/>
-                    <input type="hidden" id="edit_recipe_id" name="recipe_id" value="${currentRecipe.recipeId}" />
-                    <div class="form-row-box row">
-                        <div class="col-md-3 form-label-col">
-                            <label class="form-label mb-0">Ingredient Name</label>
-                        </div>
-                        <div class="col-md-9 form-input-col">
-                            <select id="edit_ingredient_id" name="ingredient_id" class="form-select" required>
-                                <option value="">-- Select ingredient --</option>
-                                <c:forEach var="ing" items="${ingredients}">
-                                    <option value="${ing.ingredientId}">${ing.ingredientName}</option>
-                                </c:forEach>
-                            </select>
-                            <c:if test="${empty ingredients}">
-                                <div class="form-note">No ingredients available. Please add ingredients first.</div>
-                            </c:if>
-                        </div>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Quantity</label>
-                        <input id="edit_quantity" name="quantity" type="number" min="0.01" step="0.01" class="form-control" />
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Unit</label>
-                        <input id="edit_unit" name="unit" type="text" class="form-control" />
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Note</label>
-                        <input id="edit_note" name="note" type="text" class="form-control" />
-                    </div>
+                    <input type="hidden" id="edit_recipe_id" name="menu_item_id" value="${currentRecipe.recipeId}" />
 
+                    <div class="edit-item-card">
+                        <div class="row g-3 edit-item-row align-items-end">
+                            <div class="col-12">
+                                <label class="form-label mb-1">Ingredient</label>
+                                <select id="edit_ingredient_id" name="ingredient_id" class="form-select" required>
+                                    <option value="">-- Select ingredient --</option>
+                                    <c:forEach var="ing" items="${ingredients}">
+                                        <option value="${ing.ingredientId}">${ing.ingredientName}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-2">
+                                <label class="form-label">Quantity</label>
+                                <input id="edit_quantity" name="quantity" type="number" min="0.01" step="0.01" class="form-control" placeholder="e.g. 1.0" />
+                            </div>
+
+                            <div class="col-12 col-md-2">
+                                <label class="form-label">Unit</label>
+                                <input id="edit_unit" name="unit" type="text" class="form-control" placeholder="pcs / g / ml" />
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Note</label>
+                                <input id="edit_note" name="note" type="text" class="form-control" placeholder="Optional note" />
+                            </div>
+
+                            <div class="col-12 col-md-2 d-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary btn-save-item">
+                                    <i class="bi bi-save me-1"></i> Save changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="modal-footer">
+                    <small class="text-muted me-auto">You can edit ingredient, quantity, unit or note here.</small>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
                 </div>
             </form>
         </div>
@@ -248,7 +264,7 @@
                 <div class="modal-body text-danger">
                     <p>Are you sure to delete this item?</p>
                     <input type="hidden" id="hiddenDeleteRecipeItemId" name="recipe_item_id" value=""/>
-                    <input type="hidden" name="recipe_id" value="${currentRecipe.recipeId}">
+                    <input type="hidden" name="menu_item_id" value="${currentRecipe.recipeId}">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -260,7 +276,7 @@
 </div>
 
 <script>
-    function openEditItemModal(recipeItemId, ingredientId, quantity, unit, note) {
+    function openEditItemModal(recipeItemId, ingredientId, quantity, unit, note, status) {
         document.getElementById('edit_recipe_item_id').value = recipeItemId;
         document.getElementById('edit_ingredient_id').value = ingredientId;
         document.getElementById('edit_quantity').value = quantity;

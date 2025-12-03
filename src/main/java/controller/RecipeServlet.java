@@ -204,14 +204,14 @@ public class RecipeServlet extends HttpServlet {
                 }
             } // item-level actions: add_item, edit_item, delete_item
             else if (action.equalsIgnoreCase("add_item")) {
-                int recipeId, ingredientId;
+                int menuItemId, ingredientId;
                 double quantity = 0;
                 String unit = request.getParameter("unit");
                 String note = request.getParameter("note");
                 try {
-                    recipeId = Integer.parseInt(request.getParameter("recipe_id"));
+                    menuItemId = Integer.parseInt(request.getParameter("menu_item_id"));
                 } catch (NumberFormatException e) {
-                    recipeId = -1;
+                    menuItemId = -1;
                 }
                 try {
                     ingredientId = Integer.parseInt(request.getParameter("ingredient_id"));
@@ -224,15 +224,15 @@ public class RecipeServlet extends HttpServlet {
                 } catch (NumberFormatException e) {
                     quantity = -1;
                 }
-                if (!isValidInteger(recipeId, false, false, true) 
+                if (!isValidInteger(menuItemId, false, false, true) 
                         || !isValidInteger(ingredientId, false, false, true)
                         || quantity <= 0) {
                     popupStatus = false;
                     popupMessage = "Add item failed. Input invalid.";
                 } else {
-                    int checkError = recipeDAO.addItem(recipeId, ingredientId, quantity, unit, note);
+                    int checkError = recipeDAO.addItem(menuItemId, ingredientId, quantity, unit, note);
                     if (checkError >= 1) {
-                        popupMessage = "Item added to recipe " + recipeId + " successfully.";
+                        popupMessage = "Item added to item id: " + menuItemId + " successfully.";
                     } else {
                         popupStatus = false;
                         popupMessage = "The add item action is NOT successfull. The object has " + getSqlErrorCode(checkError) + " error.";
@@ -308,15 +308,15 @@ public class RecipeServlet extends HttpServlet {
                 || "edit_item".equalsIgnoreCase(action)
                 || "delete_item".equalsIgnoreCase(action)) {
 
-            int recipeId;
+            int menuItemId;
             try {
-                recipeId = Integer.parseInt(request.getParameter("recipe_id"));
+                menuItemId = Integer.parseInt(request.getParameter("menu_item_id"));;
             } catch (NumberFormatException e) {
-                recipeId = -1;
+                menuItemId = -1;
             }
 
-            if (recipeId > 0) {
-                response.sendRedirect(request.getContextPath() + "/recipe?view=view&id=" + recipeId);
+            if (menuItemId > 0) {
+                response.sendRedirect(request.getContextPath() + "/recipe?view=view&id=" + menuItemId);
             } else {
                 response.sendRedirect(request.getContextPath() + "/recipe");
             }
