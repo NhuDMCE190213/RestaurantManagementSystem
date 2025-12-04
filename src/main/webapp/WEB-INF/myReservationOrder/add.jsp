@@ -18,7 +18,7 @@
         </div>
 
         <div class="container">
-            <form method="post" action="<c:url value="myOrder"/>">
+            <form method="post" action="<c:url value="myReservationOrder"/>">
                 <table class="table table align-middle admin-table">
                     <tr>
                         <td>
@@ -85,18 +85,11 @@
                         <td>
                         </td>
                         <td>
-                            <button class="btn btn-outline-success" type="submit" name="action" value="addOrder">Save</button>
-                            <c:choose>
-                                <c:when test="${not empty reservationsList}">
-                                    <a class="btn btn-outline-dark" href="<c:url value="myOrder"/>">Cancel</a>
-                                </c:when>
-                                <c:otherwise>
-                                    <a class="btn btn-outline-dark" href="<c:url value="myOrder">
-                                           <c:param name="view" value="listByReservation"/>
-                                           <c:param name="reservationId" value="${param.reservationId}"/>
-                                    </c:url>">Cancel</a>
-                                </c:otherwise>
-                            </c:choose>
+                            <button class="btn btn-outline-success" type="submit" name="action" value="add">Save</button>
+                            <a class="btn btn-outline-dark" href="<c:url value="myReservationOrder">
+                                   <c:param name="view" value="list"/>
+                                   <c:param name="reservationId" value="${param.reservationId}"/>
+                               </c:url>">Cancel</a>
                         </td>
                     </tr>
                 </table>

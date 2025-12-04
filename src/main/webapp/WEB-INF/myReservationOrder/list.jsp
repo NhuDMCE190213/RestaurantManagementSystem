@@ -51,8 +51,8 @@
                         </div>
                         <div class="actions d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-md-end">
                             <div class="filters d-flex flex-wrap gap-2 justify-content-end">
-                                <a class="btn btn-primary add-btn" href="<c:url value="myOrder">
-                                       <c:param name="view" value="addOrder"/>
+                                <a class="btn btn-primary add-btn" href="<c:url value="myReservationOrder">
+                                       <c:param name="view" value="add"/>
                                        <c:param name="reservationId" value="${currentReservation.reservationId}"/>
                                    </c:url>"><i class="bi bi-plus-circle"></i>Add</a>
 
@@ -103,14 +103,15 @@
                                             <div class="action-button-group d-flex justify-content-end gap-2">
                                                 <a class="btn btn-outline-success btn-icon btn-view"
                                                    title="View details" aria-label="View details"
-                                                   href="<c:url value="myOrder">
-                                                       <c:param name="view" value="detail"/>
+                                                   href="<c:url value="myReservationOrderItem">
+                                                       <c:param name="view" value="list"/>
                                                        <c:param name="orderId" value="${order.orderId}"/>
                                                    </c:url>">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                <form action="<c:url value="myOrder">
+                                                <form action="<c:url value="myReservationOrder">
                                                           <c:param name="orderId" value="${order.orderId}"/>
+                                                          <c:param name="reservationId" value="${param.reservationId}"/>
                                                       </c:url>" method="post">
                                                     <c:if test="${order.status eq 'Pending'}">
                                                         <button class="btn btn-outline-danger btn-icon btn-delete"
@@ -131,8 +132,9 @@
                 <nav aria-label="Page navigation example">
                     <ul class="pagination">
                         <li class="page-item ${((empty param.page) || param.page <= 1)?"disabled":""}">
-                            <a class="page-link" href="<c:url value="/myOrder">
+                            <a class="page-link" href="<c:url value="/myReservationOrder">
                                    <c:param name="view" value="list"/>
+                                   <c:param name="reservationId" value="${param.reservationId}"/>
                                    <c:param name="page" value="${param.page - 1}"/>
                                </c:url>" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
@@ -140,13 +142,15 @@
                         </li>
                         <c:forEach begin="1" end="${requestScope.totalPages}" var="i">
                             <li class="page-item ${((empty param.page && i == 1) || param.page == i)?"active":""}">
-                                <a class="page-link" href="<c:url value="/myOrder">
+                                <a class="page-link" href="<c:url value="/myReservationOrder">
                                        <c:param name="view" value="list"/>
+                                   <c:param name="reservationId" value="${param.reservationId}"/>
                                        <c:param name="page" value="${i}"/>
                                    </c:url>">${i}</a></li>
                             </c:forEach>
                         <li class="page-item ${(requestScope.totalPages <= param.page || requestScope.totalPages eq 1 )?"disabled":""}">
-                            <a class="page-link" href="<c:url value="/myOrder">
+                            <a class="page-link" href="<c:url value="/myReservationOrder">
+                                   <c:param name="reservationId" value="${param.reservationId}"/>
                                    <c:param name="view" value="list"/>
                                    <c:param name="page" value="${(empty param.page)?2:param.page + 1}"/>
                                </c:url>" aria-label="Next">

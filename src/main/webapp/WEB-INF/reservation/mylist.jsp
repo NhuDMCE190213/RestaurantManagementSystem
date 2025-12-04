@@ -82,6 +82,16 @@
                                             </td>
                                             <td class="text-end">
                                                 <div class="action-button-group d-flex justify-content-end gap-2">
+                                                    <c:if test="${r.status eq 'Pending' or r.status eq 'Approved' or r.status eq 'Reserving'}">
+                                                        <a class="btn btn-outline-success btn-icon btn-view"
+                                                           href="<c:url value='/myReservationOrder'>
+                                                               <c:param name='view' value='list'/>
+                                                               <c:param name='reservationId' value='${r.reservationId}'/>
+                                                           </c:url>"
+                                                           title="Order" aria-label="Order">
+                                                            <i class="bi bi-eye-fill"></i>
+                                                        </a>
+                                                    </c:if>
                                                     <!-- Edit -->
                                                     <a class="btn btn-outline-secondary btn-icon"
                                                        <a class="btn btn-outline-secondary btn-icon"

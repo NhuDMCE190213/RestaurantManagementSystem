@@ -287,6 +287,24 @@ public class OrderDAO extends DBContext {
         return 0;
     }
 
+    public int countItemByCustomerAndReservation(int customerId, int reservationId) {
+        try {
+            String query = "SELECT COUNT(o.order_id) AS numrow\n"
+                    + "FROM     [order] AS o INNER JOIN\n"
+                    + "                  reservation AS r ON o.reservation_id = r.reservation_id INNER JOIN\n"
+                    + "                  customer AS c ON r.customer_id = c.customer_id\n"
+                    + "WHERE  (LOWER(o.status) <> LOWER(N'Deleted')) AND (c.customer_id = ?) AND (o.reservation_id = ?)";
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{customerId, reservationId});
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error");
+        }
+
+        return 0;
+    }
+
     public boolean validateApprove(int id) {
         Order order = getElementByID(id);
 

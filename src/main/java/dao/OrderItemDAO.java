@@ -170,7 +170,39 @@ public class OrderItemDAO extends DBContext {
         return null;
     }
 
+    public OrderItem getElementByMenuItemID(int orderId, int menuItemId) {
+
+        try {
+            String query = "SELECT order_item_id, order_id, menu_item_id, unit_price, quantity\n"
+                    + "FROM     order_item\n"
+                    + "WHERE  (menu_item_id = ?) AND (order_id = ?)";
+
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{menuItemId, orderId});
+
+            while (rs.next()) {
+                int orderItemId = rs.getInt(1);
+                int unitPrice = rs.getInt(4);
+                int quantity = rs.getInt(5);
+
+                OrderItem orderItem = new OrderItem(orderItemId, orderDAO.getElementByID(orderId), menuItemDAO.getElementByID(menuItemId), unitPrice, quantity);
+
+                return orderItem;
+            }
+        } catch (SQLException ex) {
+            System.out.println("Can't not load object");
+        }
+
+        return null;
+    }
+
     public int add(int orderId, int menuItemId, int unitPrice, int quantity) {
+
+        OrderItem orderItemExist = getElementByMenuItemID(orderId, menuItemId);
+
+        if (orderItemExist != null) {
+            return edit(orderItemExist.getOrderItemId(), orderId, menuItemId, unitPrice, orderItemExist.getQuantity() + quantity);
+        }
+
         try {
             String query = "INSERT INTO order_item\n"
                     + "(order_id, menu_item_id, unit_price, quantity)\n"
@@ -372,7 +404,6 @@ public class OrderItemDAO extends DBContext {
 
 //                Order order = orderDAO.getElementByID(orderId);
 //                OrderItem orderItem = getElementByID(orderItemId); loi do dung chinh dbcontext cua ban than, gay du lieu bi sai
-
                 long mini_sum = rs.getInt(6) * rs.getInt(5);
 //                long mini_sum = orderItem.getQuantity() * orderItem.getUnitPrice();
 

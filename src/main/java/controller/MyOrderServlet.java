@@ -18,8 +18,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 import model.Customer;
-import model.Employee;
 import model.MenuItem;
 import model.Order;
 import model.Reservation;
@@ -99,13 +100,40 @@ public class MyOrderServlet extends HttpServlet {
             page = 1;
         }
 
+        int reservationId;// khi khong tim thay thi khong cho add
+        try {
+            reservationId = Integer.parseInt(request.getParameter("reservationId"));
+        } catch (NumberFormatException ex) {
+            reservationId = 0;
+        }
+
+        Reservation currentReservation = reservationDAO.getElementByID(reservationId);
+
         if (view == null || view.isBlank() || view.equalsIgnoreCase("list")) {
             namepage = "list";
             totalPages = getTotalPages(orderDAO.countItemByCustomer(customer.getCustomerId()));
+            request.setAttribute("ordersList", orderDAO.getAllByCustomerId(customer.getCustomerId(), page, MAX_ELEMENTS_PER_PAGE));
+        } else if (view.equalsIgnoreCase("listByReservation")) {
+            namepage = "listByReservation";
+
+            if (currentReservation != null) {
+                totalPages = getTotalPages(orderDAO.countItemByCustomerAndReservation(customer.getCustomerId(), currentReservation.getReservationId()));
+                request.setAttribute("ordersList", orderDAO.getAllByCustomerIdAndReservationId(customer.getCustomerId(),
+                        currentReservation.getReservationId(), page, MAX_ELEMENTS_PER_PAGE));
+            } else {
+                totalPages = 0;
+            }
+
+            request.setAttribute("currentReservation", currentReservation);
+
         } else if (view.equalsIgnoreCase("addOrder")) {
             namepage = "add";
 
-            request.setAttribute("reservationsList", reservationDAO.getAllByCustomerId(customer.getCustomerId()));
+            if (currentReservation == null) {
+                request.setAttribute("reservationsList", reservationDAO.getAllByCustomerId(customer.getCustomerId()));
+            } else {
+                request.setAttribute("currentReservation", currentReservation);
+            }
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("vouchersList", voucherDAO.getAllAvailable());
         } else {
@@ -150,7 +178,6 @@ public class MyOrderServlet extends HttpServlet {
         }
 
         request.setAttribute("totalPages", totalPages);
-        request.setAttribute("ordersList", orderDAO.getAllByCustomerId(customer.getCustomerId(), page, MAX_ELEMENTS_PER_PAGE));
 
         request.getRequestDispatcher("/WEB-INF/myOrder/" + namepage + ".jsp").forward(request, response);
         removePopup(request);
@@ -168,6 +195,8 @@ public class MyOrderServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
+        
+        List<String> param = new ArrayList<>();
 
         boolean popupStatus = true;
         String popupMessage = "";
@@ -204,22 +233,24 @@ public class MyOrderServlet extends HttpServlet {
                     voucherId = -1;
                     reservationId = -1;
                 }
-                
+
                 Reservation reservation = reservationDAO.getElementByID(reservationId);
                 Voucher voucher = voucherDAO.getById(voucherId); // check available
 
 //validate
-                if (paymentMethod == null || reservation == null
-                        || paymentMethod.isBlank() || (!paymentMethod.equals("Cash") && !paymentMethod.equals("Pay later"))) {
-                    popupStatus = false;
-                    popupMessage = "The add action is NOT successfull. Check the information again.";
+                popupStatus = false;
+                if (paymentMethod == null || paymentMethod.isBlank()) {
+                    popupMessage = "The add action is NOT successfull. The payment method is blank.";
+                } else if (reservation == null) {
+                    popupMessage = "The add action is NOT successfull. The reservation id is wrong.";
                 } else {
+                    popupStatus = true;
                     popupMessage = "The object added successfull.";
                 }
 //end
                 if (popupStatus == true) {
                     try {
-                        int checkError = orderDAO.add(reservation.getReservationId(), null, 
+                        int checkError = orderDAO.add(reservation.getReservationId(), null,
                                 (voucher != null) ? voucher.getVoucherId() : null, paymentMethod);
                         if (checkError >= 1) {
                         } else {
@@ -357,9 +388,17 @@ public class MyOrderServlet extends HttpServlet {
                 }
             }
         }
+        
+        String paramString = "";
+        if (!param.isEmpty()) {
+            paramString = "?";
+            for (String variable : param) {
+                paramString += variable + "&";
+            }
+        }
 
         setPopup(request, popupStatus, popupMessage);
-        response.sendRedirect(request.getContextPath() + "/myOrder");
+        response.sendRedirect(request.getContextPath() + "/listByReservation" + paramString);
     }
 
     /**
@@ -371,7 +410,7 @@ public class MyOrderServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
+    
     private int getTotalPages(int countItems) {
         return (int) Math.ceil((double) countItems / MAX_ELEMENTS_PER_PAGE);
     }
