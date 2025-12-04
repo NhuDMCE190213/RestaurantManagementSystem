@@ -46,10 +46,10 @@ public class MenuItemDAO extends DBContext {
                 int price = rs.getInt(5);
                 String description = rs.getString(6);
                 String status = rs.getString(7);
-
+                Recipe recipe = recipeDAO.getElementByID(menuItemId);
                 //Chua check tinh kha dung cua recipe
                 MenuItem menuItem = new MenuItem(menuItemId, categoryDAO.getElementByID(categoryId), itemName, imageUrl, price, description, status);
-
+                menuItem.setRecipe(recipe);
                 list.add(menuItem);
             }
         } catch (SQLException ex) {
@@ -79,10 +79,10 @@ public class MenuItemDAO extends DBContext {
                 int price = rs.getInt(5);
                 String description = rs.getString(6);
                 String status = rs.getString(7);
-
+                Recipe recipe = recipeDAO.getElementByID(menuItemId);
                 //Chua check tinh kha dung cua recipe
                 MenuItem menuItem = new MenuItem(menuItemId, categoryDAO.getElementByID(categoryId), itemName, imageUrl, price, description, status);
-
+                menuItem.setRecipe(recipe);
                 list.add(menuItem);
             }
         } catch (SQLException ex) {
@@ -254,7 +254,7 @@ public class MenuItemDAO extends DBContext {
                 int categoryId = rs.getInt("category_id");
 
                 Category category = categoryDAO.getElementByID(categoryId);
-
+                Recipe recipe = recipeDAO.getElementByID(menuItemId);
                 if (category != null) {
 
                     MenuItem item = new MenuItem(
@@ -266,6 +266,7 @@ public class MenuItemDAO extends DBContext {
                             description,
                             status
                     );
+                    item.setRecipe(recipe);
 
                     list.add(item);
 
@@ -396,7 +397,7 @@ public class MenuItemDAO extends DBContext {
      */
     public int add(MenuItem item) {
         String query = "INSERT INTO [menu_item] (category_id, item_name, image_url, price, description,status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
             return this.executeQuery(query, new Object[]{

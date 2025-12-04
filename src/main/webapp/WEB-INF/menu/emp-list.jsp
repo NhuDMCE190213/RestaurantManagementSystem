@@ -57,7 +57,7 @@
                                 <tr>
                                     <td><c:out value="${item.menuItemId}"/></td>
                                     <td><img 
-                                            src="<c:out value="${pageContext.request.contextPath}/${item.imageUrl}"/>" 
+                                            src="<c:out value="${item.imageUrl}"/>" 
                                             alt="${item.itemName}" 
                                             style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;"
                                             onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/assets/img/menu/NIA.png';"

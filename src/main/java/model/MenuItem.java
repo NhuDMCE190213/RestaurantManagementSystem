@@ -17,7 +17,15 @@ public class MenuItem {
     private int price;
     private String description;
     private String status;
+    private Recipe recipe;
 
+    public Recipe getRecipe() {
+        return recipe;
+    }
+
+    public void setRecipe(Recipe recipe) {
+        this.recipe = recipe;
+    }
     public MenuItem(int menuItemId, Category category, String itemName, String imageUrl, int price, String description, String status) {
         this.menuItemId = menuItemId;
         this.category = category;
