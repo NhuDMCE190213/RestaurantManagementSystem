@@ -94,38 +94,74 @@ public class DBContext {
             throw new RuntimeException("MD5 algorithm not found!", e);
         }
     }
-public void sendEmail(String toEmail, String subject, String content) {
 
-    String code = String.valueOf((int) (Math.random() * 900000) + 100000); 
+    public void sendEmail(String toEmail, String subject, String content) {
 
-    final String username = "phuonghtd.ce190603@gmail.com"; 
-    final String password = "dxve inyz droz nuls"; 
+        String code = String.valueOf((int) (Math.random() * 900000) + 100000);
 
-    Properties props = new Properties();
-    props.put("mail.smtp.auth", "true");
-    props.put("mail.smtp.starttls.enable", "true");
-    props.put("mail.smtp.host", "smtp.gmail.com"); 
-    props.put("mail.smtp.port", "587");
+        final String username = "phuonghtd.ce190603@gmail.com";
+        final String password = "xqou byuz rvsc qxri";
 
-    Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
-        @Override
-        protected PasswordAuthentication getPasswordAuthentication() {
-            return new PasswordAuthentication(username, password);
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(username, password);
+            }
+        });
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(username));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+            message.setSubject(subject);
+            message.setText(content);
+
+            Transport.send(message);
+            System.out.println("Sent reset code successfully to: " + toEmail);
+
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-    });
+    }
 
-    try {
-        MimeMessage message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(username));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-        message.setSubject(subject);
-        message.setText(content);
+    public void verifyEmail(String toEmail, String subject, String content) {
 
-        Transport.send(message);
-        System.out.println("Sent reset code successfully to: " + toEmail);
+        final String username = "phuonghtd.ce190603@gmail.com";
+        final String password = "xqou byuz rvsc qxri";
 
-    } catch (MessagingException e) {
-        e.printStackTrace();
-        throw new RuntimeException(e);
-    }}
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(username, password);
+            }
+        });
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(username));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+            message.setSubject(subject);
+            message.setText(content);
+
+            Transport.send(message);
+            System.out.println("Sent verification email successfully to: " + toEmail);
+
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
 }
