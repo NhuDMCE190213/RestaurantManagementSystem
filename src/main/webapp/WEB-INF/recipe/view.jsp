@@ -175,7 +175,14 @@
 
                 <div class="col-12 col-md-2">
                     <label class="form-label">Unit</label>
-                    <input name="unit" type="text" class="form-control" placeholder="pcs / g / ml" />
+                    <select name="unit" class="form-select">
+                        <option value="">-- Select Unit --</option>
+                        <option value="pcs">pcs</option>
+                        <option value="kg">kg</option>
+                        <option value="g">g</option>
+                        <option value="l">l</option>
+                        <option value="ml">ml</option>
+                    </select>
                 </div>
 
                 <div class="col-12 col-md-6">
@@ -229,7 +236,14 @@
 
                             <div class="col-12 col-md-2">
                                 <label class="form-label">Unit</label>
-                                <input id="edit_unit" name="unit" type="text" class="form-control" placeholder="pcs / g / ml" />
+                                <select id="edit_unit" name="unit" class="form-select">
+                                    <option value="">-- Select Unit --</option>
+                                    <option value="pcs">pcs</option>
+                                    <option value="kg">kg</option>
+                                    <option value="g">g</option>
+                                    <option value="l">l</option>
+                                    <option value="ml">ml</option>
+                                </select>
                             </div>
 
                             <div class="col-12 col-md-6">
