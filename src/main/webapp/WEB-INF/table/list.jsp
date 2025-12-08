@@ -65,8 +65,14 @@
                                             <c:when test="${fn:toLowerCase(table.status) == 'reserved'}">
                                                 <span class="badge bg-warning text-dark">Reserved</span>
                                             </c:when>
-                                            <c:when test="${fn:toLowerCase(table.status) == 'occupied'}">
-                                                <span class="badge bg-danger">Occupied</span>
+                                            <c:when test="${fn:toLowerCase(table.status) == 'serving'}">
+                                                <span class="badge bg-danger">Serving</span>
+                                            </c:when>
+                                            <c:when test="${fn:toLowerCase(table.status) == 'request bill'}">
+                                                <span class="badge bg-warning text-dark">Request Bill</span>
+                                            </c:when>
+                                            <c:when test="${fn:toLowerCase(table.status) == 'cleaning'}">
+                                                <span class="badge bg-warning text-dark">Cleaning</span>
                                             </c:when>
                                             <c:otherwise>
                                                 <span class="badge bg-secondary"><c:out value="${table.status}"/></span>
@@ -92,7 +98,7 @@
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-outline-primary btn-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                                     <i class="bi bi-three-dots"></i>
-                                                    
+
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                     <!-- For each possible status, show form to set it. The current status can still be shown but disabled -->
@@ -117,9 +123,27 @@
                                                     <li>
                                                         <form method="post" action="<c:url value='table'/>" class="px-2 py-1">
                                                             <input type="hidden" name="id" value="${table.id}" />
-                                                            <input type="hidden" name="newStatus" value="Occupied" />
-                                                            <button type="submit" name="action" value="changeStatus" class="dropdown-item" ${fn:toLowerCase(table.status) == 'occupied' ? 'disabled' : ''}>
-                                                                Set Occupied
+                                                            <input type="hidden" name="newStatus" value="Serving" />
+                                                            <button type="submit" name="action" value="changeStatus" class="dropdown-item" ${fn:toLowerCase(table.status) == 'serving' ? 'disabled' : ''}>
+                                                                Set Serving
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                    <li>
+                                                        <form method="post" action="<c:url value='table'/>" class="px-2 py-1">
+                                                            <input type="hidden" name="id" value="${table.id}" />
+                                                            <input type="hidden" name="newStatus" value="Request Bill" />
+                                                            <button type="submit" name="action" value="changeStatus" class="dropdown-item" ${fn:toLowerCase(table.status) == 'request bill' ? 'disabled' : ''}>
+                                                                Set Request Bill
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                    <li>
+                                                        <form method="post" action="<c:url value='table'/>" class="px-2 py-1">
+                                                            <input type="hidden" name="id" value="${table.id}" />
+                                                            <input type="hidden" name="newStatus" value="Cleaning" />
+                                                            <button type="submit" name="action" value="changeStatus" class="dropdown-item" ${fn:toLowerCase(table.status) == 'cleaning' ? 'disabled' : ''}>
+                                                                Set Cleaning
                                                             </button>
                                                         </form>
                                                     </li>
