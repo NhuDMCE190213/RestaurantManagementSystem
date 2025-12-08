@@ -183,7 +183,7 @@ public class MenuItemDAO extends DBContext {
                 int categoryId = rs.getInt("category_id");
 
                 Category category = categoryDAO.getElementByID(categoryId);
-
+ Recipe recipe = recipeDAO.getElementByID(menuItemId);
                 if (category != null) {
 
                     MenuItem item = new MenuItem(
@@ -195,7 +195,7 @@ public class MenuItemDAO extends DBContext {
                             description,
                             status
                     );
-
+ item.setRecipe(recipe);
                     list.add(item);
 
                 }
