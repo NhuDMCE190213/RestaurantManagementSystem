@@ -347,45 +347,93 @@ public class CustomerDAO extends DBContext {
         }
         return null;
     }
+
     //FORGET PASSWORD
     public Customer getElementByEmail(String email) {
-    try {
-        String query = "SELECT c.customer_id, c.customer_account, c.password, c.customer_name, "
-                + "c.gender, c.phone_number, c.email, c.address, c.dob, c.status "
-                + "FROM customer AS c "
-                + "WHERE LOWER(c.status) <> 'deleted' AND c.email = ?";
-        ResultSet rs = this.executeSelectionQuery(query, new Object[]{email});
-        if (rs.next()) {
-            int customerId = rs.getInt(1);
-            String customerAccount = rs.getString(2);
-            String password = rs.getString(3);
-            String customerName = rs.getString(4);
-            String gender = rs.getString(5);
-            String phoneNumber = rs.getString(6);
-            String foundEmail = rs.getString(7);
-            String address = rs.getString(8);
-            Date dob = rs.getDate(9);
-            String status = rs.getString(10);
-            
-            return new Customer(customerId, customerAccount, password, customerName, gender, phoneNumber, foundEmail, address, dob, status);
-        }
-    } catch (SQLException ex) {
-        Logger.getLogger(CustomerDAO.class.getName()).log(Level.SEVERE, null, ex);
-    }
-    return null;
-}
+        try {
+            String query = "SELECT c.customer_id, c.customer_account, c.password, c.customer_name, "
+                    + "c.gender, c.phone_number, c.email, c.address, c.dob, c.status "
+                    + "FROM customer AS c "
+                    + "WHERE LOWER(c.status) <> 'deleted' AND c.email = ?";
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{email});
+            if (rs.next()) {
+                int customerId = rs.getInt(1);
+                String customerAccount = rs.getString(2);
+                String password = rs.getString(3);
+                String customerName = rs.getString(4);
+                String gender = rs.getString(5);
+                String phoneNumber = rs.getString(6);
+                String foundEmail = rs.getString(7);
+                String address = rs.getString(8);
+                Date dob = rs.getDate(9);
+                String status = rs.getString(10);
 
-public int updatePassword(int customerId, String newHashedPassword) {
-    try {
-        String query = "UPDATE customer SET password = ? WHERE customer_id = ?";
-        return this.executeQuery(query, new Object[]{newHashedPassword, customerId});
-    } catch (SQLException ex) {
-              int sqlError = checkErrorSQL(ex);
-        if (sqlError != 0) {
-            return sqlError;
+                return new Customer(customerId, customerAccount, password, customerName, gender, phoneNumber, foundEmail, address, dob, status);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CustomerDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
-        Logger.getLogger(CustomerDAO.class.getName()).log(Level.SEVERE, null, ex);
+        return null;
     }
-    return -1;
-}
+
+    public int updatePassword(int customerId, String newHashedPassword) {
+        try {
+            String query = "UPDATE customer SET password = ? WHERE customer_id = ?";
+            return this.executeQuery(query, new Object[]{newHashedPassword, customerId});
+        } catch (SQLException ex) {
+            int sqlError = checkErrorSQL(ex);
+            if (sqlError != 0) {
+                return sqlError;
+            }
+            Logger.getLogger(CustomerDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
+    }
+
+    public Customer getByName(String name) {
+        try {
+            String query = "SELECT c.customer_id, c.customer_account, c.password, c.customer_name, "
+                    + "c.gender, c.phone_number, c.email, c.address, c.dob, c.status "
+                    + "FROM customer AS c "
+                    + "WHERE LOWER(c.status) <> 'deleted' AND LOWER(c.customer_name) = LOWER(?)";
+
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{name});
+
+            if (rs.next()) {
+                return new Customer(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getString(4),
+                        rs.getString(5),
+                        rs.getString(6),
+                        rs.getString(7),
+                        rs.getString(8),
+                        rs.getDate(9),
+                        rs.getString(10)
+                );
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(CustomerDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public int addCustomerNameOnly(String customerName) {
+        try     {
+            String query = "INSERT INTO customer (customer_name, status) VALUES (?, ?)";
+            return this.executeQuery(query, new Object[]{customerName, "Active"});
+
+        } catch (SQLException ex) {
+            int sqlError = checkErrorSQL(ex);
+            if (sqlError != 0) {
+                return sqlError;
+            }
+
+            Logger.getLogger(CustomerDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
+    }
+
 }

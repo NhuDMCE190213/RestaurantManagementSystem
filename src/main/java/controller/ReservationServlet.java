@@ -1,6 +1,6 @@
 /*
-     * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-     * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+             * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+             * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
 package controller;
 
@@ -10,6 +10,7 @@ import static constant.CommonFunction.removePopup;
 import static constant.CommonFunction.setPopup;
 import static constant.CommonFunction.validateInteger;
 import static constant.CommonFunction.validateString;
+import dao.CustomerDAO;
 
 import dao.ReservationDAO;
 import dao.TableDAO;
@@ -22,6 +23,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Date;
 import java.sql.Time;
+import model.Customer;
+import model.Employee;
 import model.Reservation;
 
 /**
@@ -33,6 +36,7 @@ public class ReservationServlet extends HttpServlet {
 
     ReservationDAO reservationDAO = new ReservationDAO();
     TableDAO tableDAO = new TableDAO();
+    CustomerDAO customerDAO = new CustomerDAO();
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -74,6 +78,10 @@ public class ReservationServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String view = request.getParameter("view");
+        if (view == null) {
+            view = "list";
+        }
+
         String keyword = request.getParameter("keyword");
         if (keyword == null) {
             keyword = "";
@@ -82,37 +90,33 @@ public class ReservationServlet extends HttpServlet {
         int page;
         try {
             page = Integer.parseInt(request.getParameter("page"));
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             page = 1;
         }
 
-        // ADMIN LIST
-        if (!validateString(view, -1) || view.equalsIgnoreCase("list")) {
+        // LIST
+        if (view.equalsIgnoreCase("list")) {
             int totalPages = getTotalPages(reservationDAO.countItem(keyword));
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("reservationList", reservationDAO.getAll(page, keyword));
             request.getRequestDispatcher("/WEB-INF/reservation/list.jsp").forward(request, response);
-
-            // EDIT (form dùng chung admin / customer)
-        } //        else if (view.equalsIgnoreCase("edit")) {
-        //            int id;
-        //            try {
-        //                id = Integer.parseInt(request.getParameter("id"));
-        //            } catch (NumberFormatException e) {
-        //                id = -1;
-        //            }
-        //            request.setAttribute("currentReservation", reservationDAO.getElementByID(id));
-        //            request.getRequestDispatcher("/WEB-INF/reservation/edit.jsp").forward(request, response);
-        //
-        //            // ADD (nếu có form add riêng cho admin)
-        //        } 
-        else if (view.equalsIgnoreCase("add")) {
-            request.getRequestDispatcher("/WEB-INF/reservation/add.jsp").forward(request, response);
-
-        } else {
-            response.sendRedirect(request.getContextPath() + "/reservation");
+            return;
         }
-        removePopup(request);
+
+        // CREATE FORM
+        if (view.equalsIgnoreCase("add")) {
+
+            // LẤY DANH SÁCH BÀN
+            request.setAttribute("listTable", tableDAO.getAll());
+
+            // LẤY DANH SÁCH CUSTOMER
+            request.setAttribute("listCustomer", customerDAO.getAll());
+
+            request.getRequestDispatcher("/WEB-INF/reservation/create.jsp").forward(request, response);
+            return;
+        }
+
+        response.sendRedirect(request.getContextPath() + "/reservation");
     }
 
     /**
@@ -207,8 +211,107 @@ public class ReservationServlet extends HttpServlet {
         //
         //            return;
         //       } 
-        // ==== APPROVE / REJECT (ADMIN) ====
-        else if (action.equalsIgnoreCase("approve") || action.equalsIgnoreCase("reject")) {
+
+        // ----- ADMIN ADD RESERVATION -----
+        if (action.equalsIgnoreCase("add")) {
+
+            int customerId;
+            int tableId;
+            Date date;
+            Time timeStart, timeEnd;
+
+            try {
+                customerId = Integer.parseInt(request.getParameter("customerId"));
+                tableId = Integer.parseInt(request.getParameter("tableId"));
+                date = Date.valueOf(request.getParameter("reservationDate"));
+
+                String sStart = request.getParameter("timeStart");
+                String sEnd = request.getParameter("timeEnd");
+
+                if (sStart == null || sEnd == null
+                        || sStart.isBlank() || sEnd.isBlank()) {
+                    throw new IllegalArgumentException();
+                }
+
+                if (sStart.length() == 5) {
+                    sStart += ":00";
+                }
+                if (sEnd.length() == 5) {
+                    sEnd += ":00";
+                }
+
+                timeStart = Time.valueOf(sStart);
+                timeEnd = Time.valueOf(sEnd);
+
+                if (!timeEnd.after(timeStart)) {
+                    setPopup(request, false, "End time must be later than start time.");
+                    response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                    return;
+                }
+
+            } catch (Exception e) {
+                setPopup(request, false, "Invalid input for Add Reservation.");
+                response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                return;
+            }
+
+            // ==============================
+            // KIỂM TRA CUSTOMER & TABLE
+            // ==============================
+            Customer customer = customerDAO.getElementByID(customerId);
+            if (customer == null) {
+                setPopup(request, false, "Customer not found.");
+                response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                return;
+            }
+
+            model.Table selectedTable = tableDAO.getElementByID(tableId);
+            if (selectedTable == null) {
+                setPopup(request, false, "Table not found.");
+                response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                return;
+            }
+
+            // ==============================
+            // LẤY EMPLOYEE ĐANG ĐĂNG NHẬP
+            // ==============================
+            jakarta.servlet.http.HttpSession session = request.getSession(false);
+            if (session == null) {
+                setPopup(request, false, "Employee is not logged in.");
+                response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                return;
+            }
+
+            Employee emp = (Employee) session.getAttribute("employeeSession");
+            if (emp == null) {
+                setPopup(request, false, "Employee is not logged in.");
+                response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                return;
+            }
+
+            int empId = emp.getEmpId();   // DÙNG getEmpId() từ model Employee
+
+            // ==============================
+            // TẠO RESERVATION (EMPLOYEE TẠO GIÙM)
+            // ==============================
+            int check = reservationDAO.addByEmployee(
+                    empId,
+                    customerId,
+                    tableId,
+                    date,
+                    timeStart,
+                    timeEnd
+            );
+
+            if (check < 1) {
+                setPopup(request, false, "Add failed. SQL error: " + getSqlErrorCode(check));
+            } else {
+                setPopup(request, true, "Reservation created successfully.");
+            }
+
+            response.sendRedirect(request.getContextPath() + "/reservation");
+            return;
+        } else if (action.equalsIgnoreCase("approve") || action.equalsIgnoreCase("reject")) {
             int id;
             try {
                 id = Integer.parseInt(request.getParameter("id"));
