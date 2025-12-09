@@ -15,38 +15,23 @@ public class Reservation {
 
     private int reservationId;
     private Customer customer;
+    private Employee emp;
     private Table table;
     private Date reservationDate;
     private Time timeStart;
     private Time timeEnd;
     private String Status;
 
-    public Reservation(int reservationId, Customer customer, Table table, Date reservationDate, Time timeStart, Time timeEnd, String Status) {
+    public Reservation(int reservationId, Customer customer, Employee emp, Table table, Date reservationDate, Time timeStart, Time timeEnd, String Status) {
         this.reservationId = reservationId;
         this.customer = customer;
+        this.emp = emp;
         this.table = table;
         this.reservationDate = reservationDate;
         this.timeStart = timeStart;
         this.timeEnd = timeEnd;
         this.Status = Status;
     }
-    
-    public Time getTimeStart() {
-        return timeStart;
-    }
-
-    public void setTimeStart(Time timeStart) {
-        this.timeStart = timeStart;
-    }
-
-    public Time getTimeEnd() {
-        return timeEnd;
-    }
-
-    public void setTimeEnd(Time timeEnd) {
-        this.timeEnd = timeEnd;
-    }
-
 
     public int getReservationId() {
         return reservationId;
@@ -64,6 +49,14 @@ public class Reservation {
         this.customer = customer;
     }
 
+    public Employee getEmp() {
+        return emp;
+    }
+
+    public void setEmp(Employee emp) {
+        this.emp = emp;
+    }
+
     public Table getTable() {
         return table;
     }
@@ -78,6 +71,22 @@ public class Reservation {
 
     public void setReservationDate(Date reservationDate) {
         this.reservationDate = reservationDate;
+    }
+
+    public Time getTimeStart() {
+        return timeStart;
+    }
+
+    public void setTimeStart(Time timeStart) {
+        this.timeStart = timeStart;
+    }
+
+    public Time getTimeEnd() {
+        return timeEnd;
+    }
+
+    public void setTimeEnd(Time timeEnd) {
+        this.timeEnd = timeEnd;
     }
 
     public String getStatus() {
