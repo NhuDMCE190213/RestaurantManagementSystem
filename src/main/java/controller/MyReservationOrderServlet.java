@@ -41,8 +41,8 @@ public class MyReservationOrderServlet extends HttpServlet {
     private final MenuItemDAO menuItemDAO = new MenuItemDAO();
     private final CategoryDAO categoryDAO = new CategoryDAO();
 
-    boolean popupStatus = true;
-    String popupMessage = "";
+    private boolean popupStatus = true;
+    private String popupMessage = "";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -151,8 +151,9 @@ public class MyReservationOrderServlet extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
 
-//        boolean popupStatus = true;
-//        String popupMessage = "";
+        popupStatus = true;
+        popupMessage = "";
+
         int orderId;
 
         try {
