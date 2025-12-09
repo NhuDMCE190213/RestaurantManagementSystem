@@ -65,6 +65,12 @@
                     <p class="text-muted mb-1">Cannot book table a time between 05:00 and 22:00</p>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label">Special Note (optional)</label>
+                    <textarea name="description" class="form-control"
+                              placeholder="Eg: Vegetarian, no spicy, allergy..."></textarea>
+                </div>
+
                 <c:if test="${not empty reservedRanges}">
                     <div class="alert alert-warning mt-3">
                         <strong>️The time slots have been booked:</strong>

@@ -55,8 +55,9 @@
                             <th width="10%">Table</th>
                             <th width="10%">Date</th>
                             <th width="10%">Time</th>
-                            <th width="10%">Status</th>
-                            <th width="20%" class="text-end">Action</th>
+                            <th width="10%">Note</th>
+                            <th width="2%">Status</th>
+                            <th width="15%" class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -72,6 +73,7 @@
                                         <td>
                                             ${fn:substring(r.timeStart, 0, 5)} - ${fn:substring(r.timeEnd, 0, 5)}
                                         </td>
+                                        <td>${r.description}</td>   
                                         <td>
                                             <span class="badge
                                                   ${r.status == 'Approved' ? 'bg-success' : 

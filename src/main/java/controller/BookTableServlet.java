@@ -162,6 +162,11 @@ public class BookTableServlet extends HttpServlet {
             long endMillis = timeStart.getTime() + 3 * 60 * 60 * 1000;
             Time timeEnd = new Time(endMillis);
 
+            String description = request.getParameter("description");
+            if (description == null) {
+                description = "";
+            }
+
             // Lấy trạng thái bàn
             model.Table selectedTable = tableDAO.getElementByID(tableId);
 
@@ -171,7 +176,8 @@ public class BookTableServlet extends HttpServlet {
                     tableId,
                     date,
                     timeStart,
-                    timeEnd
+                    timeEnd,
+                    description
             );
 
             if (check < 1) {

@@ -20,9 +20,10 @@ public class Reservation {
     private Date reservationDate;
     private Time timeStart;
     private Time timeEnd;
+    private String description;
     private String Status;
 
-    public Reservation(int reservationId, Customer customer, Employee emp, Table table, Date reservationDate, Time timeStart, Time timeEnd, String Status) {
+    public Reservation(int reservationId, Customer customer, Employee emp, Table table, Date reservationDate, Time timeStart, Time timeEnd, String description, String Status) {
         this.reservationId = reservationId;
         this.customer = customer;
         this.emp = emp;
@@ -30,6 +31,7 @@ public class Reservation {
         this.reservationDate = reservationDate;
         this.timeStart = timeStart;
         this.timeEnd = timeEnd;
+        this.description = description;
         this.Status = Status;
     }
 
@@ -87,6 +89,14 @@ public class Reservation {
 
     public void setTimeEnd(Time timeEnd) {
         this.timeEnd = timeEnd;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getStatus() {
