@@ -4,41 +4,40 @@
     Author     : Tiêu Gia Huy - CE191594
 --%>
 
+<%@page import="model.Table"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
+<%
+    Table selected = (Table) request.getAttribute("selectedTable");
+%>
 
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Create Reservation</title>
+        <title>Create Reservation - <%=(selected != null) ? selected.getNumber() : ""%></title>
 
-        <!-- Bootstrap giống add.jsp -->
         <link href="${pageContext.request.contextPath}/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
         <style>
             body {
                 background-color: #f8f9fa;
             }
-
             .booking-container {
                 max-width: 500px;
-                margin: 100px auto;
+                margin: 80px auto;
                 background: #fff;
                 border-radius: 12px;
                 box-shadow: 0 0 15px rgba(0,0,0,0.1);
                 padding: 30px;
             }
-
             .btn-confirm {
                 background-color: #dc3545;
                 color: white;
             }
-
             .btn-confirm:hover {
                 background-color: #c82333;
             }
-
             #availabilityMsg {
                 min-height: 1.4em;
                 font-weight: 500;
@@ -47,36 +46,40 @@
     </head>
 
     <body>
-
         <div class="booking-container">
-            <h4 class="text-center mb-4">Create Reservation (Employee)</h4>
+            <h4 class="text-center mb-4">
+                Create Reservation 
+                <% if (selected != null) {%> - Table <%= selected.getNumber()%><% }%>
+            </h4>
 
             <form id="createForm" action="${pageContext.request.contextPath}/reservation?action=add" method="post">
+                <!-- gửi tableId -->
+                <input type="hidden" name="tableId" id="tableId" value="<%= (selected != null) ? selected.getId() : ""%>">
 
-                <!-- CUSTOMER -->
+                <!-- SEARCH BY PHONE -->
+                <div class="mb-3">
+                    <label class="form-label">Search by phone</label>
+                    <input type="text" id="searchPhone" class="form-control" placeholder="Enter phone number to filter customers...">
+                </div>
+
+                <!-- CUSTOMER SELECT -->
                 <div class="mb-3">
                     <label class="form-label">Customer</label>
-                    <select name="customerId" class="form-control" required>
+                    <select name="customerId" id="customerSelect" class="form-control" required>
                         <option value="">-- Select customer --</option>
                         <c:forEach var="c" items="${listCustomer}">
-                            <option value="${c.customerId}">
+                            <option value="${c.customerId}"
+                                    data-phone="${c.phoneNumber}">
                                 ${c.customerName} (${c.phoneNumber})
                             </option>
                         </c:forEach>
                     </select>
                 </div>
 
-                <!-- TABLE -->
+                <!-- TABLE INFO (READONLY) -->
                 <div class="mb-3">
                     <label class="form-label">Table</label>
-                    <select name="tableId" id="tableId" class="form-control" required>
-                        <option value="">-- Select table --</option>
-                        <c:forEach var="t" items="${listTable}">
-                            <option value="${t.id}">
-                                Table ${t.number} (${t.capacity} seats)
-                            </option>
-                        </c:forEach>
-                    </select>
+                    <input type="text" class="form-control" value="Table <%=(selected != null) ? selected.getNumber() : ""%> (capacity: <%=(selected != null) ? selected.getCapacity() : 0%> Guests)" disabled>
                 </div>
 
                 <!-- DATE -->
@@ -85,16 +88,16 @@
                     <input type="date" name="reservationDate" id="reservationDate" class="form-control" required>
                 </div>
 
-                <!-- TIME START -->
+                <!-- START TIME -->
                 <div class="mb-3">
                     <label class="form-label">Start Time</label>
                     <input type="time" name="timeStart" id="timeStart" class="form-control" required>
-                    <p class="text-muted mb-1" style="font-size:13px;">
-                        Cannot book time between 05:00 and 22:00
+                    <p class="text-muted mb-1" style="font-size: 13px;">
+                        Cannot book table a time between 05:00 and 22:00
                     </p>
                 </div>
 
-                <!-- TIME END -->
+                <!-- END TIME -->
                 <div class="mb-3">
                     <label class="form-label">End Time</label>
                     <input type="time" name="timeEnd" id="timeEnd" class="form-control" required>
@@ -103,43 +106,61 @@
                 <!-- MESSAGE -->
                 <div id="availabilityMsg" class="mb-3"></div>
 
-                <!-- BUTTON -->
                 <div class="d-flex justify-content-between">
                     <button type="submit" id="btnSubmit" class="btn btn-confirm">Confirm</button>
-                    <a href="${pageContext.request.contextPath}/reservation" class="btn btn-secondary">Cancel</a>
+                    <a href="${pageContext.request.contextPath}/reservation?view=bookatable" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
         </div>
 
-        <!-- Bootstrap JS -->
         <script src="${pageContext.request.contextPath}/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-        <!-- DATA CHECK TRÙNG -->
+        <!-- DATA reservation đã có của bàn này -->
         <script>
             const existingReservations = [
             <c:forEach var="r" items="${existingReservations}" varStatus="loop">
             {
-            tableId: '${r.table.id}',
-                    date: '${r.reservationDate}',
+            date: '${r.reservationDate}',
                     timeStart: '${r.timeStart}'
             }<c:if test="${!loop.last}">,</c:if>
             </c:forEach>
             ];
         </script>
 
-        <!-- VALIDATE GIỜ -->
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const today = new Date().toISOString().split('T')[0];
 
-                const tableEl = document.getElementById('tableId');
                 const dateEl = document.getElementById('reservationDate');
                 const timeStartEl = document.getElementById('timeStart');
                 const timeEndEl = document.getElementById('timeEnd');
                 const btnSubmit = document.getElementById('btnSubmit');
                 const availMsg = document.getElementById('availabilityMsg');
 
+                const customerSelect = document.getElementById('customerSelect');
+                const searchPhoneInput = document.getElementById('searchPhone');
+
                 dateEl.setAttribute('min', today);
+
+                // Lưu lại danh sách option gốc để filter
+                const originalCustomerOptions = Array.from(customerSelect.options);
+
+                // SEARCH THEO SĐT
+                searchPhoneInput.addEventListener('keyup', function () {
+                    const keyword = this.value.trim().toLowerCase();
+
+                    // giữ lại option đầu tiên "-- Select customer --"
+                    customerSelect.innerHTML = '';
+                    customerSelect.appendChild(originalCustomerOptions[0]);
+
+                    for (let i = 1; i < originalCustomerOptions.length; i++) {
+                        const opt = originalCustomerOptions[i];
+                        const phone = (opt.getAttribute('data-phone') || '').toLowerCase();
+                        if (phone.includes(keyword)) {
+                            customerSelect.appendChild(opt);
+                        }
+                    }
+                });
 
                 function showMessage(text, type) {
                     const cls = type === 'success' ? 'text-success'
@@ -149,16 +170,22 @@
                 }
 
                 function toMinutes(timeStr) {
+                    if (!timeStr)
+                        return 0;
                     const parts = timeStr.split(':');
                     return parseInt(parts[0]) * 60 + parseInt(parts[1]);
                 }
 
-                function isConflict(tableId, selectedDate, selectedTime) {
+                // Check trùng (cùng ngày, lệch <= 195 phút)
+                function isConflict(selectedDate, selectedTime) {
+                    if (!selectedDate || !selectedTime)
+                        return false;
                     const selectedMins = toMinutes(selectedTime);
                     for (const r of existingReservations) {
-                        if (r.tableId === tableId && r.date === selectedDate) {
+                        if (r.date === selectedDate) {
                             const existingMins = toMinutes(r.timeStart);
-                            if (Math.abs(selectedMins - existingMins) <= 195)
+                            const diff = Math.abs(selectedMins - existingMins);
+                            if (diff <= 195)
                                 return true;
                         }
                     }
@@ -166,17 +193,17 @@
                 }
 
                 function validate() {
-                    const tableId = tableEl.value;
                     const date = dateEl.value;
                     const timeStart = timeStartEl.value;
                     const timeEnd = timeEndEl.value;
 
-                    if (!tableId || !date || !timeStart || !timeEnd) {
-                        showMessage('Please select full information.', 'danger');
+                    if (!date || !timeStart || !timeEnd) {
+                        showMessage('Please select a date and time.', 'danger');
                         btnSubmit.disabled = true;
                         return;
                     }
 
+                    // Giờ mở cửa 05:00 - 22:00
                     if (timeStart < '05:00' || timeStart >= '22:00') {
                         showMessage('Cannot book between 22:00 - 05:00.', 'danger');
                         btnSubmit.disabled = true;
@@ -189,8 +216,8 @@
                         return;
                     }
 
-                    if (isConflict(tableId, date, timeStart)) {
-                        showMessage('This time slot is already booked.', 'danger');
+                    if (isConflict(date, timeStart)) {
+                        showMessage('This time has already been booked. Please choose another time slot.', 'danger');
                         btnSubmit.disabled = true;
                     } else {
                         showMessage('Available time.', 'success');
@@ -198,12 +225,19 @@
                     }
                 }
 
-                tableEl.addEventListener('change', validate);
                 dateEl.addEventListener('change', validate);
                 timeStartEl.addEventListener('change', validate);
                 timeEndEl.addEventListener('change', validate);
+
+                document.getElementById('createForm').addEventListener('submit', function (e) {
+                    if (btnSubmit.disabled) {
+                        e.preventDefault();
+                        showMessage('Unable to submit because the time is unavailable.', 'danger');
+                    }
+                });
             });
         </script>
 
     </body>
 </html>
+
