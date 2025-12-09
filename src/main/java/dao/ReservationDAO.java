@@ -300,7 +300,7 @@ public class ReservationDAO extends DBContext {
         List<Reservation> list = new ArrayList<>();
         try {
             String sql = "SELECT reservation_date, time_start, time_end FROM reservation "
-                    + "WHERE table_id = ? AND status IN ('Approved')";
+                    + "WHERE table_id = ? AND LOWER(status) IN ('approved','pending')";
             ResultSet rs = this.executeSelectionQuery(sql, new Object[]{tableId});
             while (rs.next()) {
                 list.add(new Reservation(0, null, null, null, rs.getDate("reservation_date"), rs.getTime("time_start"), rs.getTime("time_end"), null));

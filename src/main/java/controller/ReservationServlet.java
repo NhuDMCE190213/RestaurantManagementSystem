@@ -103,14 +103,36 @@ public class ReservationServlet extends HttpServlet {
             return;
         }
 
-        // CREATE FORM
+        // BƯỚC 1: CHỌN BÀN (BOOKATABLE CHO EMPLOYEE)
+        if (view.equalsIgnoreCase("bookatable")) {
+            request.setAttribute("listTable", tableDAO.getAll()); // hoặc getAvailableTables nếu muốn
+            request.getRequestDispatcher("/WEB-INF/reservation/bookatable.jsp").forward(request, response);
+            return;
+        }
+
+        // BƯỚC 2: FORM TẠO RESERVATION CHO BÀN ĐÃ CHỌN
         if (view.equalsIgnoreCase("add")) {
 
-            // LẤY DANH SÁCH BÀN
-            request.setAttribute("listTable", tableDAO.getAll());
+            int tableId;
+            try {
+                tableId = Integer.parseInt(request.getParameter("tableId"));
+            } catch (Exception e) {
+                // Không có tableId thì quay lại chọn bàn
+                response.sendRedirect(request.getContextPath() + "/reservation?view=bookatable");
+                return;
+            }
 
-            // LẤY DANH SÁCH CUSTOMER
+            model.Table selectedTable = tableDAO.getElementByID(tableId);
+            if (selectedTable == null) {
+                setPopup(request, false, "Table not found.");
+                response.sendRedirect(request.getContextPath() + "/reservation?view=bookatable");
+                return;
+            }
+
+            // gửi bàn đã chọn + danh sách customer + reservation hiện có của bàn đó
+            request.setAttribute("selectedTable", selectedTable);
             request.setAttribute("listCustomer", customerDAO.getAll());
+            request.setAttribute("existingReservations", reservationDAO.getReservationsByTable(tableId));
 
             request.getRequestDispatcher("/WEB-INF/reservation/create.jsp").forward(request, response);
             return;
