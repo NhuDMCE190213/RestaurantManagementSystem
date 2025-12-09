@@ -216,6 +216,27 @@ public class OrderItemDAO extends DBContext {
         return -1;
     }
 
+    public int add(int orderId, List<OrderItem> orderItems) {
+
+        try {
+            String query = "INSERT INTO order_item\n"
+                    + "(order_id, menu_item_id, unit_price, quantity)\n"
+                    + "VALUES \n";
+
+            for (OrderItem orderItem : orderItems) {
+                query += "(" + orderId + ", " + orderItem.getOrderItemId() + ", " + orderItem.getPrice() + ", " + orderItem.getQuantity() + "),";
+            }
+
+            query = query.substring(0, query.length() - 1);
+
+            return this.executeQuery(query, new Object[]{});
+
+        } catch (SQLException ex) {
+            System.out.println("Can't not add object");
+        }
+        return -1;
+    }
+
     public int edit(int orderItemId, int orderId, int menuItemId, int unitPrice, int quantity) {
         try {
 
@@ -229,6 +250,26 @@ public class OrderItemDAO extends DBContext {
             System.out.println("Can't not edit object");
         }
         return -1;
+    }
+
+    public int edit(int orderId, List<OrderItem> orderItems) {
+        //edit old order item
+        int i = 0;
+        while (i < orderItems.size()) {
+            OrderItem orderItem = orderItems.get(i);
+            
+            MenuItem menuItem = orderItem.getMenuItem();
+            OrderItem orderItemExist = getElementByMenuItemID(orderId, menuItem.getMenuItemId());
+            if (orderItemExist != null) {
+                edit(orderItem.getOrderItemId(), orderId, menuItem.getMenuItemId(), orderItem.getUnitPrice(), orderItem.getQuantity());
+                orderItems.remove(orderItem);
+            }
+            
+            i++;
+        }
+
+        // add new order item
+        return add(orderId, orderItems);
     }
 
     public int delete(int id) {
