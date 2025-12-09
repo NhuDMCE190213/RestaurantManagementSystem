@@ -164,7 +164,7 @@ public class MenuItemServlet extends HttpServlet {
                                     throw new IOException("Failed to create directory: " + uploadPath + ". Check permissions.");
                                 }
                             }
-                            String uniqueFileName = System.currentTimeMillis() + "_" + fileName;
+                            String uniqueFileName = fileName;
                             String fullFilePath = uploadPath + File.separator + uniqueFileName;
 
                             filePart.write(fullFilePath);
