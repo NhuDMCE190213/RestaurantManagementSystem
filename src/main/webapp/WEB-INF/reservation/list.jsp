@@ -39,7 +39,9 @@
                         <th width="12%">Employee</th>
                         <th width="10%">Table</th>
                         <th width="15%">Date</th>
+                        <th width="15%">Description</th>
                         <th width="12%">Time</th>
+
                         <th width="15%">Status</th>
                         <th width="18%" class="text-end">Action</th>
                     </tr>
@@ -60,7 +62,7 @@
                                     <td>
                                         ${fn:substring(r.timeStart, 0, 5)} - ${fn:substring(r.timeEnd, 0, 5)}
                                     </td>
-
+                                    <td>${r.description}</td>
 
                                     <td>
                                         <span class="badge
