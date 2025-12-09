@@ -22,6 +22,10 @@
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
                         <input type="search" name="keyword" value="${param.keyword}" class="form-control" placeholder="Search id / table / status">
                     </form>
+                    <a class="btn btn-primary add-btn" href="<c:url value="reservation">
+                           <c:param name="view" value="add"/>
+                       </c:url>"><i class="bi bi-plus-circle"></i>Add</a>
+
                 </div>
             </div>
         </div>
@@ -32,6 +36,7 @@
                     <tr>
                         <th width="8%">ID</th>
                         <th width="12%">Customer</th>
+                        <th width="12%">Employee</th>
                         <th width="10%">Table</th>
                         <th width="15%">Date</th>
                         <th width="12%">Time</th>
@@ -49,6 +54,7 @@
                                 <tr>
                                     <td><c:out value="${r.reservationId}"/></td>
                                     <td><c:out value="${r.customer.customerName}"/></td>
+                                    <td><c:out value="${r.emp.empName}"/></td>
                                     <td><c:out value="${r.table.number}"/></td>
                                     <td><c:out value="${r.reservationDate}"/></td>
                                     <td>
