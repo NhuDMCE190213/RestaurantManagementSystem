@@ -22,7 +22,7 @@
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
                         <input type="search" name="keyword" value="${param.keyword}" class="form-control" placeholder="Search id / table / status">
                     </form>
-                    <a class="btn btn-primary add-btn" href="<c:url value="reservation">
+                    <a class="btn btn-primary add-btn" href="<c:url value="reservation?view=bookatable">
                            <c:param name="view" value="add"/>
                        </c:url>"><i class="bi bi-plus-circle"></i>Add</a>
 
