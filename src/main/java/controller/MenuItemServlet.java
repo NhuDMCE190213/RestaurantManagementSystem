@@ -4,6 +4,7 @@ import dao.*;
 import model.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path; // Import Path
 import java.nio.file.Paths;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -26,10 +27,20 @@ public class MenuItemServlet extends HttpServlet {
     private final int MAX_ELEMENTS_PER_PAGE = 10;
     private final MenuItemDAO menuItemDAO = new MenuItemDAO();
     private final CategoryDAO categoryDAO = new CategoryDAO();
+    // Must match ImageServingServlet
+    private static final String UPLOAD_DIRECTORY_NAME = "menu_images_storage";
+    private static final String UPLOAD_URL_PREFIX = "images/";
 
-//use absolute path
-    private static final String EXTERNAL_UPLOAD_DIR_PATH = "../../upload_files/menu";
-    private static final String UPLOAD_URL_PREFIX = "images/menu/";
+    /**
+     * Helper method to determine the image storage path based on Tomcat/User
+     * home and the predefined directory name.
+     *
+     * @return The absolute Path for the image upload directory.
+     */
+    private Path getUploadDirectoryPath() {
+        String applicationBaseDir = System.getProperty("catalina.base", System.getProperty("user.home"));
+        return new File(applicationBaseDir, UPLOAD_DIRECTORY_NAME).toPath();
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -136,17 +147,18 @@ public class MenuItemServlet extends HttpServlet {
                         popupStatus = false;
                         popupMessage = "Price must be between 5.000 and 5.000.000 VND.";
                     } else {
-                        String tempWebAppPath = request.getServletContext().getRealPath("/");
-// 2. Nối đường dẫn tương đối và chuyển nó thành đường dẫn tuyệt đối chuẩn tắc.
-                        String uploadPath = new File(tempWebAppPath, EXTERNAL_UPLOAD_DIR_PATH).getCanonicalPath();
+
+                        Path uploadDirPath = getUploadDirectoryPath();
+                        String uploadPath = uploadDirPath.toString();
+
                         String newImageUrl = existingImageUrl;
                         Part filePart = request.getPart("imageFile");
                         String fileName = (filePart != null && filePart.getSubmittedFileName() != null)
                                 ? Paths.get(filePart.getSubmittedFileName()).getFileName().toString()
                                 : "";
                         if (!fileName.isEmpty()) {
-                            // Đảm bảo thư mục vật lý vĩnh viễn tồn tại
-                            File uploadDir = new File(uploadPath);
+
+                            File uploadDir = uploadDirPath.toFile();
                             if (!uploadDir.exists()) {
                                 if (!uploadDir.mkdirs()) {
                                     throw new IOException("Failed to create directory: " + uploadPath + ". Check permissions.");
@@ -156,6 +168,7 @@ public class MenuItemServlet extends HttpServlet {
                             String fullFilePath = uploadPath + File.separator + uniqueFileName;
 
                             filePart.write(fullFilePath);
+
                             newImageUrl = UPLOAD_URL_PREFIX + uniqueFileName;
                         }
 
@@ -203,7 +216,6 @@ public class MenuItemServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/menuitem");
     }
 
-    // Utility Methods
     private void loadFormData(HttpServletRequest request) {
         request.setAttribute("categories", categoryDAO.getAll());
     }

@@ -10,6 +10,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.sql.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -83,31 +86,25 @@ public class RegisterServlet extends HttpServlet {
         String customerName = request.getParameter("name");
         String email = request.getParameter("email");
         String phoneNumber = request.getParameter("phone");
-
-        String gender = null;
-        String address = null;
-        java.sql.Date dob = null;
+        String gender = request.getParameter("gender");
+        String address = request.getParameter("address");
+        Date dob = null;
 
         boolean registerSuccess = true;
         String errorMessage = "";
+        HttpSession session = request.getSession();
 
         try {
 
-            if (isNullOrEmpty(customerAccount)
-                    || isNullOrEmpty(password)
-                    || isNullOrEmpty(customerName)
-                    || isNullOrEmpty(email)
-                    || isNullOrEmpty(phoneNumber)) {
-
+            // validate
+            if (isNullOrEmpty(customerAccount) || isNullOrEmpty(password) || isNullOrEmpty(customerName)
+                    || isNullOrEmpty(email) || isNullOrEmpty(phoneNumber)) {
                 registerSuccess = false;
                 errorMessage = "All fields marked with (*) are required. Please fill them out.";
-
             } else if (!password.equals(confirmPassword)) {
-
                 registerSuccess = false;
                 errorMessage = "Password and Confirm Password don't match.";
             } else if (password.length() < 6) {
-
                 registerSuccess = false;
                 errorMessage = "Password must be at least 6 characters long.";
             } else if (!isValidEmail(email)) {
@@ -116,12 +113,10 @@ public class RegisterServlet extends HttpServlet {
             } else if (!isValidPhone(phoneNumber)) {
                 registerSuccess = false;
                 errorMessage = "Invalid phone number. Must be 10 digits (ex: 0xxxxxxxxx).";
-
             } else if (customerDAO.checkAccountExist(customerAccount)) {
                 registerSuccess = false;
                 errorMessage = "Username already exists. Try another.";
             } else if (customerDAO.checkEmailExist(email)) {
-
                 registerSuccess = false;
                 errorMessage = "Email already exists. Try another.";
             } else if (customerDAO.checkPhoneExist(phoneNumber)) {
@@ -129,36 +124,43 @@ public class RegisterServlet extends HttpServlet {
                 errorMessage = "Phone already exists. Try another.";
             }
 
+            //send otp
             if (registerSuccess) {
 
+                // otp
+                String otpCode = String.valueOf((int) (Math.random() * 900000) + 100000);
                 String hashedPassword = db.hashToMD5(password);
-                try {
-                    int checkError = customerDAO.add(customerAccount, hashedPassword, customerName,
-                            gender, phoneNumber, email, address, dob);
 
-                    if (checkError >= 1) {
-                        setPopup(request, true, "Register successfully! Sign in to connect.");
-                        response.sendRedirect("login");
-                        return;
-                    } else {
-                        registerSuccess = false;
-                        errorMessage = "Database Error: " + getSqlErrorCode(checkError);
-                    }
-                } catch (Exception daoEx) {
+                // temp store
+                session.setAttribute("temp_account", customerAccount);
+                session.setAttribute("temp_password", hashedPassword);
+                session.setAttribute("temp_name", customerName);
+                session.setAttribute("temp_email", email);
+                session.setAttribute("temp_phone", phoneNumber);
+                session.setAttribute("temp_gender", gender);
+                session.setAttribute("temp_address", address);
+                session.setAttribute("temp_dob", dob);
+                session.setAttribute("registration_otp", otpCode);
 
-                    registerSuccess = false;
-                    errorMessage = "DAO error.";
-                    System.err.println("DAO Exception during registration: " + daoEx.getMessage());
-                    daoEx.printStackTrace();
-                }
+                String subject = "Yummy Restaurant Registration - OTP Verification";
+                String content = "Hello " + customerName + ",\n\nYour registration verification code is: " + otpCode
+                        + "\n\nPlease enter this code on the website to complete your registration."
+                        + "\n\nThis code is valid for a short time.";
+
+                db.verifyEmail(email, subject, content); //send otp
+
+                response.sendRedirect("verification");
+                return;
             }
 
+        } catch (RuntimeException e) {
+            registerSuccess = false;
+            errorMessage = "System Error (Email/Hash): Failed to send email or hash password.";
+            Logger.getLogger(RegisterServlet.class.getName()).log(Level.SEVERE, null, e);
         } catch (Exception e) {
-
             registerSuccess = false;
             errorMessage = "Unexpected error.";
-            System.err.println("Critical System Error: " + e.getMessage());
-            e.printStackTrace();
+            Logger.getLogger(RegisterServlet.class.getName()).log(Level.SEVERE, null, e);
         }
         if (!registerSuccess) {
             request.setAttribute("error", errorMessage);
@@ -169,6 +171,7 @@ public class RegisterServlet extends HttpServlet {
             request.setAttribute("phone", phoneNumber);
 
             request.getRequestDispatcher("/WEB-INF/authentication/register.jsp").forward(request, response);
+
         }
     }
 

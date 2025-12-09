@@ -212,7 +212,7 @@ public class RecipeDAO extends DBContext {
 //    
 //    public int addItem(int recipeId, int ingredientId, double quantity, String unit, String note) {
 //        try {
-////            
+    ////            
 //            String query = "INSERT INTO recipe_item (recipe_id, ingredient_id, quantity, unit, note, status) VALUES (?, ?, ?, ?, ?, ?)";
 //            return this.executeQuery(query, new Object[]{recipeId, ingredientId, quantity, unit, note, "Active"});
 //        } catch (SQLException ex) {
@@ -312,9 +312,10 @@ public class RecipeDAO extends DBContext {
 
     /**
      * Search by keyword (applies to menu_item_id and item_name)
+     *
      * @param page
      * @param keyword
-     * @return 
+     * @return
      */
     public List<Recipe> getAll(int page, String keyword) {
         List<Recipe> list = new ArrayList<>();
@@ -366,7 +367,9 @@ public class RecipeDAO extends DBContext {
             return this.executeQuery(query, new Object[]{recipeName, "Active"});
         } catch (SQLException ex) {
             int sqlError = checkErrorSQL(ex);
-            if (sqlError != 0) return sqlError;
+            if (sqlError != 0) {
+                return sqlError;
+            }
             Logger.getLogger(RecipeDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return -1;
@@ -379,7 +382,9 @@ public class RecipeDAO extends DBContext {
             return this.executeQuery(query, new Object[]{recipeName, status, id});
         } catch (SQLException ex) {
             int sqlError = checkErrorSQL(ex);
-            if (sqlError != 0) return sqlError;
+            if (sqlError != 0) {
+                return sqlError;
+            }
             Logger.getLogger(RecipeDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return -1;
@@ -399,7 +404,9 @@ public class RecipeDAO extends DBContext {
         try {
             String query = "SELECT COUNT(menu_item_id) AS numrow FROM menu_item WHERE (LOWER(status) <> LOWER(N'Deleted'))";
             ResultSet rs = this.executeSelectionQuery(query, null);
-            if (rs.next()) return rs.getInt(1);
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
         } catch (SQLException ex) {
             Logger.getLogger(RecipeDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -458,8 +465,56 @@ public class RecipeDAO extends DBContext {
         return null;
     }
 
+    public RecipeItem getItemByMenuItemAndIngredient(int menuItemId, int ingredientId) {
+        try {
+            String query = "SELECT r.recipe_item_id, r.menu_item_id, r.ingredient_id, r.quantity, r.unit, r.note, r.status, ig.ingredient_name "
+                    + "FROM recipe r LEFT JOIN ingredient ig ON r.ingredient_id = ig.ingredient_id "
+                    + "WHERE r.menu_item_id = ? AND r.ingredient_id = ? AND (LOWER(r.status) <> LOWER(N'Deleted'))";
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{menuItemId, ingredientId});
+            if (rs.next()) {
+                int id = rs.getInt("recipe_item_id");
+                int mId = rs.getInt("menu_item_id");
+                int ingId = rs.getInt("ingredient_id");
+                double qty = rs.getDouble("quantity");
+                String unit = rs.getString("unit");
+                String note = rs.getString("note");
+                String status = rs.getString("status");
+                String ingName = rs.getString("ingredient_name");
+
+                return new RecipeItem(id, mId, ingId, qty, unit, note, status, ingName);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(RecipeDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
 
     public int addItem(int menuItemId, int ingredientId, double quantity, String unit, String note) {
+        RecipeItem recipeItemExist = getItemByMenuItemAndIngredient(menuItemId, ingredientId);
+
+        if (recipeItemExist != null) {
+            String oldunit = recipeItemExist.getUnit();
+            String newunit = unit;
+            Double oldquantity = recipeItemExist.getQuantity();
+            Double newquantity = quantity;
+            if (oldunit.equals(newunit)) {
+                double total = oldquantity + newquantity;
+                recipeItemExist.setQuantity(total);
+                return editItem(recipeItemExist.getRecipeItemId(), ingredientId, total, unit, note, "Active");
+            } else {
+                Double newquantity2 = convert(newquantity, newunit, oldunit);
+                boolean useNewUnit = newquantity2 > oldquantity;
+                if (useNewUnit) {
+                    double oldConverted = convert(oldquantity, oldunit, newunit);
+                    return editItem(recipeItemExist.getRecipeItemId(), ingredientId, newquantity + oldConverted, newunit, note, "Active");
+                } else {
+                    double newConverted = convert(newquantity, newunit, oldunit);
+                    return editItem(recipeItemExist.getRecipeItemId(), ingredientId, oldquantity + newConverted, oldunit, note, "Active");
+                }
+            }
+           
+
+        }
         try {
             String query = "INSERT INTO recipe (menu_item_id, ingredient_id, quantity, unit, note, status) VALUES (?, ?, ?, ?, ?, ?)";
             return this.executeQuery(query, new Object[]{menuItemId, ingredientId, quantity, unit, note, "Active"});
@@ -473,8 +528,13 @@ public class RecipeDAO extends DBContext {
         return -1;
     }
 
-
     public int editItem(int recipeItemId, int ingredientId, double quantity, String unit, String note, String status) {
+//        OrderItem orderItemExist = getElementByMenuItemID(orderId, menuItemId);
+//
+//        if (orderItemExist != null) {
+//            return edit(orderItemExist.getOrderItemId(), orderId, menuItemId, unitPrice, orderItemExist.getQuantity() + quantity);
+//        }
+
         try {
 
             String query = "UPDATE recipe SET ingredient_id = ?, quantity = ?, unit = ?, note = ?, status = ? WHERE recipe_item_id = ?";
@@ -513,5 +573,19 @@ public class RecipeDAO extends DBContext {
         }
         return false;
     }
+    
+    private double convert(double qty, String from, String to) {
+    if (from.equals(to)) return qty;
+
+    // mass
+    if (from.equals("kg") && to.equals("gram")) return qty * 1000;
+    if (from.equals("gram") && to.equals("kg")) return qty / 1000.0;
+
+    // volume
+    if (from.equals("l") && to.equals("ml")) return qty * 1000;
+    if (from.equals("ml") && to.equals("l")) return qty / 1000.0;
+
+    return qty; // fallback
+}
 
 }
