@@ -241,6 +241,10 @@ public class ReservationServlet extends HttpServlet {
             int tableId;
             Date date;
             Time timeStart, timeEnd;
+            String description = request.getParameter("description");
+            if (description == null) {
+                description = "";
+            }
 
             try {
                 customerId = Integer.parseInt(request.getParameter("customerId"));
@@ -322,7 +326,8 @@ public class ReservationServlet extends HttpServlet {
                     tableId,
                     date,
                     timeStart,
-                    timeEnd
+                    timeEnd,
+                    description
             );
 
             if (check < 1) {

@@ -225,6 +225,10 @@ public class MyReservationServlet extends HttpServlet {
             int customerId, tableId;
             Date date;
             Time timeStart, timeEnd;
+            String description = request.getParameter("description");
+            if (description == null) {
+                description = "";
+            }
 
             try {
                 customerId = Integer.parseInt(request.getParameter("customerId"));
@@ -261,7 +265,7 @@ public class MyReservationServlet extends HttpServlet {
                 popupStatus = false;
                 popupMessage = "This table is currently reserved and not available.";
             } else {
-                int check = reservationDAO.add(customerId, tableId, date, timeStart, timeEnd);
+                int check = reservationDAO.add(customerId, tableId, date, timeStart, timeEnd, description);
                 if (check < 1) {
                     popupStatus = false;
                     popupMessage = "Add failed. SQL error: " + getSqlErrorCode(check);

@@ -103,6 +103,10 @@
                     <input type="time" name="timeEnd" id="timeEnd" class="form-control" required>
                 </div>
 
+                <label>Description (Health / Food note)</label>
+                <textarea name="description" class="form-control"
+                          placeholder="Eg: Vegetarian, no spicy, seafood allergy..."></textarea>
+
                 <!-- MESSAGE -->
                 <div id="availabilityMsg" class="mb-3"></div>
 
