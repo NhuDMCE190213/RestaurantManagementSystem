@@ -497,9 +497,11 @@ public class RecipeDAO extends DBContext {
             String newunit = unit;
             Double oldquantity = recipeItemExist.getQuantity();
             Double newquantity = quantity;
+            if (!isSameUnitType(oldunit, newunit)) {
+                return -2;
+            }
             if (oldunit.equals(newunit)) {
                 double total = oldquantity + newquantity;
-                recipeItemExist.setQuantity(total);
                 return editItem(recipeItemExist.getRecipeItemId(), ingredientId, total, unit, note, "Active");
             } else {
                 Double newquantity2 = convert(newquantity, newunit, oldunit);
@@ -512,7 +514,6 @@ public class RecipeDAO extends DBContext {
                     return editItem(recipeItemExist.getRecipeItemId(), ingredientId, oldquantity + newConverted, oldunit, note, "Active");
                 }
             }
-           
 
         }
         try {
@@ -529,12 +530,6 @@ public class RecipeDAO extends DBContext {
     }
 
     public int editItem(int recipeItemId, int ingredientId, double quantity, String unit, String note, String status) {
-//        OrderItem orderItemExist = getElementByMenuItemID(orderId, menuItemId);
-//
-//        if (orderItemExist != null) {
-//            return edit(orderItemExist.getOrderItemId(), orderId, menuItemId, unitPrice, orderItemExist.getQuantity() + quantity);
-//        }
-
         try {
 
             String query = "UPDATE recipe SET ingredient_id = ?, quantity = ?, unit = ?, note = ?, status = ? WHERE recipe_item_id = ?";
@@ -573,19 +568,54 @@ public class RecipeDAO extends DBContext {
         }
         return false;
     }
-    
+
     private double convert(double qty, String from, String to) {
-    if (from.equals(to)) return qty;
+        if (from.equals(to)) {
+            return qty;
+        }
 
-    // mass
-    if (from.equals("kg") && to.equals("gram")) return qty * 1000;
-    if (from.equals("gram") && to.equals("kg")) return qty / 1000.0;
+        // mass
+        if (from.equals("kg") && to.equals("gram")) {
+            return qty * 1000;
+        }
+        if (from.equals("gram") && to.equals("kg")) {
+            return qty / 1000.0;
+        }
 
-    // volume
-    if (from.equals("l") && to.equals("ml")) return qty * 1000;
-    if (from.equals("ml") && to.equals("l")) return qty / 1000.0;
+        // volume
+        if (from.equals("l") && to.equals("ml")) {
+            return qty * 1000;
+        }
+        if (from.equals("ml") && to.equals("l")) {
+            return qty / 1000.0;
+        }
 
-    return qty; // fallback
-}
+        return qty; // fallback
+    }
 
+    private boolean isSameUnitType(String u1, String u2) {
+        String type1 = getUnitType(u1);
+        String type2 = getUnitType(u2);
+        return type1.equals(type2);
+    }
+
+    private String getUnitType(String unit) {
+        unit = unit.toLowerCase();
+
+        switch (unit) {
+            case "kg":
+            case "g":
+                return "mass"; // khối lượng
+
+            case "l":
+            case "ml":
+                return "volume"; // thể tích
+
+            case "pcs":
+                return "count"; // đếm số lượng
+
+            default:
+                return "unknown";
+        }
+    }
 }
