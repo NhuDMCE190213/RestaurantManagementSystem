@@ -33,7 +33,6 @@
                     <tr>
                         <th scope="col" width="5%">Id</th>
                         <th scope="col" width="30%">Name</th>
-                        <th scope="col" width="10%">Quantity</th>
                         <th scope="col" width="5%">Unit</th>
                         <th scope="col" width="15%">Type</th>
                         <th scope="col" width="15%">Status</th>
@@ -52,7 +51,6 @@
                                 <tr>
                                     <td><c:out value="${ingredient.ingredientId}"/></td>
                                     <td><c:out value="${ingredient.ingredientName}"/></td>
-                                    <td><c:out value="${ingredient.quantity}"/></td>
                                     <td><c:out value="${ingredient.unit}"/></td>
                                     <td><c:out value="${ingredient.type.typeName}"/></td>
                                     <td><c:out value="${ingredient.status}"/></td>
@@ -60,7 +58,7 @@
                                         <div class="action-button-group d-flex justify-content-end gap-2">
                                             <c:url var="edit" value="ingredient">
                                                 <c:param name="view" value="edit"/>
-                                                <c:param name="id" value="${ing.ingredientId}"/>
+                                                <c:param name="id" value="${ingredient.ingredientId}"/>
                                             </c:url>
                                             <a class="btn btn-outline-secondary btn-icon btn-edit" 
                                                title="Edit"
@@ -72,7 +70,7 @@
                                             <button type="button" class="btn btn-outline-secondary btn-icon btn-delete" 
                                                     title="Delete" 
                                                     aria-label="Delete" 
-                                                    onclick="showDeletePopup('${ing.ingredientId}')">
+                                                    onclick="showDeletePopup('${ingredient.ingredientId}')">
                                                 <i class="bi bi-x-circle"></i>
                                             </button>
                                         </div>
@@ -167,7 +165,7 @@
                         <div class="modal-body">
                     <c:choose>
                         <c:when test="${param.status eq 'success'}">
-                            <p style="color: green">The Ingredient <c:out value="${param.lastAction}"/> successfully.</p>
+                            <p style="color: green"> Delete the Ingredient <c:out value="${param.lastAction}"/> successfully.</p>
                         </c:when>
                         <c:otherwise>
                             <p style="color: red">Failed to <c:out value="${param.lastAction}"/> the ingredient. Please check the information.</p>
