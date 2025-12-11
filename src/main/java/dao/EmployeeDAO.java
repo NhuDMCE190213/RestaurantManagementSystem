@@ -169,25 +169,28 @@ public class EmployeeDAO extends DBContext {
                     new Object[]{emp_account, password, emp_name, gender, dob, phone_number, email, address, role_id, "Active"});
 
         } catch (SQLException ex) {
+            ex.printStackTrace();
             System.out.println("Can't not add object");
         }
+        
         return -1;
     }
+    private static final Logger LOG = Logger.getLogger(EmployeeDAO.class.getName());
 
-    public int add(String emp_account, String password, String emp_name, int role_id) {
-        try {
-            String query = "INSERT INTO employee \n"
-                    + "                  (emp_account, password, emp_name, role_id, status)\n"
-                    + "VALUES (?, ?, ?, ?, ?)";
-
-            return this.executeQuery(query,
-                    new Object[]{emp_account, password, emp_name, role_id, "Active"});
-
-        } catch (SQLException ex) {
-            System.out.println("Can't not add object");
-        }
-        return -1;
-    }
+//    public int add(String emp_account, String password, String emp_name, int role_id) {
+//        try {
+//            String query = "INSERT INTO employee \n"
+//                    + "                  (emp_account, password, emp_name, role_id, status)\n"
+//                    + "VALUES (?, ?, ?, ?, ?)";
+//
+//            return this.executeQuery(query,
+//                    new Object[]{emp_account, password, emp_name, role_id, "Active"});
+//
+//        } catch (SQLException ex) {
+//            System.out.println("Can't not add object");
+//        }
+//        return -1;
+//    }
 
     public int edit(int empId, String empAccount, String password, String empName, String gender, Date dob, String phoneNumber, String email, String address, int roleId) {
         try {
@@ -228,8 +231,10 @@ public class EmployeeDAO extends DBContext {
     }
 
     public int edit(int empId, int roleId) {
+        
+        if (empId == -1) return -1;
+        
         try {
-
             String query = "UPDATE Employee SET role_id = ?\n"
                     + "WHERE emp_id = ?";
             return this.executeQuery(query, new Object[]{roleId, empId});

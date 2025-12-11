@@ -25,7 +25,9 @@
                     </tr>
                     <tr>
                         <th><label for="password">Password</label></th>
-                        <td><input type="text" name="password" id="password" class="form-control" required></td>
+                        <td>
+                            <input type="text" name="password" id="password" class="form-control" required>
+                        </td>
                     </tr>
                     <tr>
                         <th><label for="empName">Full Name</label></th>
@@ -40,6 +42,10 @@
                                 </c:forEach>
                             </select>
                         </td>
+                    </tr>
+                    <tr>
+                        <th><label for="email">email</label></th>
+                        <td><input type="text" name="email" id="email" class="form-control" required></td>
                     </tr>
                     <tr>
                         <td></td>

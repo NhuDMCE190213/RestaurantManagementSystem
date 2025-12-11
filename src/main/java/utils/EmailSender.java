@@ -20,7 +20,7 @@ import java.util.Properties;
 public class EmailSender {
 
     private final String username = "hethong336@gmail.com";
-    private final String password = "@a123456789";
+    private final String password = "ghoj uwid gvrs mper";
 
     public void sendPasswordToEmployeeEmail(String toEmail, String subject, String content) {
 

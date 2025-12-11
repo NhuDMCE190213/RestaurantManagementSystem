@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Role;
+import utils.EmailSender;
 
 @WebServlet(name = "EmployeeServlet", urlPatterns = {"/employee"})
 public class EmployeeServlet extends HttpServlet {
@@ -21,6 +23,8 @@ public class EmployeeServlet extends HttpServlet {
     private final int MAX_ELEMENTS_PER_PAGE = 15;
     EmployeeDAO employeeDAO = new EmployeeDAO();
     RoleDAO roleDAO = new RoleDAO();
+
+    private final EmailSender emailSender = new EmailSender();
 
     boolean popupStatus = true;
     String popupMessage = "";
@@ -127,118 +131,14 @@ public class EmployeeServlet extends HttpServlet {
         if (action != null && !action.isEmpty()) {
             if (action.equalsIgnoreCase("add")) {
                 add(request);
-
             } else if (action.equalsIgnoreCase("edit")) {
-                int empId;
-                int roleId;
-
-                try {
-                    empId = Integer.parseInt(request.getParameter("id"));
-                    roleId = Integer.parseInt(request.getParameter("roleId"));
-                } catch (NumberFormatException e) {
-                    empId = -1;
-                    roleId = -1;
-                }
-
-//validate
-                if (empId <= 0 || roleId <= 0) {
-                    popupStatus = false;
-                    popupMessage = "The edit action is NOT successfull. The input has some error.";
-                } else {
-                    popupMessage = "The object with id=" + empId + " edited role successfull.";
-                }
-//end
-
-                if (popupStatus == true) {
-                    int checkError = employeeDAO.edit(empId, roleId);
-
-                    if (checkError >= 1) {
-                    } else {
-                        popupStatus = false;
-                        popupMessage = "The edit action is NOT successfull. Check the information again.";
-                    }
-                }
+                edit(request);
             } else if (action.equalsIgnoreCase("delete")) {
-                int id;
-
-                try {
-                    id = Integer.parseInt(request.getParameter("id"));
-                } catch (NumberFormatException e) {
-                    id = -1;
-                }
-
-//validate
-                if (id <= 0) {
-                    popupStatus = false;
-                    popupMessage = "The delete action is NOT successfull.";
-                } else {
-                    popupMessage = "The object with id=" + id + " deleted successfull.";
-                }
-//end
-                if (popupStatus == true) {
-                    int checkError = employeeDAO.delete(id);
-
-                    if (checkError >= 1) {
-
-                    } else {
-                        popupStatus = false;
-                        popupMessage = "The delete action is NOT successfull. Check the information again.";
-                    }
-                }
+                delete(request);
             } else if (action.equalsIgnoreCase("ban")) {
-                int id;
-
-                try {
-                    id = Integer.parseInt(request.getParameter("id"));
-                } catch (NumberFormatException e) {
-                    id = -1;
-                }
-
-//validate
-                if (id <= 0) {
-                    popupStatus = false;
-                    popupMessage = "The ban action is NOT successfull.";
-                } else {
-                    popupMessage = "The object with id=" + id + " banned successfull.";
-                }
-//end
-                if (popupStatus == true) {
-                    int checkError = employeeDAO.ban(id);
-
-                    if (checkError >= 1) {
-
-                    } else {
-                        popupStatus = false;
-                        popupMessage = "The ban action is NOT successfull. Check the information again.";
-                    }
-                }
+                ban(request);
             } else if (action.equalsIgnoreCase("unban")) {
-                int id;
-
-                try {
-                    id = Integer.parseInt(request.getParameter("id"));
-                } catch (NumberFormatException e) {
-                    id = -1;
-                }
-
-//validate
-                if (id <= 0) {
-                    popupStatus = false;
-                    popupMessage = "The unban action is NOT successfull.";
-                } else {
-                    popupMessage = "The object with id=" + id + " unbanned successfull.";
-                }
-//end
-                if (popupStatus == true) {
-                    int checkError = employeeDAO.unban(id);
-
-                    if (checkError >= 1) {
-
-                    } else {
-                        popupStatus = false;
-                        popupMessage = "The unban action is NOT successfull. Check the information again.";
-                    }
-                }
+                unban(request);
             }
             setPopup(request, popupStatus, popupMessage);
             response.sendRedirect(request.getContextPath() + "/employee");
@@ -275,6 +175,7 @@ public class EmployeeServlet extends HttpServlet {
         String empAccount = request.getParameter("empAccount");
         String password = request.getParameter("password");
         String empName = request.getParameter("empName");
+        String email = request.getParameter("email");
         int roleId;
 
         try {
@@ -283,28 +184,183 @@ public class EmployeeServlet extends HttpServlet {
             roleId = -1;
         }
 
+        Role role = roleDAO.getElementByID(roleId);
 //validate
-        if (empAccount == null || empAccount.isBlank()
-                || password == null || password.isBlank()
-                || empName == null || empName.isBlank()
-                || roleId <= 0) {
-            popupStatus = false;
-            popupMessage = "The add action is NOT successfull. The input has some error.";
+        popupStatus = false;
+        popupMessage = "The add action is NOT successfull.";
+        if (empAccount == null || empAccount.isBlank()) {
+            popupMessage += " The username has been blank.";
+        } else if (password == null || password.isBlank()) {
+            popupMessage += " The password has been blank.";
+        } else if (empName == null || empName.isBlank()) {
+            popupMessage += " The name has been blank.";
+        } else if (email == null || email.isBlank()) {
+            popupMessage += " The email has been blank.";
+        } else if (role == null) {
+            popupMessage += " The role is not exist.";
         } else {
-            popupMessage = "The object with name=" + empName + " added successfull"
+            popupStatus = true;
+            popupMessage = "The object with name=" + empName + " added successfull<br>"
                     + "(Account: " + empAccount + "; "
                     + "Password: " + password + ")";
         }
 //end
 
-        password = employeeDAO.hashToMD5(password);
+        String passwordHarshMd5 = employeeDAO.hashToMD5(password);
 
         if (popupStatus == true) {
-            int checkError = employeeDAO.add(empAccount, password, empName, roleId);
+//            int checkError = employeeDAO.add(empAccount, passwordHarshMd5, empName, roleId);
+            int checkError = employeeDAO.add(empAccount, passwordHarshMd5, empName, null, null, null, email, null, role.getId());
             if (checkError >= 1) {
+                emailSender.sendPasswordToEmployeeEmail(email, "New employee account has been registered",
+                        "Dear " + empName + ",\n\n"
+                        + "Welcome to our company!\n\n"
+                        + "Your employee account has been successfully created. Below are your login details:\n\n"
+                        + "----------------------------------------\n"
+                        + "Account: " + empAccount + "\n"
+                        + "Password: " + password + "\n"
+                        + "Role: " + role.getName() + "\n"
+                        + "----------------------------------------\n\n"
+                        + "For security reasons, please log in and change your password as soon as possible.\n\n"
+                        + "If you have any questions or need technical assistance, feel free to contact the IT Support team.\n\n"
+                        + "Best regards,\n"
+                        + "Human Resources Department\n"
+                        + "Yummy");
+
             } else {
                 popupStatus = false;
                 popupMessage = "The add action is NOT successfull. Check the information again.";
+            }
+        }
+    }
+
+    private void edit(HttpServletRequest request) {
+        int empId;
+        int roleId;
+
+        try {
+            empId = Integer.parseInt(request.getParameter("id"));
+            roleId = Integer.parseInt(request.getParameter("roleId"));
+        } catch (NumberFormatException e) {
+            empId = -1;
+            roleId = -1;
+        }
+
+        Role role = roleDAO.getElementByID(roleId);
+//validate
+        popupStatus = false;
+        popupMessage = "The edit action is NOT successfull.";
+        if (empId <= 0) {
+            popupMessage += " The account is not exist.";
+        } else if (role == null) {
+            popupMessage += " The role is not exist.";
+        } else {
+            popupStatus = true;
+            popupMessage = "The object with id=" + empId + " edited role successfull.";
+        }
+//end
+
+        if (popupStatus == true) {
+            int checkError = employeeDAO.edit(empId, role.getId());
+
+            if (checkError >= 1) {
+                
+            } else {
+                popupStatus = false;
+                popupMessage = "The edit action is NOT successfull. Check the information again.";
+            }
+        }
+    }
+
+    private void delete(HttpServletRequest request) {
+        int empId;
+
+        try {
+            empId = Integer.parseInt(request.getParameter("id"));
+        } catch (NumberFormatException e) {
+            empId = -1;
+        }
+
+//validate
+        popupStatus = false;
+        popupMessage = "The delete action is NOT successfull.";
+        if (empId <= 0) {
+            popupMessage += " The account is not exist.";
+        } else {
+            popupStatus = true;
+            popupMessage = "The object with id=" + empId + " deleted successfull.";
+        }
+//end
+
+        if (popupStatus == true) {
+            int checkError = employeeDAO.delete(empId);
+
+            if (checkError >= 1) {
+            } else {
+                popupStatus = false;
+                popupMessage = "The delete action is NOT successfull. Check the information again.";
+            }
+        }
+    }
+
+    private void ban(HttpServletRequest request) {
+        int id;
+
+        try {
+            id = Integer.parseInt(request.getParameter("id"));
+        } catch (NumberFormatException e) {
+            id = -1;
+        }
+
+//validate
+        popupStatus = false;
+        popupMessage = "The ban action is NOT successfull.";
+        if (id <= 0) {
+            popupMessage += " The account is not exist.";
+        } else {
+            popupStatus = true;
+            popupMessage = "The object with id=" + id + " banned successfull.";
+        }
+//end
+        if (popupStatus == true) {
+            int checkError = employeeDAO.ban(id);
+
+            if (checkError >= 1) {
+
+            } else {
+                popupStatus = false;
+                popupMessage = "The ban action is NOT successfull. Check the information again.";
+            }
+        }
+    }
+
+    private void unban(HttpServletRequest request) {
+        int id;
+
+        try {
+            id = Integer.parseInt(request.getParameter("id"));
+        } catch (NumberFormatException e) {
+            id = -1;
+        }
+
+//validate
+        popupStatus = false;
+        popupMessage = "The unban action is NOT successfull.";
+        if (id <= 0) {
+            popupMessage += " The account is not exist.";
+        } else {
+            popupStatus = true;
+            popupMessage = "The object with id=" + id + " unbanned successfull.";
+        }
+//end
+        if (popupStatus == true) {
+            int checkError = employeeDAO.unban(id);
+
+            if (checkError >= 1) {
+
+            } else {
+                popupStatus = false;
+                popupMessage = "The unban action is NOT successfull. Check the information again.";
             }
         }
     }
