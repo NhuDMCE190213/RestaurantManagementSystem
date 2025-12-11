@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Customer;
 import model.Employee;
+import utils.EmailSender;
 
 /**
  *
@@ -26,8 +27,9 @@ import model.Employee;
 public class ForgetPasswordServlet extends HttpServlet {
 
     private final CustomerDAO customerDAO = new CustomerDAO();
-    private final DBContext dbContext = new DBContext();
+    private final EmailSender emailSender = new EmailSender();
     private final EmployeeDAO employeeDAO = new EmployeeDAO();
+    private final DBContext dbContext = new DBContext();
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -146,7 +148,7 @@ public class ForgetPasswordServlet extends HttpServlet {
                 // send email
                 String subject = "Password Reset Code";
                 String content = "Your password reset code is: " + resetCode + ". This code will expire in 5 minutes.";
-                dbContext.sendEmail(email, subject, content);
+                emailSender.resetPasswordbyEmail(email, subject, content);
                 request.setAttribute("message", "A password reset code has been sent to your email.");
                 request.getRequestDispatcher("/WEB-INF/authentication/forgot.jsp").forward(request, response);
                 return;
