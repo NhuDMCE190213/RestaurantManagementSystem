@@ -209,6 +209,75 @@ public class OrderDAO extends DBContext {
         return null;
     }
 
+    public Order getNewestElementByCustomerId(int customerId) {
+
+        try {
+            String query = "SELECT TOP (1) o.order_id, o.reservation_id, o.emp_id, o.voucher_id, o.order_date, o.order_time, o.payment_method, o.status\n"
+                    + "FROM     [order] AS o INNER JOIN\n"
+                    + "                  reservation AS r ON o.reservation_id = r.reservation_id INNER JOIN\n"
+                    + "                  customer AS c ON r.customer_id = c.customer_id\n"
+                    + "WHERE  (c.customer_id = ?)\n"
+                    + "ORDER BY o.order_id DESC";
+
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{customerId});
+
+            while (rs.next()) {
+                int orderId = rs.getInt(1);
+                int reservationId = rs.getInt(2);
+                int empId = rs.getInt(3);
+                int voucherId = rs.getInt(4);
+                Date orderDate = rs.getDate(5);
+                Time orderTime = rs.getTime(6);
+                String paymentMethod = rs.getString(7);
+                String status = rs.getString(8);
+
+                Order order = new Order(orderId, reservationDAO.getElementByID(reservationId),
+                        employeeDAO.getElementByID(empId), voucherDAO.getById(voucherId),
+                        orderDate, orderTime, paymentMethod, status);
+
+                return order;
+            }
+        } catch (SQLException ex) {
+            System.out.println("Can't not load object");
+        }
+
+        return null;
+    }
+    
+    public Order getNewestElementByResevationId(int reservationId) {
+
+        try {
+            String query = "SELECT TOP (1) o.order_id, o.reservation_id, o.emp_id, o.voucher_id, o.order_date, o.order_time, o.payment_method, o.status\n"
+                    + "FROM     [order] AS o INNER JOIN\n"
+                    + "                  reservation AS r ON o.reservation_id = r.reservation_id INNER JOIN\n"
+                    + "                  customer AS c ON r.customer_id = c.customer_id\n"
+                    + "WHERE  (o.reservation_id = ?)\n"
+                    + "ORDER BY o.order_id DESC";
+
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{reservationId});
+
+            while (rs.next()) {
+                int orderId = rs.getInt(1);
+                int empId = rs.getInt(3);
+                int voucherId = rs.getInt(4);
+                Date orderDate = rs.getDate(5);
+                Time orderTime = rs.getTime(6);
+                String paymentMethod = rs.getString(7);
+                String status = rs.getString(8);
+
+                Order order = new Order(orderId, reservationDAO.getElementByID(reservationId),
+                        employeeDAO.getElementByID(empId), voucherDAO.getById(voucherId),
+                        orderDate, orderTime, paymentMethod, status);
+
+                return order;
+            }
+        } catch (SQLException ex) {
+            System.out.println("Can't not load object");
+        }
+
+        return null;
+    }
+
     public int add(Integer reservationId, Integer empId, Integer voucherId, String paymentMethod) {
         try {
             String query = "INSERT INTO [order]\n"
@@ -224,7 +293,7 @@ public class OrderDAO extends DBContext {
         return -1;
     }
 
-    public int edit(int orderId, int reservationId, int empId, Integer voucherId, String paymentMethod) {
+    public int edit(int orderId, int reservationId, Integer empId, Integer voucherId, String paymentMethod) {
         try {
 
             String query = "UPDATE [order]\n"

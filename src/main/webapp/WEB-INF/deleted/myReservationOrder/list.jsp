@@ -73,7 +73,7 @@
                 <table class="table align-middle admin-table">
                     <thead>
                         <tr>
-                            <th width="15%" scope="col">Table</th>
+                            <th width="20%" scope="col">Table</th>
                             <th width="20%" scope="col">Voucher</th>
                             <th width="15%" scope="col">Date</th>
                             <th width="15%" scope="col">Time</th>
@@ -101,14 +101,13 @@
 
                                         <td class="text-end">
                                             <div class="action-button-group d-flex justify-content-end gap-2">
-                                                <a class="btn btn-outline-secondary btn-icon btn-edit"
-                                                   title="Edit" aria-label="Edit"
-                                                   href="<c:url value="myReservationOrder">
-                                                       <c:param name="view" value="edit"/>
+                                                <a class="btn btn-outline-success btn-icon btn-view"
+                                                   title="View details" aria-label="View details"
+                                                   href="<c:url value="myReservationOrderItem">
+                                                       <c:param name="view" value="list"/>
                                                        <c:param name="orderId" value="${order.orderId}"/>
-                                                       <c:param name="reservationId" value="${param.reservationId}"/>
                                                    </c:url>">
-                                                    <i class="bi bi-pencil"></i>
+                                                    <i class="bi bi-eye"></i>
                                                 </a>
                                                 <form action="<c:url value="myReservationOrder">
                                                           <c:param name="orderId" value="${order.orderId}"/>
@@ -145,7 +144,7 @@
                             <li class="page-item ${((empty param.page && i == 1) || param.page == i)?"active":""}">
                                 <a class="page-link" href="<c:url value="/myReservationOrder">
                                        <c:param name="view" value="list"/>
-                                       <c:param name="reservationId" value="${param.reservationId}"/>
+                                   <c:param name="reservationId" value="${param.reservationId}"/>
                                        <c:param name="page" value="${i}"/>
                                    </c:url>">${i}</a></li>
                             </c:forEach>

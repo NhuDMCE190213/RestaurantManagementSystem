@@ -63,6 +63,10 @@ public class OrderItem {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+    
+    public int getPrice() {
+        return this.unitPrice;
+    }
 
     public String getPriceVND() {
         String str = "";

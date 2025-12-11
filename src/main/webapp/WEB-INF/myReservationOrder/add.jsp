@@ -33,23 +33,10 @@
                         </th>
                         <td>
 
-                            <c:choose>
-                                <c:when test="${not empty reservationsList}">
-                                    <select name="reservationId" class="form-select">                                
-                                        <c:forEach var="reservation" items="${reservationsList}">
-                                            <option value="${reservation.reservationId}" class="form-options">
-                                                <c:out value="(Date: ${reservation.reservationDate} - Time: ${reservation.timeStart} ~ ${reservation.timeEnd} )"/>
-                                            </option>
-                                        </c:forEach>
-                                    </select>
-                                </c:when>
-                                <c:otherwise>
-                                    <input type="hidden" name="reservationId" value="${param.reservationId}">
-                                    <label for="reservationId" class="form-control">
-                                        <c:out value="(Date: ${currentReservation.reservationDate} - Time: ${currentReservation.timeStart} ~ ${currentReservation.timeEnd} )"/>
-                                    </label>
-                                </c:otherwise>
-                            </c:choose>
+                            <input type="hidden" name="reservationId" value="${param.reservationId}">
+                            <input type="text" for="reservationId" 
+                                   value="<c:out value="(Date: ${currentReservation.reservationDate} - Time: ${currentReservation.timeStart} ~ ${currentReservation.timeEnd} )"/>"
+                                   class="form-control" disabled>
                         </td>
                     </tr>
 
@@ -80,6 +67,81 @@
                             </select>
                         </td>
                     </tr>
+
+                    <tr>
+                        <th class="form-label">Item</th>
+                        <td>
+                        </td>
+
+                    </tr>
+
+                    <c:choose>
+                        <c:when test="${not empty categoryList}">
+                            <c:forEach var="category" items="${categoryList}">
+                                <tr>
+
+                                    <td>
+                                        <label class="form-label">
+                                            <c:out value="${category.categoryName}"/>
+                                        </label>
+                                    </td>
+                                    <td class="p-0">
+                                        <div class="overflow-auto" style="max-height: 300px;">
+                                            <table class="table table-sm mb-0">
+                                                <tr>
+                                                    <th width="20%">Image</th>
+                                                    <th width="20%">Name</th>
+                                                    <th width="20%">Price</th>
+                                                    <th width="20%">Quantity</th>
+                                                </tr>
+
+                                                <c:choose>
+                                                    <c:when test="${not empty itemsList}">                               
+                                                        <c:forEach var="item" items="${itemsList}">
+                                                            <c:if test="${category.categoryId eq item.category.categoryId}">
+                                                                <tr>
+                                                                    <td>
+                                                                        <img src="${item.imageUrl}" 
+                                                                             class="menu-img img-fluid" 
+                                                                             alt="${item.itemName}"
+                                                                             onerror="this.onerror=null;
+                                                                             var fallbackPath = '${pageContext.request.contextPath}/assets/img/menu/NIA.png';
+                                                                             this.src = fallbackPath;"
+                                                                             width="200px"/>    
+                                                                    </td>
+                                                                    <td>
+                                                                        <label class="form-label">
+                                                                            <c:out value="${item.itemName}"/>
+                                                                        </label>
+                                                                    </td>
+                                                                    <td>
+                                                                        <label class="form-label">
+                                                                            <c:out value="${item.priceVND}"/>
+                                                                        </label>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="hidden" name="itemIdList" value="${item.menuItemId}">
+                                                                        <input class="form-control" name="quantityList" type="number" min="0" max="99" value="0">                                       
+                                                                    </td>
+                                                                </tr>
+                                                            </c:if>
+                                                        </c:forEach>
+                                                    </c:when>
+
+                                                    <c:otherwise>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            No data to display
+                        </c:otherwise>
+                    </c:choose>
 
                     <tr>
                         <td>
