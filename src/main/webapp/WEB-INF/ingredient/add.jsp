@@ -53,30 +53,18 @@
                             <div style="display: flex; gap: 10px; align-items: center;">
                                 <select id="unit" name="unit" onchange="toggleBoxInput()" class="form-select">
                                     <option value="">-- Select Unit --</option>
-                                    <option value="Kilogram">Kilogram</option>
-                                    <option value="Gram">Gram</option>
-                                    <option value="Liter">Liter</option>
-                                    <option value="Milliliter">Milliliter</option>
-                                    <option value="Bottle">Bottle</option>
-                                    <option value="Can">Can</option>
-                                    <option value="Box">Box</option>
-                                    <option value="Piece">Piece</option>
+                                    <option value="pcs">pcs</option>
+                        <option value="kg">kg</option>
+                        <option value="g">g</option>
+                        <option value="l">l</option>
+                        <option value="ml">ml</option>
                                 </select>
 
                             </div>
                         </td>
                     </tr>
 
-                    <tr>
-                        <th>
-                            <label for="expirationDate">Expiration date</label>
-                        </th>
-                        <td>
-                            <input type="date" id="expirationDate" name="expirationDate" class="form-control" aria-describedby="expirationHelp" min="${today}">
-                            <small id="expirationHelp" class="text-muted">Optional. Leave blank if the ingredient does not expire.</small>
-                        </td>
-                    </tr>
-
+                   
 
 
 

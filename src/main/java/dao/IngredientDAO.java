@@ -26,7 +26,7 @@ public class IngredientDAO extends DBContext {
         List<Ingredient> list = new ArrayList<>();
 
         try {
-            String query = "SELECT ingredient_id, ingredient_name, quantity, unit, type_id, status\n"
+            String query = "SELECT ingredient_id, ingredient_name, unit, type_id, status\n"
                     + "FROM     ingredient\n"
                     + "where LOWER(status) <> 'deleted'\n";
 
@@ -35,12 +35,12 @@ public class IngredientDAO extends DBContext {
             while (rs.next()) {
                 int ingredientId = rs.getInt(1);
                 String ingredientName = rs.getString(2);
-                int quantity = rs.getInt(3);
-                String unit = rs.getString(4);
-                int typeId = rs.getInt(5);
-                String status = rs.getString(6);
 
-                Ingredient ingredient = new Ingredient(ingredientId, ingredientName, quantity, unit, typeDAO.getElementByID(typeId), status);
+                String unit = rs.getString(3);
+                int typeId = rs.getInt(4);
+                String status = rs.getString(5);
+
+                Ingredient ingredient = new Ingredient(ingredientId, ingredientName, unit, typeDAO.getElementByID(typeId), status);
 
                 list.add(ingredient);
             }
@@ -55,7 +55,7 @@ public class IngredientDAO extends DBContext {
 
         try {
             String query
-                    = "SELECT ingredient_id, ingredient_name, quantity, unit, type_id, status\n"
+                    = "SELECT ingredient_id, ingredient_name, unit, type_id, status\n"
                     + "FROM     ingredient\n"
                     + "WHERE  (LOWER(status) <> 'deleted') AND (LOWER(ingredient_name) LIKE LOWER(?))\n"
                     + "ORDER BY ingredient_id\n"
@@ -68,12 +68,11 @@ public class IngredientDAO extends DBContext {
             while (rs.next()) {
                 int ingredientId = rs.getInt(1);
                 String ingredientName = rs.getString(2);
-                int quantity = rs.getInt(3);
-                String unit = rs.getString(4);
-                int typeId = rs.getInt(5);
-                String status = rs.getString(6);
+                String unit = rs.getString(3);
+                int typeId = rs.getInt(4);
+                String status = rs.getString(5);
 
-                Ingredient ingredient = new Ingredient(ingredientId, ingredientName, quantity, unit, typeDAO.getElementByID(typeId), status);
+                Ingredient ingredient = new Ingredient(ingredientId, ingredientName, unit, typeDAO.getElementByID(typeId), status);
 
                 list.add(ingredient);
             }
@@ -88,7 +87,7 @@ public class IngredientDAO extends DBContext {
     public Ingredient getElementByID(int id) {
 
         try {
-            String query = "SELECT ingredient_id, ingredient_name, quantity, unit, type_id, status\n"
+            String query = "SELECT ingredient_id, ingredient_name, unit, type_id, status\n"
                     + "FROM     ingredient\n"
                     + "WHERE  (LOWER(status) <> 'deleted') and ingredient_id = ?";
 
@@ -97,12 +96,12 @@ public class IngredientDAO extends DBContext {
             if (rs.next()) {
                 int ingredientId = rs.getInt(1);
                 String ingredientName = rs.getString(2);
-                int quantity = rs.getInt(3);
-                String unit = rs.getString(4);
-                int typeId = rs.getInt(5);
-                String status = rs.getString(6);
 
-                Ingredient ingredient = new Ingredient(ingredientId, ingredientName, quantity, unit, typeDAO.getElementByID(typeId), status);
+                String unit = rs.getString(3);
+                int typeId = rs.getInt(4);
+                String status = rs.getString(5);
+
+                Ingredient ingredient = new Ingredient(ingredientId, ingredientName, unit, typeDAO.getElementByID(typeId), status);
 
                 return ingredient;
 
@@ -130,14 +129,14 @@ public class IngredientDAO extends DBContext {
 //
 //        return -1;
 //    }
-    public int add(String ingredientName, int quantity, String unit, int typeId) {
+    public int add(String ingredientName, String unit, int typeId) {
 
         try {
             String query = "INSERT INTO ingredient\n"
-                    + "                  (ingredient_name, quantity, unit, type_id, status)\n"
-                    + "VALUES (?, ?, ?, ?, ?)";
+                    + "                  (ingredient_name, unit, type_id, status)\n"
+                    + "VALUES (?, ?, ?, ?)";
 
-            return this.executeQuery(query, new Object[]{ingredientName, quantity, unit, typeId, "Active"});
+            return this.executeQuery(query, new Object[]{ingredientName, unit, typeId, "Active"});
 
         } catch (SQLException ex) {
 
@@ -151,14 +150,14 @@ public class IngredientDAO extends DBContext {
         return -1;
     }
 
-    public int edit(int ingredientId, String ingredientName, int quantity, String unit, int typeId, String status) {
+    public int edit(int ingredientId, String ingredientName, String unit, int typeId) {
         try {
 
             String query = "UPDATE ingredient\n"
-                    + "SET          ingredient_name = ?, quantity = ?, unit = ?, type_id = ?, status = ?\n"
+                    + "SET          ingredient_name = ?, unit = ?, type_id = ?"
                     + "WHERE  (ingredient_id = ?)";
 
-            return this.executeQuery(query, new Object[]{ingredientName, quantity, unit, typeId, status, ingredientId});
+            return this.executeQuery(query, new Object[]{ingredientName, unit, typeId, ingredientId});
 
         } catch (SQLException ex) {
 
@@ -235,7 +234,6 @@ public class IngredientDAO extends DBContext {
 //        }
 //        return list;
 //    }
-
 //    private void applyExpirationStatus(Ingredient ingredient) {
 //        if (ingredient == null) {
 //            return;
@@ -255,5 +253,4 @@ public class IngredientDAO extends DBContext {
 //        ingredient.setExpired(isExpired);
 //        ingredient.setExpiringSoon(isExpiringSoon);
 //    }
-
 }

@@ -22,8 +22,8 @@ import jakarta.servlet.annotation.WebFilter;
  */
 @WebFilter(filterName = "LoginFilter", urlPatterns = {
     "/dashboard", "/orderItem", "/order", "/reservation", "/table",
-    "/category", "/menuItem", "/type", "/ingredient", "/recipe",
-    "/import", "/supplier", "/employee", "/customer", "/role", "/voucher", "/homepage"})
+    "/category", "/menuitem", "/type", "/ingredient", "/recipe",
+    "/import", "/supplier", "/employee", "/customer", "/role", "/voucher", "/homepage","/menu"})
 public class LoginFilter implements Filter {
 
     @Override

@@ -136,109 +136,113 @@ public class IngredientServlet extends HttpServlet {
         if (action != null && !action.isEmpty()) {
 
             if (action.equalsIgnoreCase("add")) {
-//                String name = request.getParameter("ingredientName");
-//                String unit = request.getParameter("unit");
-//                int typeId;
-//
-//                try {
-//                    typeId = Integer.parseInt(request.getParameter("typeId"));
-//                } catch (NumberFormatException e) {
-//                    typeId = -1;
-//                }
-//
-//                //validate
-//                if (!validateString(name, -1) || !validateInteger(typeId, false, false, true)) {
-//                    passValidation = false;
-//                }
-//                //end
-//                if (passValidation == true) {
-//                    if (ingredientDAO.add(name, typeId, unit, expirationDate) >= 1) {
-//                    } else {
-//                        passValidation = false;
-//                    }
-//                }
+                String name = request.getParameter("ingredientName");
+                String unit = request.getParameter("unit");
+                int typeId;
+
+                try {
+                    typeId = Integer.parseInt(request.getParameter("typeId"));
+                } catch (NumberFormatException e) {
+                    typeId = -1;
+                }
+
+                //validate
+                if (!validateString(name, -1) || !validateInteger(typeId, false, false, true)) {
+                    passValidation = false;
+                }
+                //end
+                if (passValidation == true) {
+                    if (ingredientDAO.add(name, unit, typeId) >= 1)
+                    {
+                        response.sendRedirect(request.getContextPath() + "/ingredient?view=list");
+                        return;
+                    } else {
+                        passValidation = false;
+                    }
+                }
 
             } else if (action.equalsIgnoreCase("edit")) {
-//                int id;
-//                int typeId;
-//                String name = request.getParameter("ingredientName");
-//                String unit = request.getParameter("unit");
-//                LocalDate expirationDate = parseExpirationDate(request.getParameter("expirationDate"));
-//
-//                try {
-//                    id = Integer.parseInt(request.getParameter("id"));
-//                } catch (NumberFormatException e) {
-//                    id = -1;
-//                    passValidation = false;
-//                }
-//
-//                try {
-//                    typeId = Integer.parseInt(request.getParameter("typeId"));
-//                } catch (NumberFormatException e) {
-//                    typeId = -1;
-//                }
-//
-//                //validate
-//                if (!validateString(name, -1)
-//                        || !validateInteger(id, false, false, true)
-//                        || !validateInteger(typeId, false, false, true)) {
-//                    passValidation = false;
-//                }
-//                //end
-//                if (passValidation == true) {
-//                    int checkError = ingredientDAO.edit(id, name, typeId, unit, expirationDate);
-//
-//                    if (checkError >= 1) {
-//
-//                    } else {
-//                        if (checkError - DUPLICATE_KEY == 0) {
-//                            System.err.println("DUPLICATE_KEY");
-//                        } else if (checkError - FOREIGN_KEY_VIOLATION == 0) {
-//                            System.err.println("FOREIGN_KEY_VIOLATION");
-//                        } else if (checkError - NULL_INSERT_VIOLATION == 0) {
-//                            System.err.println("NULL_INSERT_VIOLATION");
-//                        }
-//
-//                        passValidation = false;
-//                    }
-//                }
+                int id;
+                int typeId;
+                String name = request.getParameter("ingredientName");
+                String unit = request.getParameter("unit");
+
+
+                try {
+                    id = Integer.parseInt(request.getParameter("id"));
+                } catch (NumberFormatException e) {
+                    id = -1;
+                    passValidation = false;
+                }
+
+                try {
+                    typeId = Integer.parseInt(request.getParameter("typeId"));
+                } catch (NumberFormatException e) {
+                    typeId = -1;
+                }
+
+                //validate
+                if (!validateString(name, -1)
+                        || !validateInteger(id, false, false, true)
+                        || !validateInteger(typeId, false, false, true)) {
+                    passValidation = false;
+                }
+                //end
+                if (passValidation == true) {
+                    int checkError = ingredientDAO.edit(id, name, unit, typeId);
+
+                    if (checkError >= 1) {
+ response.sendRedirect(request.getContextPath() + "/ingredient?view=list");
+ return;
+                    } else {
+                        if (checkError - DUPLICATE_KEY == 0) {
+                            System.err.println("DUPLICATE_KEY");
+                        } else if (checkError - FOREIGN_KEY_VIOLATION == 0) {
+                            System.err.println("FOREIGN_KEY_VIOLATION");
+                        } else if (checkError - NULL_INSERT_VIOLATION == 0) {
+                            System.err.println("NULL_INSERT_VIOLATION");
+                        }
+
+                        passValidation = false;
+                    }
+                }
             } else if (action.equalsIgnoreCase("delete")) {
-//                int id;
-//
-//                try {
-//                    id = Integer.parseInt(request.getParameter("id"));
-//                } catch (NumberFormatException e) {
-//                    id = -1;
-//
-//                    passValidation = false;
-//                }
-//
-//                //validate
-//                if (!validateInteger(id, false, false, true)) {
-//                    passValidation = false;
-//                }
-//                //end
-//                if (passValidation == true) {
-//                    int checkError = ingredientDAO.delete(id);
-//
-//                    if (checkError >= 1) {
-//
-//                    } else {
-//                        if (checkError - DUPLICATE_KEY == 0) {
-//                            System.err.println("DUPLICATE_KEY");
-//                        } else if (checkError - FOREIGN_KEY_VIOLATION == 0) {
-//                            System.err.println("FOREIGN_KEY_VIOLATION");
-//                        } else if (checkError - NULL_INSERT_VIOLATION == 0) {
-//                            System.err.println("NULL_INSERT_VIOLATION");
-//                        }
-//
-//                        passValidation = false;
-//                    }
-//                }
+                int id;
+
+                try {
+                    id = Integer.parseInt(request.getParameter("id"));
+                } catch (NumberFormatException e) {
+                    id = -1;
+
+                    passValidation = false;
+                }
+
+                //validate
+                if (!validateInteger(id, false, false, true)) {
+                    passValidation = false;
+                }
+                //end
+                if (passValidation == true) {
+                    int checkError = ingredientDAO.delete(id);
+
+                    if (checkError >= 1) {
+
+                    } else {
+                        if (checkError - DUPLICATE_KEY == 0) {
+                            System.err.println("DUPLICATE_KEY");
+                        } else if (checkError - FOREIGN_KEY_VIOLATION == 0) {
+                            System.err.println("FOREIGN_KEY_VIOLATION");
+                        } else if (checkError - NULL_INSERT_VIOLATION == 0) {
+                            System.err.println("NULL_INSERT_VIOLATION");
+                        }
+
+                        passValidation = false;
+                    }
+                }
             }
         }
 
-//        response.sendRedirect(request.getContextPath() + "/ingredient?" + "status=" + (passValidation ? "success" : "fail") + "&lastAction=" + addEDtoEverything(action));
+        response.sendRedirect(request.getContextPath() + "/ingredient?" + "status=" + (passValidation ? "success" : "fail") + "&lastAction=");
 
     }
 
