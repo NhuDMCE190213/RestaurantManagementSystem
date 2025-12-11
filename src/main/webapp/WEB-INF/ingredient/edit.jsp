@@ -19,16 +19,7 @@
         <div class="container px-4 py-3">
             <c:choose>
                 <c:when test="${not empty currentIngredient}">
-                    <c:if test="${currentIngredient.expired}">
-                        <div class="alert alert-danger" role="alert">
-                            This ingredient expired on <strong>${currentIngredient.expirationDate}</strong>. Please discontinue use or update the expiration date.
-                        </div>
-                    </c:if>
-                    <c:if test="${not currentIngredient.expired && currentIngredient.expiringSoon}">
-                        <div class="alert alert-warning" role="alert">
-                            This ingredient will expire on <strong>${currentIngredient.expirationDate}</strong>. Please review the remaining stock.
-                        </div>
-                    </c:if>
+
                     <form method="post" action="<c:url value='ingredient'/>">
                         <%-- Hidden field for ID required for POST request --%>
                         <input type="hidden" name="id" value="${currentIngredient.ingredientId}">
@@ -58,7 +49,7 @@
                                     <select name="typeId" id="typeSelect" class="form-select" required>
                                         <c:forEach var="t" items="${typesList}">
                                             <option value="${t.typeId}" 
-                                                    <c:if test="${t.typeId == currentIngredient.typeId}">selected</c:if> >
+                                                    <c:if test="${t.typeId == currentIngredient.type.typeId}">selected</c:if> >
                                                 ${t.typeName}
                                             </option>
                                         </c:forEach>
@@ -74,30 +65,13 @@
                                 <td>
                                     <select id="unit" name="unit" class="form-select" required>
                                         <option value="">-- Select Unit --</option>
-                                        <option value="Kilogram" <c:if test="${currentIngredient.unit == 'Kilogram'}">selected</c:if>>Kilogram</option>
-                                        <option value="Gram" <c:if test="${currentIngredient.unit == 'Gram'}">selected</c:if>>Gram</option>
-                                        <option value="Liter" <c:if test="${currentIngredient.unit == 'Liter'}">selected</c:if>>Liter</option>
-                                        <option value="Milliliter" <c:if test="${currentIngredient.unit == 'Milliliter'}">selected</c:if>>Milliliter</option>
-                                        <option value="Bottle" <c:if test="${currentIngredient.unit == 'Bottle'}">selected</c:if>>Bottle</option>
-                                        <option value="Can" <c:if test="${currentIngredient.unit == 'Can'}">selected</c:if>>Can</option>
-                                        <option value="Box" <c:if test="${currentIngredient.unit == 'Box'}">selected</c:if>>Box</option>
-                                        <option value="Piece" <c:if test="${currentIngredient.unit == 'Piece'}">selected</c:if>>Piece</option>
+                                <option value="pcs" <c:if test="${currentIngredient.unit == 'pcs'}">selected</c:if>>pcs</option>
+<option value="kg" <c:if test="${currentIngredient.unit == 'kg'}">selected</c:if>>kg</option>
+<option value="g" <c:if test="${currentIngredient.unit == 'g'}">selected</c:if>>g</option>
+<option value="l" <c:if test="${currentIngredient.unit == 'l'}">selected</c:if>>l</option>
+<option value="ml" <c:if test="${currentIngredient.unit == 'ml'}">selected</c:if>>ml</option>
+                                        
                                     </select>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>
-                                    <label for="expirationDate">Expiration date</label>
-                                </th>
-                                <td>
-                                    <input type="date"
-                                           id="expirationDate"
-                                           name="expirationDate"
-                                           class="form-control"
-                                           value="${currentIngredient.expirationDate != null ? currentIngredient.expirationDate : ''}"
-                                           aria-describedby="expirationHelp">
-                                    <small id="expirationHelp" class="text-muted">Optional. Leave blank to keep it unset.</small>
                                 </td>
                             </tr>
 

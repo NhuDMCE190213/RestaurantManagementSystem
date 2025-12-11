@@ -11,15 +11,14 @@ public class Ingredient {
 
     private int ingredientId;
     private String ingredientName;
-    private int quantity;
     private String unit;
     private Type type;
     private String status;
 
-    public Ingredient(int ingredientId, String ingredientName, int quantity, String unit, Type type, String status) {
+    public Ingredient(int ingredientId, String ingredientName, String unit, Type type, String status) {
         this.ingredientId = ingredientId;
         this.ingredientName = ingredientName;
-        this.quantity = quantity;
+
         this.unit = unit;
         this.type = type;
         this.status = status;
@@ -39,14 +38,6 @@ public class Ingredient {
 
     public void setIngredientName(String ingredientName) {
         this.ingredientName = ingredientName;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
     }
 
     public String getUnit() {
@@ -72,6 +63,5 @@ public class Ingredient {
     public void setStatus(String status) {
         this.status = status;
     }
-    
-    
+
 }
