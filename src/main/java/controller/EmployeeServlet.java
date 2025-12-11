@@ -22,6 +22,9 @@ public class EmployeeServlet extends HttpServlet {
     EmployeeDAO employeeDAO = new EmployeeDAO();
     RoleDAO roleDAO = new RoleDAO();
 
+    boolean popupStatus = true;
+    String popupMessage = "";
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -118,47 +121,12 @@ public class EmployeeServlet extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
 
-        boolean popupStatus = true;
-        String popupMessage = "";
+        popupStatus = true;
+        popupMessage = "";
 
         if (action != null && !action.isEmpty()) {
-
             if (action.equalsIgnoreCase("add")) {
-                String empAccount = request.getParameter("empAccount");
-                String password = request.getParameter("password");
-                String empName = request.getParameter("empName");
-                int roleId;
-
-                try {
-                    roleId = Integer.parseInt(request.getParameter("roleId"));
-                } catch (NumberFormatException ex) {
-                    roleId = -1;
-                }
-
-//validate
-                if (empAccount == null || empAccount.isBlank()
-                        || password == null || password.isBlank()
-                        || empName == null || empName.isBlank()
-                        || roleId <= 0) {
-                    popupStatus = false;
-                    popupMessage = "The add action is NOT successfull. The input has some error.";
-                } else {
-                    popupMessage = "The object with name=" + empName + " added successfull"
-                            + "(Account: " + empAccount + "; "
-                            + "Password: " + password + ")";
-                }
-//end
-
-                password = employeeDAO.hashToMD5(password);
-
-                if (popupStatus == true) {
-                    int checkError = employeeDAO.add(empAccount, password, empName, roleId);
-                    if (checkError >= 1) {
-                    } else {
-                        popupStatus = false;
-                        popupMessage = "The add action is NOT successfull. Check the information again.";
-                    }
-                }
+                add(request);
 
             } else if (action.equalsIgnoreCase("edit")) {
                 int empId;
@@ -301,6 +269,44 @@ public class EmployeeServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         session.removeAttribute("popupStatus");
         session.removeAttribute("popupMessage");
+    }
+
+    private void add(HttpServletRequest request) {
+        String empAccount = request.getParameter("empAccount");
+        String password = request.getParameter("password");
+        String empName = request.getParameter("empName");
+        int roleId;
+
+        try {
+            roleId = Integer.parseInt(request.getParameter("roleId"));
+        } catch (NumberFormatException ex) {
+            roleId = -1;
+        }
+
+//validate
+        if (empAccount == null || empAccount.isBlank()
+                || password == null || password.isBlank()
+                || empName == null || empName.isBlank()
+                || roleId <= 0) {
+            popupStatus = false;
+            popupMessage = "The add action is NOT successfull. The input has some error.";
+        } else {
+            popupMessage = "The object with name=" + empName + " added successfull"
+                    + "(Account: " + empAccount + "; "
+                    + "Password: " + password + ")";
+        }
+//end
+
+        password = employeeDAO.hashToMD5(password);
+
+        if (popupStatus == true) {
+            int checkError = employeeDAO.add(empAccount, password, empName, roleId);
+            if (checkError >= 1) {
+            } else {
+                popupStatus = false;
+                popupMessage = "The add action is NOT successfull. Check the information again.";
+            }
+        }
     }
 
 }
