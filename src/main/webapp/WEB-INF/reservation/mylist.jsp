@@ -81,6 +81,7 @@
                                                     (r.status == 'Cancelled' ? 'bg-secondary' : 'bg-warning text-dark'))}">
                                                       ${r.status}
                                                   </span>
+
                                             </td>
                                             <td class="text-end">
                                                 <div class="action-button-group d-flex justify-content-end gap-2">

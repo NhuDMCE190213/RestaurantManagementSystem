@@ -185,11 +185,12 @@ public class BookTableServlet extends HttpServlet {
                 popupMessage = "Booking failed. SQL error: " + getSqlErrorCode(check);
             } else {
                 if (selectedTable != null
-                        && "occupied".equalsIgnoreCase(selectedTable.getStatus())) {
+                        && ("Serving".equalsIgnoreCase(selectedTable.getStatus())
+                        || "Payment".equalsIgnoreCase(selectedTable.getStatus())
+                        || "Cleaning".equalsIgnoreCase(selectedTable.getStatus()))) {
 
-                    popupMessage = "Table is currently in Occupied state, "
-                            + "Your reservation request has been submitted and will likely not be accepted. "
-                            + "(Reservation status = Pending)";
+                    popupStatus = false;
+                    popupMessage = "Table is currently in use and not available.";
                 } else {
                     popupMessage = "Reservation created successfully! Status = Pending.";
                 }

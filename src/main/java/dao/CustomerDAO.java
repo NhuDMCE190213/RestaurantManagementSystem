@@ -421,7 +421,7 @@ public class CustomerDAO extends DBContext {
     }
 
     public int addCustomerNameOnly(String customerName) {
-        try     {
+        try {
             String query = "INSERT INTO customer (customer_name, status) VALUES (?, ?)";
             return this.executeQuery(query, new Object[]{customerName, "Active"});
 
@@ -434,6 +434,57 @@ public class CustomerDAO extends DBContext {
             Logger.getLogger(CustomerDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return -1;
+    }
+
+    public int addQuickCustomer(String customerName, String phoneNumber, String hashedPassword) {
+        try {
+            String customerAccount = phoneNumber;       // dùng sđt làm account
+            String password = hashedPassword;             // password tạm
+            String status = "Active";
+            String email = phoneNumber + "@guest.local"; // luôn khác nhau theo sđt
+
+            String query = "INSERT INTO customer "
+                    + "(customer_account, password, customer_name, gender, phone_number, email, address, dob, status) "
+                    + "VALUES (?, ?, ?, NULL, ?, ?, NULL, NULL, ?)";
+
+            return this.executeQuery(query, new Object[]{
+                customerAccount,
+                password,
+                customerName,
+                phoneNumber,
+                email,
+                status
+            });
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return -1;
+        }
+    }
+
+    public Customer getByPhone(String phone) {
+        try {
+            String query = "SELECT * FROM customer WHERE phone_number = ?";
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{phone});
+
+            if (rs.next()) {
+                return new Customer(
+                        rs.getInt("customer_id"),
+                        rs.getString("customer_account"),
+                        rs.getString("password"),
+                        rs.getString("customer_name"),
+                        rs.getString("gender"),
+                        rs.getString("phone_number"),
+                        rs.getString("email"),
+                        rs.getString("address"),
+                        rs.getDate("dob"),
+                        rs.getString("status")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

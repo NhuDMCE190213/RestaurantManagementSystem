@@ -39,9 +39,9 @@
                         <th width="12%">Employee</th>
                         <th width="10%">Table</th>
                         <th width="15%">Date</th>
-                        <th width="15%">Description</th>
-                        <th width="12%">Time</th>
 
+                        <th width="12%">Time</th>
+                        <th width="15%">Note</th>
                         <th width="15%">Status</th>
                         <th width="18%" class="text-end">Action</th>
                     </tr>
@@ -68,9 +68,12 @@
                                         <span class="badge
                                               ${r.status == 'Approved' ? 'bg-success' : 
                                                 (r.status == 'Rejected' ? 'bg-danger' : 
-                                                (r.status == 'Cancelled' ? 'bg-secondary' : 'bg-warning text-dark'))}">
+                                                (r.status == 'Cancelled' ? 'bg-secondary' : 
+                                                (r.status == 'Request Bill' ? 'badge-request-bill' :
+                                                (r.status == 'Cleaning' ? 'badge-cleaning' : 'bg-warning text-dark'))))}">
                                               <c:out value="${r.status}"/>
                                         </span>
+
                                     </td>
                                     <td class="text-end">
                                         <div class="action-button-group d-flex justify-content-end gap-2">

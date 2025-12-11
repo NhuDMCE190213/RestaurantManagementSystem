@@ -60,6 +60,14 @@
                 <div class="mb-3">
                     <label class="form-label">Search by phone</label>
                     <input type="text" id="searchPhone" class="form-control" placeholder="Enter phone number to filter customers...">
+                    <!-- Hiện khi không tìm được khách -->
+                    <div id="noCustomerHint" class="form-text text-danger mt-1" style="display:none;">
+                        No customer found with this phone.
+                        <button type="button" class="btn btn-link p-0 ms-1" 
+                                data-bs-toggle="modal" data-bs-target="#quickCustomerModal">
+                            Create new customer
+                        </button>
+                    </div>
                 </div>
 
                 <!-- CUSTOMER SELECT -->
@@ -69,11 +77,13 @@
                         <option value="">-- Select customer --</option>
                         <c:forEach var="c" items="${listCustomer}">
                             <option value="${c.customerId}"
-                                    data-phone="${c.phoneNumber}">
+                                    data-phone="${c.phoneNumber}"
+                                    ${param.newCustomerId == c.customerId ? "selected" : ""}>
                                 ${c.customerName} (${c.phoneNumber})
                             </option>
-                        </c:forEach>
+                        </c:forEach>    
                     </select>
+
                 </div>
 
                 <!-- TABLE INFO (READONLY) -->
@@ -143,11 +153,13 @@
 
                 const customerSelect = document.getElementById('customerSelect');
                 const searchPhoneInput = document.getElementById('searchPhone');
+                const noCustomerHint = document.getElementById('noCustomerHint');
+                const quickCustomerPhone = document.getElementById('quickCustomerPhone');
+
+                // LƯU DANH SÁCH OPTION GỐC (chỉ khai báo 1 lần)
+                const originalCustomerOptions = Array.from(customerSelect.options);
 
                 dateEl.setAttribute('min', today);
-
-                // Lưu lại danh sách option gốc để filter
-                const originalCustomerOptions = Array.from(customerSelect.options);
 
                 // SEARCH THEO SĐT
                 searchPhoneInput.addEventListener('keyup', function () {
@@ -157,12 +169,25 @@
                     customerSelect.innerHTML = '';
                     customerSelect.appendChild(originalCustomerOptions[0]);
 
+                    let matchCount = 0;
+
                     for (let i = 1; i < originalCustomerOptions.length; i++) {
                         const opt = originalCustomerOptions[i];
                         const phone = (opt.getAttribute('data-phone') || '').toLowerCase();
                         if (phone.includes(keyword)) {
                             customerSelect.appendChild(opt);
+                            matchCount++;
                         }
+                    }
+
+                    // nếu không tìm thấy ai và có nhập số điện thoại -> hiện gợi ý tạo mới
+                    if (keyword.length >= 3 && matchCount === 0) {
+                        noCustomerHint.style.display = 'block';
+                        if (quickCustomerPhone) {
+                            quickCustomerPhone.value = this.value;   // đổ sẵn vào modal
+                        }
+                    } else {
+                        noCustomerHint.style.display = 'none';
                     }
                 });
 
@@ -241,6 +266,40 @@
                 });
             });
         </script>
+
+        <!-- Quick create customer modal -->
+        <div class="modal fade" id="quickCustomerModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="${pageContext.request.contextPath}/quick-customer" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Create New Customer</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- giữ tableId để redirect về đúng reservation -->
+                            <input type="hidden" name="tableId" value="<%= (selected != null) ? selected.getId() : ""%>">
+
+                            <div class="mb-3">
+                                <label class="form-label">Customer Name</label>
+                                <input type="text" name="customerName" id="quickCustomerName" class="form-control" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" name="phoneNumber" id="quickCustomerPhone" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger">Create</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
     </body>
 </html>
