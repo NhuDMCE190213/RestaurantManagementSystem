@@ -119,11 +119,11 @@
 
 
 <c:if test="${requestScope.popupStatus != null and requestScope.popupStatus == false}">
-    <div class="modal" id="exampleModal" tabindex="-1">
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Action Fail</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Action Fail</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -135,11 +135,27 @@
             </div>
         </div>
     </div>
+
+
     <script>
-        window.onload = function () {
-            var myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
-            myModal.show();
-        };
+        document.addEventListener('DOMContentLoaded', function() {
+            var modalElement = document.getElementById('exampleModal');
+            
+            if (modalElement) {
+                var myModal = new bootstrap.Modal(modalElement);
+                myModal.show();
+                modalElement.addEventListener('hidden.bs.modal', function () {
+
+                    const backdrops = document.querySelectorAll('.modal-backdrop');
+                    backdrops.forEach(backdrop => {
+                        backdrop.remove();
+                    });
+                    document.body.classList.remove('modal-open');
+                    document.body.style.paddingRight = ''; 
+                    document.body.style.overflow = '';
+                });
+            }
+        });
     </script>
 </c:if>
 
