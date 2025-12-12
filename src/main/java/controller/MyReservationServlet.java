@@ -264,17 +264,19 @@ public class MyReservationServlet extends HttpServlet {
             } else if (selectedTable.getStatus().equalsIgnoreCase("Reserved")) {
                 popupStatus = false;
                 popupMessage = "This table is currently reserved and not available.";
+            } else if (selectedTable.getStatus().equalsIgnoreCase("Serving")
+                    || selectedTable.getStatus().equalsIgnoreCase("Payment")
+                    || selectedTable.getStatus().equalsIgnoreCase("Cleaning")) {
+
+                popupStatus = false;
+                popupMessage = "This table is currently in use and not available.";
             } else {
                 int check = reservationDAO.add(customerId, tableId, date, timeStart, timeEnd, description);
                 if (check < 1) {
                     popupStatus = false;
                     popupMessage = "Add failed. SQL error: " + getSqlErrorCode(check);
                 } else {
-                    if (selectedTable.getStatus().equalsIgnoreCase("Occupied")) {
-                        popupMessage = "Bàn hiện đang ở trạng thái Occupied, yêu cầu đã gửi (Pending).";
-                    } else {
-                        popupMessage = "Reservation created successfully (Pending).";
-                    }
+                    popupMessage = "Reservation created successfully (Pending).";
                 }
             }
 
@@ -285,7 +287,8 @@ public class MyReservationServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath()
                     + "/my-reservation?customerId=" + request.getParameter("customerId"));
             return;
-        } else if (action.equalsIgnoreCase("cancel")) {
+        } else if (action.equalsIgnoreCase(
+                "cancel")) {
             // Customer tự hủy reservation
             int id, customerId;
             try {

@@ -27,26 +27,39 @@
         <div class="container" data-aos="fade-up" data-aos-delay="100">
 
             <!-- Legend -->
-            <div class="row align-items-center justify-content-between g-4 table-legend">
-                <div class="col-md-4">
+            <div class="row align-items-center justify-content-start g-4 table-legend">
+                <div class="col-6 col-md-2">
                     <div class="legend-item d-flex align-items-center">
                         <span class="legend-swatch available"></span>
-                        <span>Available Table</span>
+                        <span>Available</span>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-6 col-md-2">
                     <div class="legend-item d-flex align-items-center">
                         <span class="legend-swatch reserved"></span>
                         <span>Reserved</span>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-6 col-md-2">
                     <div class="legend-item d-flex align-items-center">
-                        <span class="legend-swatch occupied"></span>
-                        <span>Occupied</span>
+                        <span class="legend-swatch serving"></span>
+                        <span>Serving</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="legend-item d-flex align-items-center">
+                        <span class="legend-swatch request-bill"></span>
+                        <span>Request Bill</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="legend-item d-flex align-items-center">
+                        <span class="legend-swatch cleaning"></span>
+                        <span>Cleaning</span>
                     </div>
                 </div>
             </div>
+
 
             <!-- Table List -->
             <div class="row g-4 mt-1" data-aos="fade-up" data-aos-delay="150">
@@ -55,12 +68,14 @@
                     List<Table> tables = (List<Table>) request.getAttribute("tableList");
                     if (tables != null) {
                         for (Table t : tables) {
-                            String status = t.getStatus().toLowerCase();
+                            String status = t.getStatus(); // Ví dụ: "Request bill "
+                            // Trim khoảng trắng + đổi thường + đổi mọi khoảng trắng giữa từ thành dấu '-'
+                            String statusClass = status.trim().toLowerCase().replaceAll("\\s+", "-");
                             boolean clickable = true;
                 %>
 
                 <div class="col-6 col-md-4 col-lg-3">
-                    <div class="table-card <%= status%> h-100 text-center p-4"
+                    <div class="table-card <%= statusClass%> h-100 text-center p-4"
                          style="<%= clickable ? "cursor:pointer;" : "cursor:not-allowed; opacity:0.6;"%>"
                          <%= clickable
                                  ? "onclick=\"window.location.href='booktable?view=add&tableId=" + t.getId() + "'\""
@@ -76,7 +91,10 @@
                 } else {
                 %>
                 <p>No tables available.</p>
-                <% }%>
+                <%
+                    }
+                %>
+
 
             </div>
         </div>

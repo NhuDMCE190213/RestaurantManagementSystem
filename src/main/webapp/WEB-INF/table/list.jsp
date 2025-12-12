@@ -62,18 +62,23 @@
                                             <c:when test="${fn:toLowerCase(table.status) == 'available'}">
                                                 <span class="badge bg-success">Available</span>
                                             </c:when>
+
                                             <c:when test="${fn:toLowerCase(table.status) == 'reserved'}">
                                                 <span class="badge bg-warning text-dark">Reserved</span>
                                             </c:when>
+
                                             <c:when test="${fn:toLowerCase(table.status) == 'serving'}">
-                                                <span class="badge bg-danger">Serving</span>
+                                                <span class="badge" style="background:#dc3545; color:white;">Serving</span>
                                             </c:when>
+
                                             <c:when test="${fn:toLowerCase(table.status) == 'request bill'}">
-                                                <span class="badge bg-warning text-dark">Request Bill</span>
+                                                <span class="badge" style="background:#6f42c1; color:white;">Request Bill</span>
                                             </c:when>
+
                                             <c:when test="${fn:toLowerCase(table.status) == 'cleaning'}">
-                                                <span class="badge bg-warning text-dark">Cleaning</span>
+                                                <span class="badge" style="background:#0dcaf0; color:#003b47;">Cleaning</span>
                                             </c:when>
+
                                             <c:otherwise>
                                                 <span class="badge bg-secondary"><c:out value="${table.status}"/></span>
                                             </c:otherwise>
