@@ -87,7 +87,6 @@
                             <tr>
                                 <th scope="col">No.</th>
                                 <th scope="col">Ingredient</th>
-                                <th scope="col">Ingredient ID</th>
                                 <th scope="col">Quantity</th>
                                 <th scope="col">Unit</th>
                                 <th scope="col">Note</th>
@@ -113,7 +112,7 @@
                                                     <c:otherwise>Unknown</c:otherwise>
                                                 </c:choose>
                                             </td>
-                                            <td><c:out value="${it.ingredientId}" /></td>
+
                                             <td><c:out value="${it.quantity}" /></td>
                                             <td><c:out value="${it.unit}" /></td>
                                             <td><c:out value="${it.note}" /></td>
@@ -156,10 +155,11 @@
                 <!-- Ingredient select: full width -->
                 <div class="col-12">
                     <label class="form-label mb-1">Ingredient Name</label>
-                    <select name="ingredient_id" class="form-select" required>
+                    <select id="add_ingredient_select" name="ingredient_id" class="form-select" required>
                         <option value="">-- Select ingredient --</option>
                         <c:forEach var="ing" items="${ingredients}">
-                            <option value="${ing.ingredientId}">${ing.ingredientName}</option>
+                            <%-- embed ingredient's declared unit in data-unit attribute (null-safe) --%>
+                            <option value="${ing.ingredientId}" data-unit="${fn:toLowerCase(ing.unit)}">${ing.ingredientName}</option>
                         </c:forEach>
                     </select>
                     <c:if test="${empty ingredients}">
@@ -175,7 +175,7 @@
 
                 <div class="col-12 col-md-2">
                     <label class="form-label">Unit</label>
-                    <select name="unit" class="form-select">
+                    <select id="add_unit_select" name="unit" class="form-select">
                         <option value="">-- Select Unit --</option>
                         <option value="pcs">pcs</option>
                         <option value="kg">kg</option>
@@ -224,7 +224,7 @@
                                 <select id="edit_ingredient_id" name="ingredient_id" class="form-select" required>
                                     <option value="">-- Select ingredient --</option>
                                     <c:forEach var="ing" items="${ingredients}">
-                                        <option value="${ing.ingredientId}">${ing.ingredientName}</option>
+                                        <option value="${ing.ingredientId}" data-unit="${fn:toLowerCase(ing.unit)}">${ing.ingredientName}</option>
                                     </c:forEach>
                                 </select>
                             </div>
@@ -290,12 +290,122 @@
 </div>
 
 <script>
+    // Helper: lấy nhóm unit giống backend
+    function unitGroup(unit) {
+        if (!unit)
+            return 'unknown';
+        unit = unit.toString().trim().toLowerCase();
+        if (['g', 'gram', 'grams', 'kg', 'kilogram', 'kilograms'].includes(unit))
+            return 'mass';
+        if (['ml', 'milliliter', 'milliliters', 'l', 'liter', 'litre'].includes(unit))
+            return 'volume';
+        if (['pc', 'pcs', 'piece', 'pieces'].includes(unit))
+            return 'count';
+        return 'unknown';
+    }
+
+    function isAllowedOption(ingredientUnit, optionUnit) {
+        if (!ingredientUnit)
+            return true;
+        return unitGroup(ingredientUnit) === unitGroup(optionUnit);
+    }
+
+    /**
+     * Lọc các option của unitSelect dựa vào ingredientSelect.
+     * preserveValue:
+     *   - true  : giữ giá trị hiện tại nếu hợp lệ; nếu không sẽ chọn canonical (nếu có) hoặc first allowed.
+     *   - false : KHÔNG tự chọn; nếu current value rỗng giữ nguyên (placeholder).
+     */
+    function filterUnitSelectByIngredient(ingredientSelectElem, unitSelectElem, preserveValue) {
+        var ingOption = ingredientSelectElem.selectedOptions[0];
+        var ingUnit = ingOption ? ingOption.getAttribute('data-unit') : null;
+        var currentValue = unitSelectElem.value;
+
+        // ensure placeholder option (value="") is visible & enabled
+        for (var i = 0; i < unitSelectElem.options.length; i++) {
+            var opt = unitSelectElem.options[i];
+            if (opt.value === "") {
+                opt.hidden = false;
+                opt.disabled = false;
+                break;
+            }
+        }
+
+        // hide/disable incompatible options
+        for (var i = 0; i < unitSelectElem.options.length; i++) {
+            var opt = unitSelectElem.options[i];
+            var optVal = opt.value;
+            if (optVal === '')
+                continue; // placeholder kept visible
+            if (isAllowedOption(ingUnit, optVal)) {
+                opt.hidden = false;
+                opt.disabled = false;
+            } else {
+                opt.hidden = true;
+                opt.disabled = true;
+            }
+        }
+
+        // Selection behavior:
+        if (preserveValue) {
+            // prefer to keep current value if still allowed
+            if (currentValue && currentValue !== "" && !unitSelectElem.querySelector('option[value="' + currentValue + '"]').disabled) {
+                unitSelectElem.value = currentValue;
+                return;
+            }
+            // otherwise try to select canonical (ingredient's unit) if present and allowed
+            if (ingUnit) {
+                for (var i = 0; i < unitSelectElem.options.length; i++) {
+                    var opt = unitSelectElem.options[i];
+                    if (opt.value && opt.value.toLowerCase() === ingUnit.toLowerCase() && !opt.disabled) {
+                        unitSelectElem.value = opt.value;
+                        return;
+                    }
+                }
+            }
+            // fallback: choose first allowed non-empty option
+            for (var i = 0; i < unitSelectElem.options.length; i++) {
+                var opt = unitSelectElem.options[i];
+                if (opt.value && !opt.disabled) {
+                    unitSelectElem.value = opt.value;
+                    return;
+                }
+            }
+            // if none found, leave placeholder
+            unitSelectElem.value = "";
+        } else {
+            // preserveValue === false -> DO NOT auto-select.
+            // If current value is empty (placeholder), keep it.
+            // If current value is non-empty but now disabled, reset to placeholder.
+            var curOpt = unitSelectElem.querySelector('option[value="' + currentValue + '"]');
+            if (currentValue && curOpt && curOpt.disabled) {
+                unitSelectElem.value = "";
+            }
+            // otherwise keep whatever user had (or placeholder)
+        }
+    }
+
+    // Open edit modal and filter; preserveValue = true so we restore passed unit when possible
     function openEditItemModal(recipeItemId, ingredientId, quantity, unit, note, status) {
         document.getElementById('edit_recipe_item_id').value = recipeItemId;
         document.getElementById('edit_ingredient_id').value = ingredientId;
         document.getElementById('edit_quantity').value = quantity;
-        document.getElementById('edit_unit').value = unit || '';
         document.getElementById('edit_note').value = note || '';
+
+        var editIngredientSelect = document.getElementById('edit_ingredient_id');
+        var editUnitSelect = document.getElementById('edit_unit');
+
+        // ensure the ingredient select has the value set before filtering
+        setTimeout(function () {
+            filterUnitSelectByIngredient(editIngredientSelect, editUnitSelect, true);
+            // set unit after filtering (only if allowed)
+            if (unit) {
+                var opt = editUnitSelect.querySelector('option[value="' + unit + '"]');
+                if (opt && !opt.disabled) {
+                    editUnitSelect.value = unit;
+                }
+            }
+        }, 0);
 
         var modal = new bootstrap.Modal(document.getElementById('editItemModal'));
         modal.show();
@@ -306,6 +416,29 @@
         var modal = new bootstrap.Modal(document.getElementById('deleteItemPopup'));
         modal.show();
     }
+
+    // DOM ready: attach listeners
+    document.addEventListener('DOMContentLoaded', function () {
+        var addIng = document.getElementById('add_ingredient_select');
+        var addUnit = document.getElementById('add_unit_select');
+        if (addIng && addUnit) {
+            addIng.addEventListener('change', function () {
+                // preserveValue = false so placeholder stays if user hasn't chosen unit
+                filterUnitSelectByIngredient(addIng, addUnit, false);
+            });
+            // initial: don't auto-select, keep placeholder
+            filterUnitSelectByIngredient(addIng, addUnit, false);
+        }
+
+        var editIng = document.getElementById('edit_ingredient_id');
+        var editUnit = document.getElementById('edit_unit');
+        if (editIng && editUnit) {
+            editIng.addEventListener('change', function () {
+                // when user changes ingredient in modal, we can preserve current unit selection if any
+                filterUnitSelectByIngredient(editIng, editUnit, true);
+            });
+        }
+    });
 </script>
 
 <%@ include file="/WEB-INF/include/footerDashboard.jsp" %>

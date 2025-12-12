@@ -24,7 +24,7 @@ public class VoucherDAO extends DBContext {
     public List<Voucher> getAllAvailable() {
         List<Voucher> list = new ArrayList<>();
         try {
-            String query = "SELECT voucher_id, voucher_code, voucher_name, discount_type, discount_value, quantity, start_date, end_date, status "
+            String query = "SELECT voucher_id, voucher_code, voucher_name, discount_type, discount_value, quantity, used, start_date, end_date, status "
                     + "FROM Voucher WHERE LOWER(status) <> 'deleted'\n"
                     + "AND CAST(GETDATE() AS DATE) BETWEEN start_date AND end_date\n"
                     + "AND quantity > 0\n"
@@ -38,6 +38,7 @@ public class VoucherDAO extends DBContext {
                         rs.getString("discount_type"),
                         rs.getInt("discount_value"),
                         rs.getInt("quantity"),
+                        rs.getInt("used"),
                         rs.getDate("start_date"),
                         rs.getDate("end_date"),
                         rs.getString("status")
@@ -53,7 +54,7 @@ public class VoucherDAO extends DBContext {
     public List<Voucher> getAll() {
         List<Voucher> list = new ArrayList<>();
         try {
-            String query = "SELECT voucher_id, voucher_code, voucher_name, discount_type, discount_value, quantity, start_date, end_date, status "
+            String query = "SELECT voucher_id, voucher_code, voucher_name, discount_type, discount_value, quantity, used, start_date, end_date, status "
                     + "FROM Voucher WHERE LOWER(status) <> 'deleted' ORDER BY voucher_id";
             ResultSet rs = this.executeSelectionQuery(query, null);
             while (rs.next()) {
@@ -64,6 +65,7 @@ public class VoucherDAO extends DBContext {
                         rs.getString("discount_type"),
                         rs.getInt("discount_value"),
                         rs.getInt("quantity"),
+                        rs.getInt("used"),
                         rs.getDate("start_date"),
                         rs.getDate("end_date"),
                         rs.getString("status")
@@ -80,7 +82,7 @@ public class VoucherDAO extends DBContext {
         List<Voucher> list = new ArrayList<>();
         try {
             String query = "SELECT v.voucher_id, v.voucher_code, v.voucher_name, v.discount_type, v.discount_value, "
-                    + "v.quantity, v.start_date, v.end_date, v.status "
+                    + "v.quantity, v.used, v.start_date, v.end_date, v.status "
                     + "FROM voucher AS v "
                     + "WHERE LOWER(v.status) <> 'deleted' "
                     + "ORDER BY v.voucher_id "
@@ -94,6 +96,7 @@ public class VoucherDAO extends DBContext {
                         rs.getString("discount_type"),
                         rs.getInt("discount_value"),
                         rs.getInt("quantity"),
+                        rs.getInt("used"),
                         rs.getDate("start_date"),
                         rs.getDate("end_date"),
                         rs.getString("status")
@@ -114,7 +117,7 @@ public class VoucherDAO extends DBContext {
                     .replace("%", "\\%") // escape dấu %
                     .replace("_", "\\_");   // escape dấu _
             String query = "SELECT v.voucher_id, v.voucher_code, v.voucher_name, v.discount_type, v.discount_value, "
-                    + "v.quantity, v.start_date, v.end_date, v.status "
+                    + "v.quantity, v.used, v.start_date, v.end_date, v.status "
                     + "FROM voucher AS v "
                     + "WHERE LOWER(v.status) <> 'deleted' "
                     + "AND (LOWER(v.voucher_code) LIKE LOWER(?) OR "
@@ -140,6 +143,7 @@ public class VoucherDAO extends DBContext {
                         rs.getString("discount_type"),
                         rs.getInt("discount_value"),
                         rs.getInt("quantity"),
+                        rs.getInt("used"),
                         rs.getDate("start_date"),
                         rs.getDate("end_date"),
                         rs.getString("status")
@@ -186,7 +190,7 @@ public class VoucherDAO extends DBContext {
 
     public Voucher getById(int id) {
         try {
-            String query = "SELECT voucher_id, voucher_code, voucher_name, discount_type, discount_value, quantity, start_date, end_date, status "
+            String query = "SELECT voucher_id, voucher_code, voucher_name, discount_type, discount_value, quantity, used, start_date, end_date, status "
                     + "FROM Voucher WHERE voucher_id = ? AND LOWER(status) <> 'deleted'";
             ResultSet rs = this.executeSelectionQuery(query, new Object[]{id});
             if (rs.next()) {
@@ -197,6 +201,7 @@ public class VoucherDAO extends DBContext {
                         rs.getString("discount_type"),
                         rs.getInt("discount_value"),
                         rs.getInt("quantity"),
+                        rs.getInt("used"),
                         rs.getDate("start_date"),
                         rs.getDate("end_date"),
                         rs.getString("status")
@@ -226,7 +231,7 @@ public class VoucherDAO extends DBContext {
     public int decrease1Quantity(int id) {
         try {
             String query = "UPDATE Voucher\n"
-                    + "SET quantity = quantity - 1\n"
+                    + "SET quantity = quantity - 1, used = used + 1\n"
                     + "WHERE voucher_id = ?\n"
                     + "  AND quantity > 0;";
             return this.executeQuery(query, new Object[]{id});
