@@ -18,6 +18,7 @@ public class Voucher {
     private String discountType;
     private int discountValue;
     private int quantity;
+    private int used;
     private Date startDate;
     private Date endDate;
     private String status;
@@ -33,6 +34,19 @@ public class Voucher {
         this.discountType = discountType;
         this.discountValue = discountValue;
         this.quantity = quantity;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.status = status;
+    }
+
+    public Voucher(int voucherId, String voucherCode, String voucherName, String discountType, int discountValue, int quantity, int used, Date startDate, Date endDate, String status) {
+        this.voucherId = voucherId;
+        this.voucherCode = voucherCode;
+        this.voucherName = voucherName;
+        this.discountType = discountType;
+        this.discountValue = discountValue;
+        this.quantity = quantity;
+        this.used = used;
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = status;
@@ -84,6 +98,14 @@ public class Voucher {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public int getUsed() {
+        return used;
+    }
+
+    public void setUsed(int used) {
+        this.used = used;
     }
 
     public Date getStartDate() {
