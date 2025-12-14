@@ -1,6 +1,6 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to editQuantityList this template
  */
 package controller;
 
@@ -13,7 +13,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import model.*;
 
 /**
@@ -46,7 +48,7 @@ public class MyOrderServlet extends HttpServlet {
             throws ServletException, IOException {
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to editQuantityList the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -97,18 +99,35 @@ public class MyOrderServlet extends HttpServlet {
 
         if (view == null || view.isBlank() || view.equalsIgnoreCase("list")) {
             namepage = "list";
-
-            if (currentReservation != null) {
-                request.setAttribute("orderItemsList", orderItemDAO.getAllByReservationId(currentReservation.getReservationId()));
-            }
         } else if (view.equalsIgnoreCase("add")) {
             namepage = "add";
         } else if (view.equalsIgnoreCase("edit")) {
-            request.setAttribute("currentReservation", reservationDAO.getElementByID(reservationId));
             request.setAttribute("currentOrderItem", orderItemDAO.getAllByReservationId(reservationId));
             namepage = "edit";
         }
 
+        if (currentReservation != null) {
+
+            //Process list to map
+            List<OrderItem> orderItems = orderItemDAO.getAllByReservationId(currentReservation.getReservationId());
+            Map<String, Map<String, Integer>> orderItemsMap = new HashMap<>();
+
+            for (OrderItem orderItem : orderItems) {
+                String key = orderItem.getMenuItem().getMenuItemId() + "_" + orderItem.getUnitPrice();
+                String status = orderItem.getStatus();
+                int quantity = orderItem.getQuantity();
+
+                if (!orderItemsMap.containsKey(key)) {
+                    orderItemsMap.put(key, new HashMap<>());
+                }
+
+                orderItemsMap.get(key).put(status, quantity);
+            }
+            // end
+
+            request.setAttribute("orderItemsMap", orderItemsMap);
+        }
+        request.setAttribute("orderItemsList", orderItemDAO.getAllByReservationId(reservationId));
         request.setAttribute("categoryList", categoryDAO.getAll());
         request.setAttribute("itemsList", menuItemDAO.getAll());
         request.setAttribute("vouchersList", voucherDAO.getAllAvailable());
@@ -219,7 +238,9 @@ public class MyOrderServlet extends HttpServlet {
                     popupMessage += " The reservation is not exist. Check information again.";
                 } else if (menuItem == null) {
                     popupMessage += " The item is not exist. Check information again.";
-                } else if (!reservation.getStatus().equalsIgnoreCase("Pending")) {
+                } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
+                        || reservation.getStatus().equalsIgnoreCase("Approved")
+                        || reservation.getStatus().equalsIgnoreCase("Serving"))) {
                     popupMessage += " The reservation is pending or serving. Check information again.";
                 } else {
                     popupStatus = true;
@@ -232,8 +253,6 @@ public class MyOrderServlet extends HttpServlet {
                         orderItems.add(new OrderItem(menuItemId, reservation, menuItem, menuItem.getPrice(), quantity, "Pending"));
                     }
                 } else {
-                    popupStatus = false;
-                    popupMessage = "The add action is NOT successfull. Check information again.";
                     break;
                 }
             }
@@ -284,7 +303,9 @@ public class MyOrderServlet extends HttpServlet {
                     popupMessage += " The reservation is not exist. Check information again.";
                 } else if (menuItem == null) {
                     popupMessage += " The item is not exist. Check information again.";
-                } else if (!reservation.getStatus().equalsIgnoreCase("Pending")) {
+                } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
+                        || reservation.getStatus().equalsIgnoreCase("Approved")
+                        || reservation.getStatus().equalsIgnoreCase("Serving"))) {
                     popupMessage += " The reservation is pending or serving. Check information again.";
                 } else {
                     popupStatus = true;
@@ -295,14 +316,12 @@ public class MyOrderServlet extends HttpServlet {
                 if (popupStatus == true) {
                     orderItems.add(new OrderItem(menuItemId, reservation, menuItem, menuItem.getPrice(), quantity, "Pending"));
                 } else {
-                    popupStatus = false;
-                    popupMessage = "The edit action is NOT successfull. The item is wrong.";
                     break;
                 }
             }
 
             if (popupStatus == true) {
-                int checkError2 = orderItemDAO.edit(reservation.getReservationId(), orderItems);
+                int checkError2 = orderItemDAO.editQuantityList(reservation.getReservationId(), orderItems);
 
                 if (checkError2 >= 1) {
                 } else {
