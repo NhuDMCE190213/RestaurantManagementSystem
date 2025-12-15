@@ -1,11 +1,16 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to editQuantityList this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
 package controller;
 
-import dao.*;
+import dao.CategoryDAO;
+import dao.MenuItemDAO;
+import dao.OrderItemDAO;
+import dao.ReservationDAO;
+import dao.VoucherDAO;
 import java.io.IOException;
+import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,14 +21,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import model.*;
+import model.Customer;
+import model.MenuItem;
+import model.OrderItem;
+import model.Reservation;
 
 /**
  *
  * @author Dai Minh Nhu - CE190213
  */
-@WebServlet(name = "MyOrder", urlPatterns = {"/myOrder"})
-public class MyOrderServlet extends HttpServlet {
+@WebServlet(name = "OrderServlet", urlPatterns = {"/order"})
+public class OrderServlet extends HttpServlet {
 
     private final int MAX_ELEMENTS_PER_PAGE = 15;
     private final OrderItemDAO orderItemDAO = new OrderItemDAO();
@@ -46,9 +54,22 @@ public class MyOrderServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try ( PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet OrderServlet</title>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet OrderServlet at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
+        }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to editQuantityList the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -60,18 +81,8 @@ public class MyOrderServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Customer customer = null;
         String namepage = "";
         String view = request.getParameter("view");
-
-        // check tam
-        try {
-            customer = (Customer) request.getSession(false).getAttribute("customerSession");
-        } catch (Exception e) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-        // check tam
 
         int reservationId;// khi khong tim thay thi khong cho add
         try {
@@ -82,20 +93,20 @@ public class MyOrderServlet extends HttpServlet {
 
         Reservation currentReservation = reservationDAO.getElementByID(reservationId);
 
-        int page;
-        int totalPages;
+//        int page;
+//        int totalPages;
 
-        if (currentReservation != null) {
-            totalPages = getTotalPages(orderItemDAO.countItembyReservationId(currentReservation.getReservationId()));
-        } else {
-            totalPages = 0;
-        }
+//        if (currentReservation != null) {
+//            totalPages = getTotalPages(orderItemDAO.countItembyReservationId(currentReservation.getReservationId()));
+//        } else {
+//            totalPages = 0;
+//        }
 
-        try {
-            page = Integer.parseInt(request.getParameter("page"));
-        } catch (NumberFormatException e) {
-            page = 1;
-        }
+//        try {
+//            page = Integer.parseInt(request.getParameter("page"));
+//        } catch (NumberFormatException e) {
+//            page = 1;
+//        }
 
         if (view == null || view.isBlank() || view.equalsIgnoreCase("list")) {
             namepage = "list";
@@ -116,8 +127,10 @@ public class MyOrderServlet extends HttpServlet {
                 String key = orderItem.getMenuItem().getMenuItemId() + "_" + orderItem.getUnitPrice();
                 String status = orderItem.getStatus();
                 int quantity = orderItem.getQuantity();
-                
-                if (quantity <= 0) continue;
+
+                if (quantity <= 0) {
+                    continue;
+                }
 
                 if (!orderItemsMap.containsKey(key)) {
                     orderItemsMap.put(key, new HashMap<>());
@@ -134,9 +147,9 @@ public class MyOrderServlet extends HttpServlet {
         request.setAttribute("itemsList", menuItemDAO.getAll());
         request.setAttribute("vouchersList", voucherDAO.getAllAvailable());
         request.setAttribute("currentReservation", currentReservation);
-        request.setAttribute("totalPages", totalPages);
+//        request.setAttribute("totalPages", totalPages);
 
-        request.getRequestDispatcher("/WEB-INF/myOrder/" + namepage + ".jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/order/" + namepage + ".jsp").forward(request, response);
         removePopup(request);
     }
 
@@ -177,11 +190,16 @@ public class MyOrderServlet extends HttpServlet {
                 add(request, currentReservation);
             } else if (action.equalsIgnoreCase("edit")) {
                 edit(request, currentReservation);
-            }
+            } 
+//            else if (action.equalsIgnoreCase("complete")) {
+//                complete(request, currentReservation);
+//            } else if (action.equalsIgnoreCase("cook")) {
+//                cook(request, currentReservation);
+//            } 
         }
 
         setPopup(request, popupStatus, popupMessage);
-        response.sendRedirect(request.getContextPath() + "/myOrder?reservationId=" + reservationId);
+        response.sendRedirect(request.getContextPath() + "/order?reservationId=" + reservationId);
     }
 
     /**
@@ -197,7 +215,7 @@ public class MyOrderServlet extends HttpServlet {
     private int getTotalPages(int countItems) {
         return (int) Math.ceil((double) countItems / MAX_ELEMENTS_PER_PAGE);
     }
-
+    
     private void setPopup(HttpServletRequest request, boolean status, String message) {
         HttpSession session = request.getSession(false);
         session.setAttribute("popupStatus", status);
@@ -272,7 +290,6 @@ public class MyOrderServlet extends HttpServlet {
             popupStatus = false;
             popupMessage = "The add action is NOT successfull. Check the information menu item again.";
         }
-
     }
 
     private void edit(HttpServletRequest request, Reservation reservation) {

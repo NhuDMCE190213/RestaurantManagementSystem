@@ -34,16 +34,15 @@
             <table class="table align-middle admin-table">
                 <thead>
                     <tr>
-                        <th width="8%">ID</th>
-                        <th width="12%">Customer</th>
-                        <th width="12%">Employee</th>
+                        <th width="5%">ID</th>
+                        <th width="15%">Customer</th>
+                        <th width="15%">Employee</th>
                         <th width="10%">Table</th>
-                        <th width="15%">Date</th>
-
-                        <th width="12%">Time</th>
+                        <th width="10%">Date</th>
+                        <th width="10%">Time</th>
                         <th width="15%">Note</th>
-                        <th width="15%">Status</th>
-                        <th width="18%" class="text-end">Action</th>
+                        <th width="5%">Status</th>
+                        <th width="15%" class="text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -77,6 +76,15 @@
                                     </td>
                                     <td class="text-end">
                                         <div class="action-button-group d-flex justify-content-end gap-2">
+
+                                            <a class="btn btn-outline-success btn-icon btn-view"
+                                               href="<c:url value='/order'>
+                                                   <c:param name='view' value='list'/>
+                                                   <c:param name='reservationId' value='${r.reservationId}'/>
+                                               </c:url>"
+                                               title="View Order" aria-label="View Order">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
 
                                             <!-- Approve -->
                                             <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">

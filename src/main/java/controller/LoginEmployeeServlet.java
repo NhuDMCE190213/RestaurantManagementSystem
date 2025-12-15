@@ -90,7 +90,7 @@ public class LoginEmployeeServlet extends HttpServlet {
                 session.setAttribute("employeeSession", employee);
                 session.setMaxInactiveInterval(30 * 60);
 
-                response.sendRedirect(request.getContextPath() + "/order");
+                response.sendRedirect(request.getContextPath() + "/reservation");
                 return;
             } else {
 

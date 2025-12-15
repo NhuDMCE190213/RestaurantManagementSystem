@@ -90,7 +90,7 @@
                 </tr>
 
                 <c:choose>
-                    <c:when test="${not empty categoryList}">
+                    <c:when test="${not empty orderItemsList}">
                         <c:forEach var="category" items="${categoryList}">
                             <tr>
                                 <td colspan="2">

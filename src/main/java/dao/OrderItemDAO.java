@@ -275,6 +275,7 @@ public class OrderItemDAO extends DBContext {
                 edit(orderItemExist.getOrderItemId(), reservationId, menuItem.getMenuItemId(),
                         orderItem.getUnitPrice(), orderItemExist.getQuantity() + orderItem.getQuantity(), "Pending");
                 orderItems.remove(orderItem);
+                i--;
             }
         }
 
