@@ -334,11 +334,22 @@ public class ReservationServlet extends HttpServlet {
                 setPopup(request, false, "Add failed. SQL error: " + getSqlErrorCode(check));
             } else {
                 setPopup(request, true, "Reservation created successfully.");
+
+                try {
+                    tableDAO.updateStatus(tableId, "Reserved");
+                } catch (Exception ex) {
+                    ex.printStackTrace(); // log nhẹ, không làm crash flow
+                }
             }
 
             response.sendRedirect(request.getContextPath() + "/reservation");
             return;
-        } else if (action.equalsIgnoreCase("approve") || action.equalsIgnoreCase("reject")) {
+            // ====== APPROVE / REJECT / COMPLETE (ADMIN) ======
+            // ====== APPROVE / REJECT / COMPLETE (ADMIN) ======
+        } else if ("approve".equalsIgnoreCase(action)
+                || "reject".equalsIgnoreCase(action)
+                || "complete".equalsIgnoreCase(action)) {
+
             int id;
             try {
                 id = Integer.parseInt(request.getParameter("id"));
@@ -356,24 +367,60 @@ public class ReservationServlet extends HttpServlet {
                     popupMessage = "Reservation not found.";
                 } else {
                     String currentStatus = current.getStatus();
-                    String actionType = action.equalsIgnoreCase("approve") ? "Approved" : "Rejected";
+                    String targetStatus = null;
 
-                    if (currentStatus.equalsIgnoreCase("Approved") && action.equalsIgnoreCase("reject")) {
+                    if ("approve".equalsIgnoreCase(action)) {
+                        targetStatus = "Approved";
+                    } else if ("reject".equalsIgnoreCase(action)) {
+                        targetStatus = "Rejected";
+                    } else if ("complete".equalsIgnoreCase(action)) {
+                        targetStatus = "Complete";    // reservation hiển thị Complete
+                    }
+
+                    // ====== RULE NGHIỆP VỤ ======
+                    if ("Cleaning".equalsIgnoreCase(currentStatus)
+                            || "Cancelled".equalsIgnoreCase(currentStatus)) {
                         popupStatus = false;
-                        popupMessage = "Cannot reject a reservation that has already been approved.";
-                    } else if (currentStatus.equalsIgnoreCase("Rejected") && action.equalsIgnoreCase("approve")) {
+                        popupMessage = "Cannot change status of a cancelled/cleaning reservation.";
+                    } else if ("approve".equalsIgnoreCase(action)
+                            && !"Pending".equalsIgnoreCase(currentStatus)) {
                         popupStatus = false;
-                        popupMessage = "Cannot approve a reservation that has already been rejected.";
-                    } else if (currentStatus.equalsIgnoreCase("Cancelled")) {
+                        popupMessage = "Only pending reservations can be approved.";
+                    } else if ("reject".equalsIgnoreCase(action)
+                            && !"Pending".equalsIgnoreCase(currentStatus)) {
                         popupStatus = false;
-                        popupMessage = "Cannot change status of a cancelled reservation.";
+                        popupMessage = "Only pending reservations can be rejected.";
+                    } else if ("complete".equalsIgnoreCase(action)
+                            && !"Approved".equalsIgnoreCase(currentStatus)) {
+                        popupStatus = false;
+                        popupMessage = "Only approved reservations can be completed.";
                     } else {
-                        int check = reservationDAO.updateStatus(id, actionType);
+                        int check = reservationDAO.updateStatus(id, targetStatus);
                         if (check < 1) {
                             popupStatus = false;
                             popupMessage = "Update failed. SQL error: " + getSqlErrorCode(check);
                         } else {
-                            popupMessage = "Reservation (ID: " + id + ") updated -> " + actionType;
+                            popupMessage = "Reservation (ID: " + id + ") updated -> " + targetStatus;
+
+                            // ✅ Sau khi APPROVE -> Table = Serving
+                            if ("approve".equalsIgnoreCase(action)) {
+                                try {
+                                    int tableId = current.getTable().getId();
+                                    tableDAO.updateStatus(tableId, "Serving");
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+
+                            // ✅ Sau khi COMPLETE -> Table = Cleaning
+                            if ("complete".equalsIgnoreCase(action)) {
+                                try {
+                                    int tableId = current.getTable().getId();
+                                    tableDAO.updateStatus(tableId, "Cleaning");
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
                         }
                     }
                 }
