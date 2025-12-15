@@ -81,18 +81,34 @@
                                                     (r.status == 'Cancelled' ? 'bg-secondary' : 'bg-warning text-dark'))}">
                                                       ${r.status}
                                                   </span>
-
                                             </td>
                                             <td class="text-end">
                                                 <div class="action-button-group d-flex justify-content-end gap-2">
+                                                    <a class="btn btn-outline-success btn-icon btn-view"
+                                                       href="<c:url value='/myOrder'>
+                                                           <c:param name='view' value='list'/>
+                                                           <c:param name='reservationId' value='${r.reservationId}'/>
+                                                       </c:url>"
+                                                       title="View Order" aria-label="View Order">
+                                                        <i class="bi bi-eye-fill"></i>
+                                                    </a>
                                                     <c:if test="${r.status eq 'Pending' or r.status eq 'Approved' or r.status eq 'Reserving'}">
                                                         <a class="btn btn-outline-success btn-icon btn-view"
-                                                           href="<c:url value='/myReservationOrder'>
-                                                               <c:param name='view' value='list'/>
+                                                           href="<c:url value='/myOrder'>
+                                                               <c:param name='view' value='add'/>
                                                                <c:param name='reservationId' value='${r.reservationId}'/>
                                                            </c:url>"
-                                                           title="Order" aria-label="Order">
-                                                            <i class="bi bi-eye-fill"></i>
+                                                           title="Add Order" aria-label="Add Order">
+                                                           <i class="bi bi-cart-plus-fill"></i>
+                                                        </a>
+                                                        <a class="btn btn-outline-warning btn-icon btn-view"
+                                                           href="<c:url value='/myOrder'>
+                                                               <c:param name='view' value='edit'/>
+                                                               <c:param name='reservationId' value='${r.reservationId}'/>
+                                                           </c:url>"
+                                                           title="Edit Order" aria-label="Edit Order">
+                                                           <i class="bi bi-cart-check"></i>
+
                                                         </a>
                                                     </c:if>
                                                     <!-- Edit -->

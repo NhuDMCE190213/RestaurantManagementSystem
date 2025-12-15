@@ -1,119 +1,183 @@
 <%-- 
-    Document   : list
-    Created on : 7 Nov 2025, 12:41:23 AM
+    Document   : listByReservation
+    Created on : 3 Dec 2025, 7:33:33 AM
     Author     : Dai Minh Nhu - CE190213
 --%>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:set var="title" value="My Order List - Yummy"/>
+<c:set var="title" value="My Order - Yummy"/>
 
 <%@include file="/WEB-INF/include/headerCustomer.jsp" %>
 
-<main class="d-flex justify-content-center align-items-center bg-light">
-    <section class="col-12 col-lg-9 col-xxl-10 table-section" aria-label="Listing table">
-        <div class="content-card shadow-sm">
-            <div class="card-header border-0 px-4 py-3 d-flex flex-column flex-md-row gap-3 gap-md-0 justify-content-between align-items-md-center">
-                <div>
-                    <h1 class="section-title mb-1">My Order list</h1>
-                </div>
-                <div class="actions d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-md-end">
-                    <div class="filters d-flex flex-wrap gap-2 justify-content-end">
-                        <a class="btn btn-primary add-btn" href="<c:url value="myOrder">
-                               <c:param name="view" value="addOrder"/>
-                           </c:url>"><i class="bi bi-plus-circle"></i>Add</a>
-
-                    </div>
-                </div>
+<section class="col-12 col-lg-9 col-xxl-10 table-section" style="padding-left: 250px" aria-label="Listing table">
+    <div class="content-card shadow-sm ">
+        <div class="border-0 px-4 py-3">
+            <div class="card-header">
+                <h1 class="section-title mb-1 text-start">My Order</h1>
             </div>
 
-            <div class="table-responsive px-4 pb-2">
-                <table class="table align-middle admin-table">
-                    <thead>
+            <c:choose>
+                <c:when test="${not empty currentReservation}">
+                    <div class=" card-body row g-3 g-md-4 mb-4">
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="border rounded-3 p-3 bg-light">
+                                <small class="text-uppercase text-muted fw-semibold">Table</small>
+                                <p class="fs-5 fw-semibold mb-0"><c:out value='${currentReservation.table.number}'/></p>
+                            </div>
+                        </div>
+                        <c:if test="${not empty currentReservation.emp}">
+                            <div class="col-12 col-sm-6 col-xl-3">
+                                <div class="border rounded-3 p-3 bg-light">
+                                    <small class="text-uppercase text-muted fw-semibold">Employee</small>
+                                    <p class="fs-5 fw-semibold mb-0"><c:out value='${currentReservation.emp.empName}'/></p>
+                                </div>
+                            </div>
+                        </c:if>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="border rounded-3 p-3 bg-light">
+                                <small class="text-uppercase text-muted fw-semibold">Date</small>
+                                <p class="mb-0 fw-semibold"><c:out value='${currentReservation.reservationDate}'/></p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="border rounded-3 p-3 bg-light">
+                                <small class="text-uppercase text-muted fw-semibold">Time Start</small>
+                                <p class="mb-0 fw-semibold"><c:out value='${currentReservation.timeStart}'/></p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="border rounded-3 p-3 bg-light">
+                                <small class="text-uppercase text-muted fw-semibold">Time End</small>
+                                <p class="mb-0 fw-semibold"><c:out value='${currentReservation.timeEnd}'/></p>
+                            </div>
+                        </div>
+                        <%--cho voucher--%>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="border rounded-3 p-3 bg-light">
+                                <small class="text-uppercase text-muted fw-semibold">Status</small>
+                                <p class="mb-0 fw-semibold"><c:out value='${currentReservation.status}'/></p>
+                            </div>
+                        </div>
+                        <div class="actions d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-md-end">
+                            <div class="filters d-flex flex-wrap gap-2 justify-content-end">
+                                <a class="btn btn-primary add-btn" href="<c:url value="myOrder">
+                                       <c:param name="view" value="add"/>
+                                       <c:param name="reservationId" value="${currentReservation.reservationId}"/>
+                                   </c:url>"><i class="bi bi-plus-circle"></i>Add</a>
+                                <a class="btn btn-warning add-btn" href="<c:url value="myOrder">
+                                       <c:param name="view" value="edit"/>
+                                       <c:param name="reservationId" value="${currentReservation.reservationId}"/>
+                                   </c:url>"><i class="bi bi-pencil-fill"></i>Edit</a>
+                            </div>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="card-body px-4 pb-4">
+                            <div class="alert alert-warning mb-3" role="alert">
+                                The reservation not found. Please check information again.
+                            </div>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+
+            <table class="table table align-middle admin-table">
+                <tr>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+
+                <c:choose>
+                    <c:when test="${not empty orderItemsList}">
+                        <c:forEach var="category" items="${categoryList}">
+                            <tr>
+                                <td colspan="2">
+                                    <button class="btn btn-outline-danger w-100 text-start"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#category_${category.categoryId}">
+                                        <i class="bi bi-caret-down-fill me-2"></i>
+                                        <c:out value="${category.categoryName}"/>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="p-0">
+                                    <div id="category_${category.categoryId}" class="collapse border border-2 rounded-3 p-2 mb-3">
+                                        <div class="overflow-auto" style="max-height: 300px;">
+                                            <table class="table table-sm mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="20%">Image</th>
+                                                        <th width="20%">Name</th>
+                                                        <th width="15%">Price</th>
+                                                        <th width="15%">Completed</th>
+                                                        <th width="15%">Cooking</th>
+                                                        <th width="15%">Pending</th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    <c:forEach var="item" items="${orderItemsList}">
+                                                        <c:set var="key" value="${item.menuItem.menuItemId}_${item.unitPrice}"/>
+                                                        <c:set var="orderItem" value="${orderItemsMap[key]}"/>
+                                                        <c:if test="${category.categoryId eq item.menuItem.category.categoryId and not empty orderItem}">
+                                                            <tr>
+                                                                <td>
+                                                                    <img src="${item.menuItem.imageUrl}"
+                                                                         class="menu-img img-fluid"
+                                                                         alt="${item.menuItem.itemName}"
+                                                                         onerror="this.onerror=null;
+                                                                         this.src='${pageContext.request.contextPath}/assets/img/menu/NIA.png';"
+                                                                         width="120"/>
+                                                                </td>
+
+                                                                <td>
+                                                                    <c:out value="${item.menuItem.itemName}"/>
+                                                                </td>
+
+                                                                <td>
+                                                                    <c:out value="${item.priceVND}"/>
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" disabled
+                                                                           value="${(not empty orderItem['Completed'])?orderItem['Completed']:0}">
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" disabled 
+                                                                           value="${(not empty orderItem['Cooking'])?orderItem['Cooking']:0}">
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" disabled 
+                                                                           value="${(not empty orderItem['Pending'])?orderItem['Pending']:0}">
+                                                                </td>
+                                                            </tr>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        </c:forEach>
+                    </c:when>
+
+                    <c:otherwise>
                         <tr>
-                            <th width="10%" scope="col">Table Name</th>
-                            <th width="20%" scope="col">Voucher</th>
-                            <th width="15%" scope="col">Date</th>
-                            <th width="15%" scope="col">Time</th>
-                            <th width="10%" scope="col">Payment</th>
-                            <th width="15%" scope="col">Status</th>
-                            <th width="20%"scope="col" class="text-end">Actions</th>
+                            <td colspan="2" class="text-center text-muted">
+                                No data to display
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${ordersList == null || empty ordersList}">
-                                <tr>
-                                    <td colspan="9" style="color:red;">No data to display</td>
-                                </tr>   
-                            </c:when>
-                            <c:otherwise>
-                                <c:forEach var="order" items="${ordersList}" varStatus="loop">
-                                    <tr>
-                                        <td><c:out value="${order.reservation.table.number}"/></td>
-                                        <td><c:out value="${order.voucher.voucherCode}"/></td>
-                                        <td><c:out value="${order.orderDate}"/></td>
-                                        <td><c:out value="${order.orderTime}"/></td>
-                                        <td><c:out value="${order.paymentMethod}"/></td>
-                                        <td><c:out value="${order.status}"/></td>
+                    </c:otherwise>
+                </c:choose>
 
-                                        <td class="text-end">
-                                            <div class="action-button-group d-flex justify-content-end gap-2">
-                                                <a class="btn btn-outline-success btn-icon btn-view"
-                                                   title="View details" aria-label="View details"
-                                                   href="<c:url value="myOrder">
-                                                       <c:param name="view" value="detail"/>
-                                                       <c:param name="orderId" value="${order.orderId}"/>
-                                                   </c:url>">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                                <form action="<c:url value="myOrder">
-                                                          <c:param name="orderId" value="${order.orderId}"/>
-                                                      </c:url>" method="post">
-                                                    <c:if test="${order.status eq 'Pending'}">
-                                                        <button class="btn btn-outline-danger btn-icon btn-delete"
-                                                                title="Cancel" aria-label="Cancel"
-                                                                type="submit" name="action" value="cancel">
-                                                            <i class="bi bi-x-circle"></i>
-                                                        </button>
-                                                    </c:if>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-                        <li class="page-item ${((empty param.page) || param.page <= 1)?"disabled":""}">
-                            <a class="page-link" href="<c:url value="/myOrder">
-                                   <c:param name="view" value="list"/>
-                                   <c:param name="page" value="${param.page - 1}"/>
-                               </c:url>" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                        <c:forEach begin="1" end="${requestScope.totalPages}" var="i">
-                            <li class="page-item ${((empty param.page && i == 1) || param.page == i)?"active":""}">
-                                <a class="page-link" href="<c:url value="/myOrder">
-                                       <c:param name="view" value="list"/>
-                                       <c:param name="page" value="${i}"/>
-                                   </c:url>">${i}</a></li>
-                            </c:forEach>
-                        <li class="page-item ${(requestScope.totalPages <= param.page || requestScope.totalPages eq 1 )?"disabled":""}">
-                            <a class="page-link" href="<c:url value="/myOrder">
-                                   <c:param name="view" value="list"/>
-                                   <c:param name="page" value="${(empty param.page)?2:param.page + 1}"/>
-                               </c:url>" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
+            </table>
         </div>
-    </section>
-</main>
+    </div>
+</section>
 <%@include file="/WEB-INF/include/footerCustomer.jsp" %>
+
