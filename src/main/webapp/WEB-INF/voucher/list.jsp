@@ -40,7 +40,7 @@
                             <th>Type</th>
                             <th>Discount Value</th>
                             <th>Quantity</th>
-                            <th>Use</th>
+                            <th>Used</th>
                             <th>Start Date</th>
                             <th>End Date</th>
                             
