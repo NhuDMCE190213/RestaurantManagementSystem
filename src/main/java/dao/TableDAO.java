@@ -209,6 +209,7 @@ public class TableDAO extends DBContext {
             String query = "UPDATE [table]\n"
                     + "SET          status = 'Deleted'\n"
                     + "WHERE  (table_id = ?)";
+                    
 
             return this.executeQuery(query, new Object[]{id});
 
@@ -274,4 +275,14 @@ public class TableDAO extends DBContext {
         return -1;
     }
 
+        public boolean isTableUsed(int id) {
+        try {
+            String sql = "SELECT TOP 1 reservation_id FROM [reservation] WHERE table_id = ?";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{id});
+            return rs.next();
+        } catch (SQLException ex) {
+            Logger.getLogger(TableDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
 }
