@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpSession;
 import java.sql.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import utils.EmailSender;
 
 /**
  *
@@ -23,6 +24,7 @@ public class RegisterServlet extends HttpServlet {
 
     private CustomerDAO customerDAO = new CustomerDAO();
     private DBContext db = new DBContext();
+    private EmailSender emailSender = new EmailSender();
 
     // validate methods
     private boolean isNullOrEmpty(String str) {
@@ -147,7 +149,7 @@ public class RegisterServlet extends HttpServlet {
                         + "\n\nPlease enter this code on the website to complete your registration."
                         + "\n\nThis code is valid for a short time.";
 
-                db.verifyEmail(email, subject, content); //send otp
+                emailSender.authenticatebyEmail(email, subject, content); //send otp
 
                 response.sendRedirect("verification");
                 return;

@@ -3,7 +3,7 @@ package controller;
 import dao.CustomerDAO;
 import model.Customer;
 import db.DBContext;
-
+import utils.EmailSender; // Import the EmailSender utility
 import java.io.IOException;
 import java.sql.Date;
 import jakarta.servlet.ServletException;
@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Random;
 
 /**
  *
@@ -24,8 +25,10 @@ import java.util.logging.Logger;
 @WebServlet(name = "CustomerProfileServlet", urlPatterns = {"/customer-profile"})
 public class MyCustomerProfileServlet extends HttpServlet {
 
+    private static final int OTP_LENGTH = 6;
     private CustomerDAO customerDAO = new CustomerDAO();
     private DBContext db = new DBContext();
+    private EmailSender emailSender = new EmailSender();
 
     private boolean isNullOrEmpty(String str) {
         return str == null || str.trim().isEmpty();
@@ -76,6 +79,9 @@ public class MyCustomerProfileServlet extends HttpServlet {
         if (session != null) {
             session.removeAttribute("popupStatus");
             session.removeAttribute("popupMessage");
+            session.removeAttribute("otpCode");
+            session.removeAttribute("newEmailPending");
+            session.removeAttribute("tempCustomerData");
         }
         request.removeAttribute("popupStatus");
         request.removeAttribute("popupMessage");
@@ -95,10 +101,19 @@ public class MyCustomerProfileServlet extends HttpServlet {
 
         if (action == null || action.equalsIgnoreCase("view")) {
             request.setAttribute("customer", customer);
+            session.removeAttribute("otpCode");
+            session.removeAttribute("newEmailPending");
+            session.removeAttribute("tempCustomerData");
             request.getRequestDispatcher("/WEB-INF/profile/view.jsp").forward(request, response);
             removePopup(request);
         } else if (action.equalsIgnoreCase("edit")) {
-            request.setAttribute("customer", customer);
+            Customer tempCustomer = (Customer) session.getAttribute("tempCustomerData");
+            if (tempCustomer != null) {
+                request.setAttribute("customer", tempCustomer);
+            } else {
+                request.setAttribute("customer", customer);
+            }
+
             removePopup(request);
             request.getRequestDispatcher("/WEB-INF/profile/edit.jsp").forward(request, response);
         } else if (action.equalsIgnoreCase("change-password")) {
@@ -126,10 +141,60 @@ public class MyCustomerProfileServlet extends HttpServlet {
         }
     }
 
+    private String generateOTP() {
+        Random random = new Random();
+        int min = (int) Math.pow(10, OTP_LENGTH - 1);
+        int max = (int) Math.pow(10, OTP_LENGTH) - 1;
+        int code = random.nextInt(max - min + 1) + min;
+        return String.valueOf(code);
+    }
+
     private void updateProfile(HttpServletRequest request, HttpServletResponse response,
             HttpSession session, Customer customer)
             throws ServletException, IOException {
 
+        // State retrieval
+        String submittedOtp = request.getParameter("otp_code");
+        String storedOtp = (String) session.getAttribute("otpCode");
+        String newEmailPending = (String) session.getAttribute("newEmailPending");
+        Customer tempCustomerData = (Customer) session.getAttribute("tempCustomerData");
+
+        if (!isNullOrEmpty(submittedOtp) && storedOtp != null && newEmailPending != null && tempCustomerData != null) {
+            if (!storedOtp.equals(submittedOtp)) {
+                setErrorPopup(request, "Invalid verification code. Please check your email and try again.");
+                request.setAttribute("customer", tempCustomerData);
+                request.getRequestDispatcher("/WEB-INF/profile/edit.jsp").forward(request, response);
+                return;
+            }
+            int result = customerDAO.edit(
+                    customer.getCustomerId(),
+                    customer.getCustomerAccount(),
+                    tempCustomerData.getCustomerName(),
+                    tempCustomerData.getGender(),
+                    tempCustomerData.getPhoneNumber(),
+                    newEmailPending,
+                    tempCustomerData.getAddress(),
+                    tempCustomerData.getDob()
+            );
+
+            if (result > 0) {
+                Customer updated = customerDAO.getElementByID(customer.getCustomerId());
+                session.setAttribute("customerSession", updated);
+                setSuccessPopup(request, "Profile and email updated successfully.");
+            } else {
+
+                setSuccessPopup(request, "Email verified but profile update failed due to a database error.");
+            }
+
+            session.removeAttribute("otpCode");
+            session.removeAttribute("newEmailPending");
+            session.removeAttribute("tempCustomerData");
+
+            response.sendRedirect(request.getContextPath() + "/customer-profile?action=view");
+            return;
+        }
+
+        //validate
         String name = request.getParameter("customer_name");
         String gender = request.getParameter("gender");
         String phone = request.getParameter("phone_number");
@@ -139,14 +204,17 @@ public class MyCustomerProfileServlet extends HttpServlet {
         Date dob = null;
         String errorMessage = null;
 
+        Customer submittedData = new Customer(customer.getCustomerId(), customer.getCustomerAccount(), customer.getPassword(),
+                name, gender, phone, email, address, dob);
+
         if (!isNullOrEmpty(dobStr)) {
             try {
                 dob = Date.valueOf(dobStr);
+                submittedData.setDob(dob);
             } catch (IllegalArgumentException e) {
                 errorMessage = "Invalid date format for Date of Birth.";
             }
         }
-
         if (isNullOrEmpty(name)) {
             errorMessage = "Full Name is required.";
         } else if (errorMessage == null && !isValidEmail(email)) {
@@ -156,18 +224,6 @@ public class MyCustomerProfileServlet extends HttpServlet {
         } else if (errorMessage == null && dob != null && !isValidAgeRange(dob, 18, 70)) {
             errorMessage = "Abnormal age found. Age must be between 18 and 70 years old.";
         }
-
-        if (errorMessage == null && email != null && !email.equalsIgnoreCase(customer.getEmail())) {
-            try {
-                if (customerDAO.checkEmailExist(email)) {
-                    errorMessage = "This email address is already in use by another account.";
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(MyCustomerProfileServlet.class.getName()).log(Level.SEVERE, "Error checking email existence", ex);
-                errorMessage = "Error checking email existence.";
-            }
-        }
-
         if (errorMessage == null && phone != null && !phone.equals(customer.getPhoneNumber())) {
             try {
                 if (customerDAO.checkPhoneExist(phone)) {
@@ -179,11 +235,44 @@ public class MyCustomerProfileServlet extends HttpServlet {
             }
         }
 
+        // Email Change Check
+        boolean emailChanged = email != null && !email.equalsIgnoreCase(customer.getEmail());
+
+        if (errorMessage == null && emailChanged) {
+            try {
+                if (customerDAO.checkEmailExist(email)) {
+                    errorMessage = "This email address is already in use by another account.";
+                } else {
+
+                    String otpCode = generateOTP();
+                    String subject = "Email Change Verification Code";
+                    String content = "Your verification code to update your email address is: " + otpCode;
+
+                    emailSender.authenticatebyEmail(email, subject, content);
+
+                    session.setAttribute("otpCode", otpCode);
+                    session.setAttribute("newEmailPending", email);
+                    session.setAttribute("tempCustomerData", submittedData);
+
+                    setSuccessPopup(request, "A verification code has been sent to your new email (" + email + "). Please enter it below to confirm the change.");
+
+                    request.setAttribute("customer", submittedData);
+                    request.getRequestDispatcher("/WEB-INF/profile/edit.jsp").forward(request, response);
+                    return;
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(MyCustomerProfileServlet.class.getName()).log(Level.SEVERE, "Error during email check or sending OTP", ex);
+                errorMessage = "Error processing email change: " + ex.getMessage();
+            }
+        }
+
         if (errorMessage != null) {
             setErrorPopup(request, errorMessage);
-            Customer tempCustomer = new Customer(customer.getCustomerId(), customer.getCustomerAccount(), customer.getPassword(),
-                    name, gender, phone, email, address, dob);
-            request.setAttribute("customer", tempCustomer);
+            request.setAttribute("customer", submittedData);
+
+            session.removeAttribute("otpCode");
+            session.removeAttribute("newEmailPending");
+            session.removeAttribute("tempCustomerData");
             request.getRequestDispatcher("/WEB-INF/profile/edit.jsp").forward(request, response);
             return;
         }
@@ -202,6 +291,10 @@ public class MyCustomerProfileServlet extends HttpServlet {
         if (result > 0) {
             Customer updated = customerDAO.getElementByID(customer.getCustomerId());
             session.setAttribute("customerSession", updated);
+            session.removeAttribute("otpCode");
+            session.removeAttribute("newEmailPending");
+            session.removeAttribute("tempCustomerData");
+
             setSuccessPopup(request, "Profile updated successfully.");
             response.sendRedirect(request.getContextPath() + "/customer-profile?action=view");
             return;
@@ -210,7 +303,6 @@ public class MyCustomerProfileServlet extends HttpServlet {
             request.setAttribute("customer", customer);
             request.getRequestDispatcher("/WEB-INF/profile/edit.jsp").forward(request, response);
         }
-
     }
 
     private void changePassword(HttpServletRequest request, HttpServletResponse response,
@@ -239,7 +331,7 @@ public class MyCustomerProfileServlet extends HttpServlet {
                 errorMessage = "New password and confirmation do not match.";
             }
         }
-    if (errorMessage == null) {
+        if (errorMessage == null) {
             if (newPassword.length() < 6) {
                 errorMessage = "Password must be at least 6 characters long.";
             }

@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Table;
 
 /**
  *
@@ -180,12 +181,19 @@ public class TableServlet extends HttpServlet {
                 } catch (NumberFormatException e) {
                     id = -1;
                 }
-
-                // validate
+//                String status = request.getParameter("status");
+//
+//                // validate  Only tables with status 'Available' can be deleted.
+//                if (!status.equalsIgnoreCase("")
+//                        || status == null) {
+                Table current = tableDAO.getElementByID(id);
                 if (!isValidInteger(id, false, false, true)) {
                     popupStatus = false;
                     popupMessage = "The delete action is NOT successful. Invalid ID.";
-                } else {
+                } else if(!"Available".equalsIgnoreCase(current.getStatus())){
+                    popupStatus = false;
+                    popupMessage = "The delete action is NOT successful. Only tables with status 'Available' can be deleted. Current status: " + current.getStatus();
+                } else{
                     int result = tableDAO.delete(id);
                     if (result >= 1) {
                         popupMessage = "Table with ID=" + id + " deleted successfully.";
@@ -194,6 +202,7 @@ public class TableServlet extends HttpServlet {
                         popupMessage = "The delete action failed. SQL Error: " + getSqlErrorCode(result);
                     }
                 }
+//                }
             } else if (action.equalsIgnoreCase("changeStatus")) {
                 // New action: change table status (Available, Reserved, Occupied)
                 int id;
@@ -227,6 +236,8 @@ public class TableServlet extends HttpServlet {
                 }
             }
         }
+        
+        
 
         setPopup(request, popupStatus, popupMessage);
         response.sendRedirect(request.getContextPath() + "/table");

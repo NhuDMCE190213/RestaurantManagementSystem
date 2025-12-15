@@ -40,6 +40,7 @@
                             <th>Type</th>
                             <th>Discount Value</th>
                             <th>Quantity</th>
+                            <th>Use</th>
                             <th>Start Date</th>
                             <th>End Date</th>
                             
@@ -72,6 +73,7 @@
                                         </c:choose>
                                     </td>
                                     <td><c:out value="${voucher.quantity}"/></td>
+                                    <td><c:out value="${voucher.used}"/></td>
                                     <td><c:out value="${voucher.startDate}"/></td>
                                     <td><c:out value="${voucher.endDate}"/></td>
                                     

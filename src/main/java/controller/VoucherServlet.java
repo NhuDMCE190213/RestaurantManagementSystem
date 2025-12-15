@@ -156,6 +156,10 @@ public class VoucherServlet extends HttpServlet {
                         || startDate.after(endDate)) {
                     popupStatus = false;
                     popupMessage = "The add action is NOT successful. Please check your input (invalid or start date after end date).";
+                    request.setAttribute("popupStatus", popupStatus);
+                    request.setAttribute("popupMessage", popupMessage);
+                    request.getRequestDispatcher("/WEB-INF/voucher/add.jsp").forward(request, response);
+                    return;
                 } else {
                     status = "Active";
                     int result = dao.add(code, name, discountType, discountValue, quantity, startDate, endDate, status);
@@ -201,8 +205,12 @@ public class VoucherServlet extends HttpServlet {
                         || startDate.after(endDate)) {
                     popupStatus = false;
                     popupMessage = "The edit action is NOT successful. Please check your input (invalid or start date after end date).";
+                    request.setAttribute("popupStatus", popupStatus);
+                    request.setAttribute("popupMessage", popupMessage);
+                    request.getRequestDispatcher("/WEB-INF/voucher/edit.jsp").forward(request, response);
+                    return;
                 } else {
-                    
+
                     int result = dao.edit(id, code, name, discountType, discountValue, quantity, startDate, endDate, status);
                     if (result >= 1) {
                         popupMessage = "Voucher ID=" + id + " edited successfully.";
@@ -234,10 +242,10 @@ public class VoucherServlet extends HttpServlet {
                 }
             }
         }
-        setPopup(request, popupStatus, popupMessage);
-        response.sendRedirect(request.getContextPath() + "/voucher");
+            setPopup(request, popupStatus, popupMessage);
+            response.sendRedirect(request.getContextPath() + "/voucher");
 
-    }
+        }
 
     private boolean isValidString(String str, int limitLength) {
         if (limitLength < 0) {
