@@ -93,13 +93,15 @@ public class QuickCustomerServlet extends HttpServlet {
             req.setAttribute("newCustomerId", newCustomerId);
 
             // redirect lại trang create reservation
-            resp.sendRedirect(req.getContextPath() + "/reservation?view=add&tableId=" + tableId);
-        } else {
             resp.sendRedirect(
                     req.getContextPath()
-                    + "/reservation?view=add&tableId=" + tableId
-                    + "&errorCreateCustomer=1"
+                    + "/reservation?view=add"
+                    + "&tableId=" + tableId
+                    + "&newCustomerId=" + newCustomerId
             );
+        } else {
+            req.setAttribute("error", "Failed to create new customer!");
+            req.getRequestDispatcher("/WEB-INF/reservation/create.jsp").forward(req, resp);
         }
     }
 
