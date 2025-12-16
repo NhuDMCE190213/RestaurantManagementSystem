@@ -66,7 +66,7 @@ public class MenuItemDAO extends DBContext {
             String query = "SELECT menu_item_id, category_id, item_name, image_url, price, description, status\n"
                     + "FROM  menu_item\n"
                     + "WHERE  (LOWER(status) <> LOWER('Deleted'))\n"
-                    + "ORDER BY menu_item_id DESC\n"
+                    + "ORDER BY menu_item_id ASC\n"
                     + "OFFSET ? ROWS \n"
                     + "FETCH NEXT ? ROWS ONLY;";
             ResultSet rs = this.executeSelectionQuery(query, new Object[]{(page - 1) * maxElement, maxElement});
