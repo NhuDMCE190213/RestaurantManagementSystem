@@ -58,6 +58,12 @@
                                 <p class="mb-0 fw-semibold"><c:out value='${currentReservation.status}'/></p>
                             </div>
                         </div>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="border rounded-3 p-3 bg-light">
+                                <small class="text-uppercase text-muted fw-semibold">Total Price</small>
+                                <p class="mb-0 fw-semibold"><c:out value='${totalPrice}'/></p>
+                            </div>
+                        </div>
                         <div class="actions d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-md-end">
                             <div class="filters d-flex flex-wrap gap-2 justify-content-end">
                                 <a class="btn btn-primary add-btn" href="<c:url value="myOrder">
@@ -105,7 +111,7 @@
                             </tr>
                             <tr>
                                 <td colspan="2" class="p-0">
-                                    <div id="category_${category.categoryId}" class="collapse border border-2 rounded-3 p-2 mb-3">
+                                    <div id="category_${category.categoryId}" class="collapse show border border-2 rounded-3 p-2 mb-3">
                                         <div class="overflow-auto" style="max-height: 300px;">
                                             <table class="table table-sm mb-0">
                                                 <thead>
@@ -120,7 +126,7 @@
                                                 </thead>
 
                                                 <tbody>
-                                                    <c:forEach var="item" items="${orderItemsList}">
+                                                    <c:forEach var="item" items="${orderItemForMapList}">
                                                         <c:set var="key" value="${item.menuItem.menuItemId}_${item.unitPrice}"/>
                                                         <c:set var="orderItem" value="${orderItemsMap[key]}"/>
                                                         <c:if test="${category.categoryId eq item.menuItem.category.categoryId and not empty orderItem}">

@@ -129,12 +129,13 @@ public class MyOrderServlet extends HttpServlet {
 
             request.setAttribute("orderItemsMap", orderItemsMap);
         }
+        request.setAttribute("orderItemForMapList", orderItemDAO.getAllByReservationIdForMap(reservationId));
         request.setAttribute("orderItemsList", orderItemDAO.getAllByReservationId(reservationId));
         request.setAttribute("categoryList", categoryDAO.getAll());
         request.setAttribute("itemsList", menuItemDAO.getAll());
         request.setAttribute("vouchersList", voucherDAO.getAllAvailable());
         request.setAttribute("currentReservation", currentReservation);
-        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalPrice", orderItemDAO.getFormatVND(orderItemDAO.getTotalPrice(reservationId)));
 
         request.getRequestDispatcher("/WEB-INF/myOrder/" + namepage + ".jsp").forward(request, response);
         removePopup(request);

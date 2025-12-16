@@ -58,6 +58,12 @@
                                 <p class="mb-0 fw-semibold"><c:out value='${currentReservation.status}'/></p>
                             </div>
                         </div>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="border rounded-3 p-3 bg-light">
+                                <small class="text-uppercase text-muted fw-semibold">Total Price</small>
+                                <p class="mb-0 fw-semibold"><c:out value='${totalBillVND}'/></p>
+                            </div>
+                        </div>
                     </c:when>
                     <c:otherwise>
                         <div class="card-body px-4 pb-4">
@@ -97,7 +103,7 @@
                                     </tr>
                                     <tr>
                                         <td colspan="2" class="p-0">
-                                            <div id="category_${category.categoryId}" class="collapse border border-2 rounded-3 p-2 mb-3">
+                                            <div id="category_${category.categoryId}" class="collapse show border border-2 rounded-3 p-2 mb-3">
                                                 <div class="overflow-auto" style="max-height: 300px;">
                                                     <table class="table table-sm mb-0">
                                                         <tr>

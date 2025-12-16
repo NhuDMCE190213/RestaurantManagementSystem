@@ -101,7 +101,7 @@
                                                        title="View Order" aria-label="View Order">
                                                         <i class="bi bi-eye-fill"></i>
                                                     </a>
-                                                    <c:if test="${r.status eq 'Pending' or r.status eq 'Approved' or r.status eq 'Reserving'}">
+                                                    <c:if test="${r.status eq 'Waiting_deposit' or r.status eq 'Reserving'}">
                                                         <a class="btn btn-outline-success btn-icon btn-view"
                                                            href="<c:url value='/myOrder'>
                                                                <c:param name='view' value='add'/>

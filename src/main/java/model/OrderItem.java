@@ -73,11 +73,11 @@ public class OrderItem {
     public void setStatus(String status) {
         this.status = status;
     }
-
-    public String getPriceVND() {
+    
+    private String toVND(long price) {
         String str = "";
 
-        String temp = getUnitPrice() + "";
+        String temp = price + "";
 
         while (temp.length() > 0) {
             if (temp.length() > 3) {
@@ -95,5 +95,13 @@ public class OrderItem {
         str += " VND";
 
         return str;
+    }
+
+    public String getPriceVND() {
+        return toVND(unitPrice);
+    }
+    
+    public String getTotalPriceVND() {
+        return toVND(quantity * unitPrice);
     }
 }
