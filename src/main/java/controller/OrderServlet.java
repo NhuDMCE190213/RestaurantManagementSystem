@@ -21,10 +21,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import model.Customer;
 import model.MenuItem;
 import model.OrderItem;
 import model.Reservation;
+import model.Voucher;
 
 /**
  *
@@ -139,12 +139,10 @@ public class OrderServlet extends HttpServlet {
         request.setAttribute("vouchersList", voucherDAO.getAllAvailable());
         request.setAttribute("currentReservation", currentReservation);
 
-        long subTotal;
-        long deposit;
         if (currentReservation.getStatus().equalsIgnoreCase("Waiting_deposit")) {
-            subTotal = orderItemDAO.getTotalDeposit(reservationId);
-            deposit = subTotal * 20/100;
-            
+            long subTotal = orderItemDAO.getTotalDeposit(reservationId);
+            long deposit = subTotal * 20 / 100;
+
             request.setAttribute("orderItemBill", orderItemDAO.getAllByReservationId(reservationId, "Pending"));
             request.setAttribute("subTotal", orderItemDAO.getFormatVND(subTotal));
             request.setAttribute("deposit", orderItemDAO.getFormatVND(deposit));
@@ -152,12 +150,25 @@ public class OrderServlet extends HttpServlet {
             request.setAttribute("totalBillReal", deposit);
         } else {
 
-            subTotal = orderItemDAO.getTotalPrice(reservationId);
-            deposit = reservationDAO.getDeposit(reservationId);
-            long vat = subTotal * 10 / 100;
-            long totalPrice = subTotal - deposit + vat;
+            long subTotal = orderItemDAO.getTotalPrice(reservationId);
+            long deposit = reservationDAO.getDeposit(reservationId);
+            Voucher voucher = currentReservation.getVoucher();
             long voucherDiscount = 0;
-            if (totalPrice < 0) totalPrice = 0;
+            if (voucher != null) {
+                if (voucher.getDiscountType().equalsIgnoreCase("percent")) {
+                    voucherDiscount = subTotal * voucher.getDiscountValue() / 100;
+                } else {
+                    voucherDiscount = voucher.getDiscountValue();
+                }
+            }
+            long subTotalAfterDiscount = subTotal - voucherDiscount;
+            if (subTotalAfterDiscount < 0) subTotalAfterDiscount = 0;
+            long vat = subTotalAfterDiscount * 10 / 100;
+            long totalPrice = subTotal - voucherDiscount - deposit + vat;
+            if (totalPrice < 0) {
+                totalPrice = 0;
+            }
+
             request.setAttribute("orderItemBill", orderItemDAO.getAllByReservationId(reservationId, "Completed"));
             request.setAttribute("subTotal", orderItemDAO.getFormatVND(subTotal));
             request.setAttribute("vat", orderItemDAO.getFormatVND(vat));
@@ -275,8 +286,7 @@ public class OrderServlet extends HttpServlet {
                     popupMessage += " The reservation is not exist. Check information again.";
                 } else if (menuItem == null) {
                     popupMessage += " The item is not exist. Check information again.";
-                } else if (!(reservation.getStatus().equalsIgnoreCase("Pending") //trang thai nay khong ton tai
-                        || reservation.getStatus().equalsIgnoreCase("Waiting_deposit")
+                } else if (!(reservation.getStatus().equalsIgnoreCase("Waiting_deposit")
                         || reservation.getStatus().equalsIgnoreCase("Serving"))) {
                     popupMessage += " The reservation is not waiting deposit or serving. Check information again.";
                 } else {
@@ -339,8 +349,7 @@ public class OrderServlet extends HttpServlet {
                     popupMessage += " The reservation is not exist. Check information again.";
                 } else if (menuItem == null) {
                     popupMessage += " The item is not exist. Check information again.";
-                } else if (!(reservation.getStatus().equalsIgnoreCase("Pending") //trang thai nay khong ton tai
-                        || reservation.getStatus().equalsIgnoreCase("Waiting_deposit")
+                } else if (!(reservation.getStatus().equalsIgnoreCase("Waiting_deposit")
                         || reservation.getStatus().equalsIgnoreCase("Serving"))) {
                     popupMessage += " The reservation is not waiting deposit or serving. Check information again.";
                 } else {

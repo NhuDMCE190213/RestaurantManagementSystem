@@ -51,7 +51,14 @@
                                 <p class="mb-0 fw-semibold"><c:out value='${currentReservation.timeEnd}'/></p>
                             </div>
                         </div>
-                        <%--cho voucher--%>
+                        <c:if test="${not empty currentReservation.voucher}">
+                            <div class="col-12 col-sm-6 col-xl-3">
+                                <div class="border rounded-3 p-3 bg-light">
+                                    <small class="text-uppercase text-muted fw-semibold">Voucher</small>
+                                    <p class="mb-0 fw-semibold"><c:out value='${currentReservation.voucher.voucherName}'/></p>
+                                </div>
+                            </div>
+                        </c:if>
                         <div class="col-12 col-sm-6 col-xl-3">
                             <div class="border rounded-3 p-3 bg-light">
                                 <small class="text-uppercase text-muted fw-semibold">Status</small>
@@ -61,19 +68,26 @@
                         <div class="col-12 col-sm-6 col-xl-3">
                             <div class="border rounded-3 p-3 bg-light">
                                 <small class="text-uppercase text-muted fw-semibold">Total Price</small>
-                                <p class="mb-0 fw-semibold"><c:out value='${totalPrice}'/></p>
+                                <p class="mb-0 fw-semibold"><c:out value='${totalBillVND}'/></p>
                             </div>
                         </div>
                         <div class="actions d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-md-end">
                             <div class="filters d-flex flex-wrap gap-2 justify-content-end">
-                                <a class="btn btn-primary add-btn" href="<c:url value="myOrder">
-                                       <c:param name="view" value="add"/>
-                                       <c:param name="reservationId" value="${currentReservation.reservationId}"/>
-                                   </c:url>"><i class="bi bi-plus-circle"></i>Add</a>
-                                <a class="btn btn-warning add-btn" href="<c:url value="myOrder">
-                                       <c:param name="view" value="edit"/>
-                                       <c:param name="reservationId" value="${currentReservation.reservationId}"/>
-                                   </c:url>"><i class="bi bi-pencil-fill"></i>Edit</a>
+                                <button class="btn btn-outline-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#billModal">
+                                    View Bill
+                                </button>
+                                <c:if test="${currentReservation.status eq 'Waiting_deposit' or currentReservation.status eq 'Serving'}">
+                                    <a class="btn btn-primary add-btn" href="<c:url value="myOrder">
+                                           <c:param name="view" value="add"/>
+                                           <c:param name="reservationId" value="${currentReservation.reservationId}"/>
+                                       </c:url>"><i class="bi bi-plus-circle"></i>Add</a>
+                                    <a class="btn btn-warning add-btn" href="<c:url value="myOrder">
+                                           <c:param name="view" value="edit"/>
+                                           <c:param name="reservationId" value="${currentReservation.reservationId}"/>
+                                       </c:url>"><i class="bi bi-pencil-fill"></i>Edit</a>
+                                </c:if>
                             </div>
                         </div>
                     </c:when>
@@ -185,5 +199,98 @@
         </div>
     </div>
 </section>
+
+<div class="modal fade" id="billModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    ${(currentReservation.status ne 'Waiting_deposit')?'Bill Payment':'Deposit Payment'}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p><b>Status:</b> ${currentReservation.status}</p>
+
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="item" items="${orderItemBill}">
+                            <tr>
+                                <td>${item.menuItem.itemName}</td>
+                                <td>${item.quantity}</td>
+                                <td>${item.priceVND}</td>
+                                <td>${item.totalPriceVND}</td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+
+                <h5 class="text-end">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>Subtotal</td>
+                                <td class="text-end">${subTotal}</td>
+                            </tr>
+                            <c:if test="${currentReservation.status ne 'Waiting_deposit'}">
+                                <tr>
+                                    <td>VAT (10%)</td>
+                                    <td class="text-end text-danger">${vat}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Voucher</td>
+                                    <td class="text-end text-success">
+                                        ${voucherDiscount}
+                                    </td>
+                                </tr>
+                            </c:if>
+
+                            <tr>
+                                <td>Deposit(20%)</td>
+                                <td class="text-end text-success">
+                                    ${deposit}
+                                </td>
+                            </tr>
+
+                            <tr class="table-active fw-bold">
+                                <td>Total to pay</td>
+                                <td class="text-end text-success">
+                                    <c:out value="${totalBillVND}"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </h5>
+
+            </div>
+
+            <div class="modal-footer">
+                <c:if test="${currentReservation.status eq 'Waiting_deposit' or currentReservation.status eq 'Serving'}">
+                    <form method="post" action="<c:url value="payment">
+                              <c:param name="reservationId" value="${param.reservationId}"/>
+                              <c:param name="totalBill" value="${totalBillReal}"/>
+                          </c:url>">
+                        <button class="btn btn-success" type="submit" name="action">Payment</button>
+                    </form>
+                </c:if>
+
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <%@include file="/WEB-INF/include/footerCustomer.jsp" %>
 

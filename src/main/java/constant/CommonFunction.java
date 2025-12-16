@@ -118,8 +118,13 @@ public class CommonFunction {
 
     public static void removePopup(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-        session.removeAttribute("popupStatus");
-        session.removeAttribute("popupMessage");
+        if (session != null) {
+            request.setAttribute("popupStatus", session.getAttribute("popupStatus"));
+            request.setAttribute("popupMessage", session.getAttribute("popupMessage"));
+
+            session.removeAttribute("popupStatus");
+            session.removeAttribute("popupMessage");
+        }
     }
 
     public static String getSqlErrorCode(int temp_code) {
