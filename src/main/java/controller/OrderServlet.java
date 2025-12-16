@@ -92,7 +92,7 @@ public class OrderServlet extends HttpServlet {
         }
 
         Reservation currentReservation = reservationDAO.getElementByID(reservationId);
-        
+
         if (view == null || view.isBlank() || view.equalsIgnoreCase("list")) {
             namepage = "list";
         } else if (view.equalsIgnoreCase("add")) {
@@ -131,21 +131,41 @@ public class OrderServlet extends HttpServlet {
             request.setAttribute("orderItemsMap", orderItemsMap);
             request.setAttribute("orderItemsIdMap", orderItemsIdMap);
         }
-        
-        
-                
+
         request.setAttribute("orderItemForMapList", orderItemDAO.getAllByReservationIdForMap(reservationId));
         request.setAttribute("orderItemsList", orderItemDAO.getAllByReservationId(reservationId));
         request.setAttribute("categoryList", categoryDAO.getAll());
         request.setAttribute("itemsList", menuItemDAO.getAll());
         request.setAttribute("vouchersList", voucherDAO.getAllAvailable());
         request.setAttribute("currentReservation", currentReservation);
-        
-        long subTotal = orderItemDAO.getTotalPrice(reservationId);
-        long vat = subTotal * 10 / 100;
-        
-        request.setAttribute("subTotal", orderItemDAO.getFormatVND(subTotal));
-        request.setAttribute("vat", orderItemDAO.getFormatVND(vat));
+
+        long subTotal;
+        long deposit;
+        if (currentReservation.getStatus().equalsIgnoreCase("Waiting_deposit")) {
+            subTotal = orderItemDAO.getTotalDeposit(reservationId);
+            deposit = subTotal * 20/100;
+            
+            request.setAttribute("orderItemBill", orderItemDAO.getAllByReservationId(reservationId, "Pending"));
+            request.setAttribute("subTotal", orderItemDAO.getFormatVND(subTotal));
+            request.setAttribute("deposit", orderItemDAO.getFormatVND(deposit));
+            request.setAttribute("totalBillVND", orderItemDAO.getFormatVND(deposit));
+            request.setAttribute("totalBillReal", deposit);
+        } else {
+
+            subTotal = orderItemDAO.getTotalPrice(reservationId);
+            deposit = reservationDAO.getDeposit(reservationId);
+            long vat = subTotal * 10 / 100;
+            long totalPrice = subTotal - deposit + vat;
+            long voucherDiscount = 0;
+            if (totalPrice < 0) totalPrice = 0;
+            request.setAttribute("orderItemBill", orderItemDAO.getAllByReservationId(reservationId, "Completed"));
+            request.setAttribute("subTotal", orderItemDAO.getFormatVND(subTotal));
+            request.setAttribute("vat", orderItemDAO.getFormatVND(vat));
+            request.setAttribute("voucherDiscount", orderItemDAO.getFormatVND(voucherDiscount));
+            request.setAttribute("deposit", orderItemDAO.getFormatVND(deposit));
+            request.setAttribute("totalBillVND", orderItemDAO.getFormatVND(totalPrice));
+            request.setAttribute("totalBillReal", totalPrice);
+        }
 
         request.getRequestDispatcher("/WEB-INF/order/" + namepage + ".jsp").forward(request, response);
         removePopup(request);
@@ -255,10 +275,10 @@ public class OrderServlet extends HttpServlet {
                     popupMessage += " The reservation is not exist. Check information again.";
                 } else if (menuItem == null) {
                     popupMessage += " The item is not exist. Check information again.";
-                } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
-                        || reservation.getStatus().equalsIgnoreCase("Approved")
+                } else if (!(reservation.getStatus().equalsIgnoreCase("Pending") //trang thai nay khong ton tai
+                        || reservation.getStatus().equalsIgnoreCase("Waiting_deposit")
                         || reservation.getStatus().equalsIgnoreCase("Serving"))) {
-                    popupMessage += " The reservation is not pending or serving. Check information again.";
+                    popupMessage += " The reservation is not waiting deposit or serving. Check information again.";
                 } else {
                     popupStatus = true;
                     popupMessage = "The add action is successfull.";
@@ -319,10 +339,10 @@ public class OrderServlet extends HttpServlet {
                     popupMessage += " The reservation is not exist. Check information again.";
                 } else if (menuItem == null) {
                     popupMessage += " The item is not exist. Check information again.";
-                } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
-                        || reservation.getStatus().equalsIgnoreCase("Approved")
+                } else if (!(reservation.getStatus().equalsIgnoreCase("Pending") //trang thai nay khong ton tai
+                        || reservation.getStatus().equalsIgnoreCase("Waiting_deposit")
                         || reservation.getStatus().equalsIgnoreCase("Serving"))) {
-                    popupMessage += " The reservation is not pending or serving. Check information again.";
+                    popupMessage += " The reservation is not waiting deposit or serving. Check information again.";
                 } else {
                     popupStatus = true;
                     popupMessage = "The edit action is successfull.";
@@ -371,10 +391,9 @@ public class OrderServlet extends HttpServlet {
             popupMessage += " The order item is not exist. Check information again.";
         } else if (!orderItem.getStatus().equalsIgnoreCase("Cooking")) {
             popupMessage += " The order item is not cooking. Check information again.";
-        } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
-                || reservation.getStatus().equalsIgnoreCase("Approved")
+        } else if (!(reservation.getStatus().equalsIgnoreCase("Approved")
                 || reservation.getStatus().equalsIgnoreCase("Serving"))) {
-            popupMessage += " The reservation is not pending or serving. Check information again.";
+            popupMessage += " The reservation is not approved or serving. Check information again.";
         } else {
             popupStatus = true;
             popupMessage = "The complete action is successfull.";
@@ -412,10 +431,9 @@ public class OrderServlet extends HttpServlet {
             popupMessage += " The order item is not exist. Check information again.";
         } else if (!orderItem.getStatus().equalsIgnoreCase("Pending")) {
             popupMessage += " The order item is not pending. Check information again.";
-        } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
-                || reservation.getStatus().equalsIgnoreCase("Approved")
+        } else if (!(reservation.getStatus().equalsIgnoreCase("Approved")
                 || reservation.getStatus().equalsIgnoreCase("Serving"))) {
-            popupMessage += " The reservation is not pending or serving. Check information again.";
+            popupMessage += " The reservation is not approved or serving. Check information again.";
         } else {
             popupStatus = true;
             popupMessage = "The cook action is successfull.";

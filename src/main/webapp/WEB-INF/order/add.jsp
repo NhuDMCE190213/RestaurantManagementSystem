@@ -60,7 +60,7 @@
                         <div class="col-12 col-sm-6 col-xl-3">
                             <div class="border rounded-3 p-3 bg-light">
                                 <small class="text-uppercase text-muted fw-semibold">Total Price</small>
-                                <p class="mb-0 fw-semibold"><c:out value='${totalPrice}'/></p>
+                                <p class="mb-0 fw-semibold"><c:out value='${totalBillVND}'/></p>
                             </div>
                         </div>
                     </c:when>

@@ -60,8 +60,8 @@
                         </div>
                         <div class="col-12 col-sm-6 col-xl-3">
                             <div class="border rounded-3 p-3 bg-light">
-                                <small class="text-uppercase text-muted fw-semibold">Sub Total</small>
-                                <p class="mb-0 fw-semibold"><c:out value='${subTotal}'/></p>
+                                <small class="text-uppercase text-muted fw-semibold">Total Price</small>
+                                <p class="mb-0 fw-semibold"><c:out value='${totalBillVND}'/></p>
                             </div>
                         </div>
                         <div class="actions d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-md-end">
@@ -71,14 +71,16 @@
                                         data-bs-target="#billModal">
                                     View Bill
                                 </button>
-                                <a class="btn btn-primary add-btn" href="<c:url value="order">
-                                       <c:param name="view" value="add"/>
-                                       <c:param name="reservationId" value="${currentReservation.reservationId}"/>
-                                   </c:url>"><i class="bi bi-plus-circle"></i>Add</a>
-                                <a class="btn btn-warning add-btn" href="<c:url value="order">
-                                       <c:param name="view" value="edit"/>
-                                       <c:param name="reservationId" value="${currentReservation.reservationId}"/>
-                                   </c:url>"><i class="bi bi-pencil-fill"></i>Edit</a>
+                                <c:if test="${currentReservation.status eq 'Waiting_deposit' or currentReservation.status eq 'Serving'}">
+                                    <a class="btn btn-primary add-btn" href="<c:url value="order">
+                                           <c:param name="view" value="add"/>
+                                           <c:param name="reservationId" value="${currentReservation.reservationId}"/>
+                                       </c:url>"><i class="bi bi-plus-circle"></i>Add</a>
+                                    <a class="btn btn-warning add-btn" href="<c:url value="order">
+                                           <c:param name="view" value="edit"/>
+                                           <c:param name="reservationId" value="${currentReservation.reservationId}"/>
+                                       </c:url>"><i class="bi bi-pencil-fill"></i>Edit</a>
+                                </c:if>
                             </div>
                         </div>
                     </c:when>
@@ -159,7 +161,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <c:choose>
-                                                                        <c:when test="${(not empty orderItem['Cooking']) and orderItem['Cooking'] > 0}">
+                                                                        <c:when test="${(not empty orderItem['Cooking']) and orderItem['Cooking'] > 0 and (currentReservation.status eq 'Approved' or currentReservation.status eq 'Serving')}">
                                                                             <button class="form-control btn btn-outline-success"
                                                                                     title="Complete" aria-label="Complete"
                                                                                     onclick="showPopupComplete(<c:out value="${orderItemId['Cooking']}"/>, '<c:out value="${item.menuItem.itemName}"/>')"
@@ -176,7 +178,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <c:choose>
-                                                                        <c:when test="${(not empty orderItem['Pending']) and orderItem['Pending'] > 0}">
+                                                                        <c:when test="${(not empty orderItem['Pending']) and orderItem['Pending'] > 0  and (currentReservation.status eq 'Approved' or currentReservation.status eq 'Serving')}">
                                                                             <button class="form-control btn btn-outline-success"
                                                                                     title="Cook" aria-label="Cook"
                                                                                     onclick="showPopupCook(<c:out value="${orderItemId['Pending']}"/>, '<c:out value="${item.menuItem.itemName}"/>')"
@@ -247,7 +249,7 @@
 
             <div class="modal-header">
                 <h5 class="modal-title">
-                    Bill
+                    ${(currentReservation.status ne 'Waiting_deposit')?'Bill Payment':'Deposit Payment'}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -265,7 +267,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="item" items="${orderItemsList}">
+                        <c:forEach var="item" items="${orderItemBill}">
                             <tr>
                                 <td>${item.menuItem.itemName}</td>
                                 <td>${item.quantity}</td>
@@ -283,30 +285,31 @@
                                 <td>Subtotal</td>
                                 <td class="text-end">${subTotal}</td>
                             </tr>
+                            <c:if test="${currentReservation.status ne 'Waiting_deposit'}">
+                                <tr>
+                                    <td>VAT (10%)</td>
+                                    <td class="text-end text-danger">${vat}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Voucher</td>
+                                    <td class="text-end text-success">
+                                        ${voucherDiscount}
+                                    </td>
+                                </tr>
+                            </c:if>
 
                             <tr>
-                                <td>VAT (10%)</td>
-                                <td class="text-end">${vat}</td>
-                            </tr>
-
-                            <tr>
-                                <td>Voucher</td>
-                                <td class="text-end text-danger">
-                                    -${order.voucherAmount}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>Deposit</td>
-                                <td class="text-end text-danger">
-                                    -${order.depositAmount}
+                                <td>Deposit(20%)</td>
+                                <td class="text-end text-success">
+                                    ${deposit}
                                 </td>
                             </tr>
 
                             <tr class="table-active fw-bold">
                                 <td>Total to pay</td>
                                 <td class="text-end text-success">
-                                    
+                                    <c:out value="${totalBillVND}"/>
                                 </td>
                             </tr>
                         </tbody>
@@ -316,6 +319,15 @@
             </div>
 
             <div class="modal-footer">
+                <c:if test="${currentReservation.status eq 'Waiting_deposit' or currentReservation.status eq 'Serving'}">
+                    <form method="post" action="<c:url value="payment">
+                              <c:param name="reservationId" value="${param.reservationId}"/>
+                              <c:param name="totalBill" value="${totalBillReal}"/>
+                          </c:url>">
+                        <button class="btn btn-success" type="submit" name="action">Payment</button>
+                    </form>
+                </c:if>
+
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
 

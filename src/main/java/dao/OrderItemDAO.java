@@ -87,6 +87,37 @@ public class OrderItemDAO extends DBContext {
 
         return list;
     }
+    
+    public List<OrderItem> getAllByReservationId(int reservationId, String status) {
+
+        List<OrderItem> list = new ArrayList<>();
+
+        try {
+            String query = "SELECT order_item_id, reservation_id, menu_item_id, unit_price, quantity, status\n"
+                    + "FROM     order_item\n"
+                    + "WHERE  (reservation_id = ? and quantity > 0 and LOWER(status) = LOWER(?))\n"
+                    + "ORDER BY menu_item_id\n";
+
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{reservationId, status});
+
+            while (rs.next()) {
+                int orderItemId = rs.getInt(1);
+                int menuItemId = rs.getInt(3);
+                int unitPrice = rs.getInt(4);
+                int quantity = rs.getInt(5);
+
+                OrderItem orderItem = new OrderItem(orderItemId, reservationDAO.getElementByID(reservationId),
+                        menuItemDAO.getElementByID(menuItemId), unitPrice, quantity, status);
+
+                list.add(orderItem);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            System.out.println("Can't not load list");
+        }
+
+        return list;
+    }
 
     public List<OrderItem> getAllByReservationIdForMap(int reservationId) {
 
@@ -622,6 +653,22 @@ public class OrderItemDAO extends DBContext {
             String query = "SELECT SUM(quantity * unit_price) AS totalPrice\n"
                     + "FROM     order_item\n"
                     + "WHERE  (reservation_id = ?) AND (LOWER(status) = LOWER('Completed'))";
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{reservationId});
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error");
+        }
+
+        return 0;
+    }
+    
+    public long getTotalDeposit(int reservationId) {
+        try {
+            String query = "SELECT SUM(quantity * unit_price) AS totalPrice\n"
+                    + "FROM     order_item\n"
+                    + "WHERE  (reservation_id = ?) AND (LOWER(status) = LOWER('Pending'))";
             ResultSet rs = this.executeSelectionQuery(query, new Object[]{reservationId});
             if (rs.next()) {
                 return rs.getInt(1);

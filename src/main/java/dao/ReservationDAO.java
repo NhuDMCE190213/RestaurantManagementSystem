@@ -378,4 +378,51 @@ public class ReservationDAO extends DBContext {
             return checkErrorSQL(ex);
         }
     }
+    
+    public int deposit(int reservationId, String status, int deposit) {
+        try {
+            String sql = "UPDATE reservation "
+                    + "SET status = ?, deposit = ?\n"
+                    + "WHERE reservation_id = ?";
+            return this.executeQuery(sql, new Object[]{status, deposit, reservationId});
+        } catch (SQLException ex) {
+            int err = checkErrorSQL(ex);
+            if (err != 0) {
+                return err;
+            }
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
+    }
+    
+    public int complete(int reservationId, String status) {
+        try {
+            String sql = "UPDATE reservation "
+                    + "SET status = ?\n"
+                    + "WHERE reservation_id = ?";
+            return this.executeQuery(sql, new Object[]{status, reservationId});
+        } catch (SQLException ex) {
+            int err = checkErrorSQL(ex);
+            if (err != 0) {
+                return err;
+            }
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
+    }
+    
+    public int getDeposit(int reservationId) {
+        try {
+            String sql = "SELECT deposit\n"
+                    + "FROM reservation\n"
+                    + "WHERE reservation_id = ? ";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{reservationId});
+            while (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
 }
