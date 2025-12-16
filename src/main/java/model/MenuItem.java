@@ -4,6 +4,9 @@
  */
 package model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Huynh Thai Duy Phuong - CE190603
@@ -17,15 +20,10 @@ public class MenuItem {
     private int price;
     private String description;
     private String status;
-    private Recipe recipe;
 
-    public Recipe getRecipe() {
-        return recipe;
-    }
+    private List<RecipeItem> items;
+    
 
-    public void setRecipe(Recipe recipe) {
-        this.recipe = recipe;
-    }
     public MenuItem(int menuItemId, Category category, String itemName, String imageUrl, int price, String description, String status) {
         this.menuItemId = menuItemId;
         this.category = category;
@@ -35,7 +33,8 @@ public class MenuItem {
         this.description = description;
         this.status = status;
     }
-
+    
+    
     public int getMenuItemId() {
         return menuItemId;
     }
@@ -92,7 +91,20 @@ public class MenuItem {
         this.status = status;
     }
     
-    
+    public List<RecipeItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<RecipeItem> items) {
+        this.items = items;
+    }
+
+    public void addItem(RecipeItem item) {
+        if (this.items == null) {
+            this.items = new ArrayList<>();
+        }
+        this.items.add(item);
+    }
 
     public String getPriceVND() {
         String str = "";

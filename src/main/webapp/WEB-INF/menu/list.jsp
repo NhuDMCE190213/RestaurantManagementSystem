@@ -86,8 +86,8 @@
                             <div class="col-md-6">
                                 <h6 class="text-uppercase text-muted fw-semibold">Recipe: </h6>
                                 <c:choose>
-                                    <c:when test="${not empty item.recipe and not empty item.recipe.items}">
-                                        <p class="small text-muted mb-2">Total Ingredients: <strong>${fn:length(item.recipe.items)}</strong></p>
+                                    <c:when test="${not empty item.items}">
+                                        <p class="small text-muted mb-2">Total Ingredients: <strong>${fn:length(item.items)}</strong></p>
                                         <div class="table-responsive" style="max-height: 40vh; overflow-y: auto;">
                                             <table class="table table-striped table-sm align-middle">
                                                 <thead>
@@ -98,7 +98,7 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <c:forEach var="recipeItem" items="${item.recipe.items}">
+                                                    <c:forEach var="recipeItem" items="${item.items}">
                                                         <tr>
                                                             <td>
                                                                 <c:choose>
