@@ -80,7 +80,6 @@
                     <col style="width:60px;">   <!-- ID -->
                     <col style="width:160px;">  <!-- Customer -->
                     <col style="width:160px;">  <!-- Employee -->
-                    <col style="width:220px;">  <!-- Voucher -->
                     <col style="width:90px;">   <!-- Table -->
                     <col style="width:120px;">  <!-- Date -->
                     <col style="width:140px;">  <!-- Time -->
@@ -94,7 +93,6 @@
                         <th>ID</th>
                         <th>Customer</th>
                         <th>Employee</th>
-                        <th>Voucher</th>
                         <th>Table</th>
                         <th>Date</th>
                         <th>Time</th>
@@ -118,14 +116,6 @@
                                         <c:choose>
                                             <c:when test="${empty r.emp}">N/A</c:when>
                                             <c:otherwise><c:out value="${r.emp.empName}"/></c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${empty r.voucher}">None</c:when>
-                                            <c:otherwise>
-                                                <c:out value="${r.voucher.voucherCode}"/> - <c:out value="${r.voucher.voucherName}"/>
-                                            </c:otherwise>
                                         </c:choose>
                                     </td>
                                     <td><c:out value="${r.table.number}"/></td>

@@ -50,7 +50,14 @@
                                 <p class="mb-0 fw-semibold"><c:out value='${currentReservation.timeEnd}'/></p>
                             </div>
                         </div>
-                        <%--cho voucher--%>
+                        <c:if test="${not empty currentReservation.voucher}">
+                            <div class="col-12 col-sm-6 col-xl-3">
+                                <div class="border rounded-3 p-3 bg-light">
+                                    <small class="text-uppercase text-muted fw-semibold">Voucher</small>
+                                    <p class="mb-0 fw-semibold"><c:out value='${currentReservation.voucher.voucherName}'/></p>
+                                </div>
+                            </div>
+                        </c:if>
                         <div class="col-12 col-sm-6 col-xl-3">
                             <div class="border rounded-3 p-3 bg-light">
                                 <small class="text-uppercase text-muted fw-semibold">Status</small>

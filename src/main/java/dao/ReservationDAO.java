@@ -12,7 +12,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Customer;
@@ -194,7 +196,7 @@ public class ReservationDAO extends DBContext {
             String sql = "INSERT INTO reservation (customer_id, voucher_id, table_id, reservation_date, time_start, time_end, description, status) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             return this.executeQuery(sql, new Object[]{
-                customerId, voucherId, tableId, date, time_start, time_end, description, "Pending"});
+                customerId, voucherId, tableId, date, time_start, time_end, description, "Waiting_deposit"});
         } catch (SQLException ex) {
             int err = checkErrorSQL(ex);
             if (err != 0) {
@@ -361,7 +363,7 @@ public class ReservationDAO extends DBContext {
                 time_start,
                 time_end,
                 description,
-                "Pending"
+                "Waiting_deposit"
             });
         } catch (SQLException ex) {
             return checkErrorSQL(ex);
@@ -389,7 +391,7 @@ public class ReservationDAO extends DBContext {
             return checkErrorSQL(ex);
         }
     }
-    
+
     public int deposit(int reservationId, String status, int deposit) {
         try {
             String sql = "UPDATE reservation "
@@ -405,7 +407,7 @@ public class ReservationDAO extends DBContext {
         }
         return -1;
     }
-    
+
     public int complete(int reservationId, String status) {
         try {
             String sql = "UPDATE reservation "
@@ -421,7 +423,7 @@ public class ReservationDAO extends DBContext {
         }
         return -1;
     }
-    
+
     public int getDeposit(int reservationId) {
         try {
             String sql = "SELECT deposit\n"
@@ -435,5 +437,79 @@ public class ReservationDAO extends DBContext {
             Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return 0;
+    }
+
+    public int totalReservation() {
+        try {
+            String sql = "SELECT COUNT(*) AS Expr1\n"
+                    + "FROM     reservation";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
+            while (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+
+    public Map<String, Integer> getTableListOfUsed() {
+        Map<String, Integer> tableMap = new HashMap<>();
+
+        try {
+            String sql = "SELECT Top(5) t.table_number, COUNT(r.table_id) AS used\n"
+                    + "FROM     reservation AS r INNER JOIN\n"
+                    + "                  [table] AS t ON r.table_id = t.table_id\n"
+                    + "GROUP BY t.table_number\n"
+                    + "ORDER BY used DESC";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
+            while (rs.next()) {
+                tableMap.put(rs.getString(1), rs.getInt(2));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return tableMap;
+    }
+
+    public Map<String, Integer> getStatusList() {
+        Map<String, Integer> statusMap = new HashMap<>();
+
+        try {
+            String sql = "SELECT status, COUNT(*) AS appeared\n"
+                    + "FROM     reservation\n"
+                    + "GROUP BY status\n"
+                    + "ORDER BY appeared DESC";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
+            while (rs.next()) {
+                statusMap.put(rs.getString(1), rs.getInt(2));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return statusMap;
+    }
+
+    public Map<String, Integer> getMonthIncomeList() {
+        Map<String, Integer> monthIncomeMap = new HashMap<>();
+
+        try {
+            String sql = "SELECT DATENAME(MONTH, r.reservation_date) AS month_name, sum(oi.unit_price * oi.quantity) as total, MONTH(r.reservation_date) AS month_number\n"
+                    + "FROM     reservation AS r INNER JOIN\n"
+                    + "                  order_item AS oi ON r.reservation_id = oi.reservation_id\n"
+                    + "WHERE  (YEAR(r.reservation_date) = YEAR(GETDATE())) AND (LOWER(r.status) = LOWER('Completed')) AND (LOWER(oi.status) = LOWER('Completed'))\n"
+                    + "group by DATENAME(MONTH, r.reservation_date), MONTH(r.reservation_date)\n"
+                    + "order by month_number";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
+            while (rs.next()) {
+                monthIncomeMap.put(rs.getString(1), rs.getInt(2));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return monthIncomeMap;
     }
 }

@@ -376,7 +376,7 @@ public class ReservationServlet extends HttpServlet {
                     } else if ("serving".equalsIgnoreCase(action)) {
                         targetStatus = "Serving";
                     } else if ("complete".equalsIgnoreCase(action)) {
-                        targetStatus = "Complete";    // reservation hiển thị Complete
+                        targetStatus = "Completed";    // reservation hiển thị Complete
                     }
 
                     // ====== RULE NGHIỆP VỤ ======

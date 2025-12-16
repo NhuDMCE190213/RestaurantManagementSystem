@@ -70,21 +70,21 @@
 
 </body>
 
-<c:if  test="${not empty sessionScope.popupStatus}">
+<c:if  test="${not empty popupStatus}">
     <div class="modal" id="exampleModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Action ${sessionScope.popupStatus eq true?"Successful":"Fail"}</h5>
+                    <h5 class="modal-title">Action ${popupStatus eq true?"Successful":"Fail"}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <c:choose>
-                        <c:when test="${sessionScope.popupStatus eq true}">
-                            <p style="color: green"><c:out value="${sessionScope.popupMessage}"/></p>
+                        <c:when test="${popupStatus eq true}">
+                            <p style="color: green"><c:out value="${popupMessage}"/></p>
                         </c:when>
                         <c:otherwise>
-                            <p style="color: red"><c:out value="${sessionScope.popupMessage}"/></p>
+                            <p style="color: red"><c:out value="${popupMessage}"/></p>
                         </c:otherwise>
                     </c:choose>
                 </div>

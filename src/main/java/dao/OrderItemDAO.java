@@ -87,7 +87,7 @@ public class OrderItemDAO extends DBContext {
 
         return list;
     }
-    
+
     public List<OrderItem> getAllByReservationId(int reservationId, String status) {
 
         List<OrderItem> list = new ArrayList<>();
@@ -663,7 +663,7 @@ public class OrderItemDAO extends DBContext {
 
         return 0;
     }
-    
+
     public long getTotalDeposit(int reservationId) {
         try {
             String query = "SELECT SUM(quantity * unit_price) AS totalPrice\n"
@@ -679,4 +679,38 @@ public class OrderItemDAO extends DBContext {
 
         return 0;
     }
+
+    public long getTotalIncome(int reservationId) {
+        try {
+            String query = "SELECT SUM(quantity * unit_price) AS totalPrice\n"
+                    + "FROM     order_item\n"
+                    + "WHERE  (reservation_id = ?) AND (LOWER(status) = LOWER('Pending'))";
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{reservationId});
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error");
+        }
+
+        return 0;
+    }
+
+    public long getTotalIncome() {
+        try {
+            String query = "SELECT SUM(oi.quantity * oi.unit_price) AS totalPrice\n"
+                    + "FROM     order_item AS oi INNER JOIN\n"
+                    + "                  reservation AS r ON oi.reservation_id = r.reservation_id\n"
+                    + "WHERE  (LOWER(oi.status) = LOWER('Completed')) AND (LOWER(r.status) = LOWER('Completed'))";
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{});
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error");
+        }
+
+        return 0;
+    }
+
 }
