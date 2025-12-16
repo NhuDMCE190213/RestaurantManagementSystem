@@ -5,7 +5,7 @@
 --%>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:set var="title" value="Add Order - Yummy"/>
+<c:set var="title" value="Edit Order - Yummy"/>
 
 <%@include file="/WEB-INF/include/headerCustomer.jsp" %>
 
@@ -13,8 +13,9 @@
     <div class="content-card shadow-sm ">
         <div class="border-0 px-4 py-3">
             <div class="card-header">
-                <h1 class="section-title mb-1 text-start">Add Order</h1>
-            </div> 
+                <h1 class="section-title mb-1 text-start">Edit Order</h1>
+            </div>
+
             <c:choose>
                 <c:when test="${not empty currentReservation}">
                     <div class=" card-body row g-3 g-md-4 mb-4">
@@ -103,16 +104,15 @@
                                                             <th width="20%">Image</th>
                                                             <th width="20%">Name</th>
                                                             <th width="15%">Price</th>
-                                                            <th width="10%">Completed</th>
-                                                            <th width="10%">Cooking</th>
-                                                            <th width="10%">Pending</th>
-                                                            <th width="10%">New</th>
+                                                            <th width="15%">Completed</th>
+                                                            <th width="15%">Cooking</th>
+                                                            <th width="15%">Pending</th>
                                                         </tr>
 
                                                         <c:forEach var="item" items="${itemsList}">
                                                             <c:set var="key" value="${item.menuItemId}_${item.price}"/>
-                                                            <c:set var="orderItem" value="${orderItemsMap[key]}"/>
-                                                            <c:if test="${category.categoryId eq item.category.categoryId}">
+                                                            <c:set var="orderItem" value="${orderItemsMap[key]}"/>                                                            
+                                                            <c:if test="${category.categoryId eq item.category.categoryId and not empty orderItem and not empty orderItem['Pending']}">
                                                                 <tr>
                                                                     <td>
                                                                         <img src="${item.imageUrl}" 
@@ -142,12 +142,9 @@
                                                                                value="${(not empty orderItem['Cooking'])?orderItem['Cooking']:0}">
                                                                     </td>
                                                                     <td>
-                                                                        <input class="form-control" disabled 
-                                                                               value="${(not empty orderItem['Pending'])?orderItem['Pending']:0}">
-                                                                    </td>
-                                                                    <td>
                                                                         <input type="hidden" name="itemIdList" value="${item.menuItemId}">
-                                                                        <input class="form-control" name="quantityList" type="number" min="0" max="99" value="0">                                       
+                                                                        <input class="form-control" name="quantityList" type="number" min="0" max="99" 
+                                                                               value="${(not empty orderItem['Pending'])?orderItem['Pending']:0}">
                                                                     </td>
                                                                 </tr>
                                                             </c:if>
@@ -168,7 +165,7 @@
                             <td>
                             </td>
                             <td>
-                                <button class="btn btn-outline-success" type="submit" name="action" value="add">Save</button>
+                                <button class="btn btn-outline-success" type="submit" name="action" value="edit">Save</button>
                                 <a class="btn btn-outline-dark" href="<c:url value="myOrder">
                                        <c:param name="view" value="list"/>
                                        <c:param name="reservationId" value="${param.reservationId}"/>
@@ -177,6 +174,7 @@
                         </tr>
                     </table>
                 </form>
+
             </div>
         </div>
 </section>

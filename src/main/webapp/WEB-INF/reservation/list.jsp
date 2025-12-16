@@ -34,16 +34,15 @@
             <table class="table align-middle admin-table">
                 <thead>
                     <tr>
-                        <th width="8%">ID</th>
-                        <th width="12%">Customer</th>
-                        <th width="12%">Employee</th>
+                        <th width="5%">ID</th>
+                        <th width="15%">Customer</th>
+                        <th width="15%">Employee</th>
                         <th width="10%">Table</th>
-                        <th width="15%">Date</th>
-
-                        <th width="12%">Time</th>
+                        <th width="10%">Date</th>
+                        <th width="10%">Time</th>
                         <th width="15%">Note</th>
-                        <th width="15%">Status</th>
-                        <th width="18%" class="text-end">Action</th>
+                        <th width="5%">Status</th>
+                        <th width="15%" class="text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -66,42 +65,71 @@
 
                                     <td>
                                         <span class="badge
-                                              ${r.status == 'Approved' ? 'bg-success' : 
-                                                (r.status == 'Rejected' ? 'bg-danger' : 
-                                                (r.status == 'Cancelled' ? 'bg-secondary' : 
+                                              ${r.status == 'Approved' ? 'bg-success' :
+                                                (r.status == 'Rejected' ? 'bg-danger' :
+                                                (r.status == 'Cancelled' ? 'bg-secondary' :
+                                                (r.status == 'Complete' ? 'bg-primary' :
                                                 (r.status == 'Request Bill' ? 'badge-request-bill' :
-                                                (r.status == 'Cleaning' ? 'badge-cleaning' : 'bg-warning text-dark'))))}">
+                                                (r.status == 'Cleaning' ? 'badge-cleaning' : 'bg-warning text-dark')))))}">
                                               <c:out value="${r.status}"/>
                                         </span>
-
                                     </td>
+
                                     <td class="text-end">
                                         <div class="action-button-group d-flex justify-content-end gap-2">
 
-                                            <!-- Approve -->
-                                            <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
-                                                <input type="hidden" name="action" value="approve"/>
-                                                <input type="hidden" name="id" value="${r.reservationId}"/>
-                                                <button type="submit" class="btn btn-success btn-icon" 
-                                                        title="Approve" aria-label="Approve"
-                                                        ${r.status == 'Approved' ? 'disabled' : ''}>
-                                                    <i class="bi bi-check2-circle"></i>
-                                                </button>
-                                            </form>
+                                            <!-- Nút View Order (giữ nguyên từ remote) -->
+                                            <a class="btn btn-outline-success btn-icon btn-view"
+                                               href="<c:url value='/order'>
+                                                   <c:param name='view' value='list'/>
+                                                   <c:param name='reservationId' value='${r.reservationId}'/>
+                                               </c:url>"
+                                               title="View Order" aria-label="View Order">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </a>
 
-                                            <!-- Reject -->
-                                            <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
-                                                <input type="hidden" name="action" value="reject"/>
-                                                <input type="hidden" name="id" value="${r.reservationId}"/>
-                                                <button type="submit" class="btn btn-danger btn-icon" 
-                                                        title="Reject" aria-label="Reject"
-                                                        ${r.status == 'Rejected' ? 'disabled' : ''}>
-                                                    <i class="bi bi-x-octagon"></i>
-                                                </button>
-                                            </form>
+                                            <!-- ========================= PENDING ========================= -->
+                                            <!-- Khi trạng thái là PENDING thì hiện APPROVE + REJECT -->
+                                            <c:if test="${r.status eq 'Pending'}">
+
+                                                <!-- Approve -->
+                                                <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
+                                                    <input type="hidden" name="action" value="approve"/>
+                                                    <input type="hidden" name="id" value="${r.reservationId}"/>
+                                                    <button type="submit" class="btn btn-success btn-icon"
+                                                            title="Approve" aria-label="Approve">
+                                                        <i class="bi bi-check2-circle"></i>
+                                                    </button>
+                                                </form>
+
+                                                <!-- Reject -->
+                                                <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
+                                                    <input type="hidden" name="action" value="reject"/>
+                                                    <input type="hidden" name="id" value="${r.reservationId}"/>
+                                                    <button type="submit" class="btn btn-danger btn-icon"
+                                                            title="Reject" aria-label="Reject">
+                                                        <i class="bi bi-x-octagon"></i>
+                                                    </button>
+                                                </form>
+
+                                            </c:if>
+
+                                            <!-- ========================= APPROVED ========================= -->
+                                            <!-- Khi trạng thái đã Approved thì chỉ hiện COMPLETE -->
+                                            <c:if test="${r.status eq 'Approved'}">
+                                                <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
+                                                    <input type="hidden" name="action" value="complete"/>
+                                                    <input type="hidden" name="id" value="${r.reservationId}"/>
+                                                    <button type="submit" class="btn btn-warning btn-icon"
+                                                            title="Complete" aria-label="Complete">
+                                                        <i class="bi bi-check2-square"></i>
+                                                    </button>
+                                                </form>
+                                            </c:if>
 
                                         </div>
                                     </td>
+
                                 </tr>
                             </c:forEach>
                         </c:otherwise>

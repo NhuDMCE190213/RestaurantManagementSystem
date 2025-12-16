@@ -11,17 +11,19 @@ package model;
 public class OrderItem {
 
     private int orderItemId;
-    private Order order;
+    private Reservation reservation;
     private MenuItem menuItem;
     private int unitPrice;
     private int quantity;
+    private String status;
 
-    public OrderItem(int orderItemId, Order order, MenuItem menuItem, int unitPrice, int quantity) {
+    public OrderItem(int orderItemId, Reservation reservation, MenuItem menuItem, int unitPrice, int quantity, String status) {
         this.orderItemId = orderItemId;
-        this.order = order;
+        this.reservation = reservation;
         this.menuItem = menuItem;
         this.unitPrice = unitPrice;
         this.quantity = quantity;
+        this.status = status;
     }
 
     public int getOrderItemId() {
@@ -32,12 +34,12 @@ public class OrderItem {
         this.orderItemId = orderItemId;
     }
 
-    public Order getOrder() {
-        return order;
+    public Reservation getReservation() {
+        return reservation;
     }
 
-    public void setOrder(Order order) {
-        this.order = order;
+    public void setReservation(Reservation reservation) {
+        this.reservation = reservation;
     }
 
     public MenuItem getMenuItem() {
@@ -63,9 +65,13 @@ public class OrderItem {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-    
-    public int getPrice() {
-        return this.unitPrice;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getPriceVND() {

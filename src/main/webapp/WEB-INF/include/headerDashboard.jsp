@@ -94,7 +94,7 @@
                         <nav class="menu-panel">
                             <h1 class="menu-title">Browse Lists</h1>
                             <ul class="menu-links list-unstyled mb-0">
-                                <li><a href="order"><i class="bi bi-receipt"></i> Order List</a></li>
+                                <!--<li><a href="order"><i class="bi bi-receipt"></i> Order List</a></li>-->
                                     <c:if test="${sessionScope.employeeSession.role.id eq 1}">
                                     <li><a href="role"><i class="bi bi-shield-lock"></i> Role List</a></li>
                                     <li><a href="category"><i class="bi bi-tags"></i> Category List</a></li>
