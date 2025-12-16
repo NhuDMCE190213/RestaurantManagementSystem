@@ -11,7 +11,7 @@ package model;
 public class RecipeItem {
 
     private int recipeItemId;
-    private int recipeId;
+    private int menuItemId;
     private int ingredientId;
     private double quantity;
     private String unit;
@@ -25,7 +25,7 @@ public class RecipeItem {
 
     public RecipeItem(int recipeItemId, int recipeId, int ingredientId, double quantity, String unit, String note, String status) {
         this.recipeItemId = recipeItemId;
-        this.recipeId = recipeId;
+        this.menuItemId = recipeId;
         this.ingredientId = ingredientId;
         this.quantity = quantity;
         this.unit = unit;
@@ -35,7 +35,7 @@ public class RecipeItem {
 
     public RecipeItem(int recipeItemId, int recipeId, int ingredientId, double quantity, String unit, String note, String status, String ingredientName) {
         this.recipeItemId = recipeItemId;
-        this.recipeId = recipeId;
+        this.menuItemId = recipeId;
         this.ingredientId = ingredientId;
         this.quantity = quantity;
         this.unit = unit;
@@ -53,12 +53,12 @@ public class RecipeItem {
         this.recipeItemId = recipeItemId;
     }
 
-    public int getRecipeId() {
-        return recipeId;
+    public int getMenuItemId() {
+        return menuItemId;
     }
 
-    public void setRecipeId(int recipeId) {
-        this.recipeId = recipeId;
+    public void setMenuItemId(int menuItemId) {
+        this.menuItemId = menuItemId;
     }
 
     public int getIngredientId() {

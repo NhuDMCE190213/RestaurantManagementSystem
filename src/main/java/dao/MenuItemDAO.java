@@ -1,7 +1,5 @@
 package dao;
 
-import static constant.CommonFunction.checkErrorSQL;
-import static constant.Constants.MAX_ELEMENTS_PER_PAGE;
 import db.DBContext;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Category;
 import model.MenuItem;
-import model.Recipe;
+import model.RecipeItem;
 
 public class MenuItemDAO extends DBContext {
 
@@ -39,17 +37,17 @@ public class MenuItemDAO extends DBContext {
             ResultSet rs = this.executeSelectionQuery(query, new Object[]{});
 
             while (rs.next()) {
-                int menuItemId = rs.getInt(1);
-                int categoryId = rs.getInt(2);
-                String itemName = rs.getString(3);
-                String imageUrl = rs.getString(4);
-                int price = rs.getInt(5);
-                String description = rs.getString(6);
-                String status = rs.getString(7);
-                Recipe recipe = recipeDAO.getElementByID(menuItemId);
-                //Chua check tinh kha dung cua recipe
-                MenuItem menuItem = new MenuItem(menuItemId, categoryDAO.getElementByID(categoryId), itemName, imageUrl, price, description, status);
-                menuItem.setRecipe(recipe);
+                int menuItemId = rs.getInt("menu_item_id");
+                int categoryId = rs.getInt("category_id");
+                String itemName = rs.getString("item_name");
+                String imageUrl = rs.getString("image_url");
+                int price = rs.getInt("price");
+                String description = rs.getString("description");
+                String status = rs.getString("status");
+
+                Category category = categoryDAO.getElementByID(categoryId);
+                MenuItem menuItem = new MenuItem(menuItemId, category, itemName, imageUrl, price, description, status);
+                // DO NOT load recipe items here (to avoid N+1). Load in getElementByID if needed.
                 list.add(menuItem);
             }
         } catch (SQLException ex) {
@@ -72,208 +70,19 @@ public class MenuItemDAO extends DBContext {
             ResultSet rs = this.executeSelectionQuery(query, new Object[]{(page - 1) * maxElement, maxElement});
 
             while (rs.next()) {
-                int menuItemId = rs.getInt(1);
-                int categoryId = rs.getInt(2);
-                String itemName = rs.getString(3);
-                String imageUrl = rs.getString(4);
-                int price = rs.getInt(5);
-                String description = rs.getString(6);
-                String status = rs.getString(7);
-                Recipe recipe = recipeDAO.getElementByID(menuItemId);
-                //Chua check tinh kha dung cua recipe
-                MenuItem menuItem = new MenuItem(menuItemId, categoryDAO.getElementByID(categoryId), itemName, imageUrl, price, description, status);
-                menuItem.setRecipe(recipe);
+                int menuItemId = rs.getInt("menu_item_id");
+                int categoryId = rs.getInt("category_id");
+                String itemName = rs.getString("item_name");
+                String imageUrl = rs.getString("image_url");
+                int price = rs.getInt("price");
+                String description = rs.getString("description");
+                String status = rs.getString("status");
+
+                Category category = categoryDAO.getElementByID(categoryId);
+                MenuItem menuItem = new MenuItem(menuItemId, category, itemName, imageUrl, price, description, status);
+                // DO NOT load recipe items here (to avoid N+1). Load in getElementByID if needed.
                 list.add(menuItem);
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(CategoryDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return list;
-    }
-
-    public List<String> getAllCategoryNames() {
-
-        List<String> categoryNames = new ArrayList<>();
-
-        try {
-
-            String query = "SELECT category_name FROM category WHERE LOWER(status) <> LOWER('Deleted')  ORDER BY category_id";
-
-            ResultSet rs = this.executeSelectionQuery(query, null);
-
-            while (rs.next()) {
-
-                categoryNames.add(rs.getString("category_name"));
-
-            }
-
-        } catch (SQLException ex) {
-
-            Logger.getLogger(MenuItemDAO.class.getName()).log(Level.SEVERE, null, ex);
-
-        }
-
-        return categoryNames;
-
-    }
-
-    public List<String> getTopCategoryNames() {
-
-        List<String> categoryNames = new ArrayList<>();
-
-        try {
-
-            String query = "SELECT TOP 4 category_name FROM category WHERE LOWER(status) <> LOWER('Deleted') ORDER BY category_id";
-
-            ResultSet rs = this.executeSelectionQuery(query, null);
-
-            while (rs.next()) {
-
-                categoryNames.add(rs.getString("category_name"));
-
-            }
-
-        } catch (SQLException ex) {
-
-            Logger.getLogger(MenuItemDAO.class.getName()).log(Level.SEVERE, null, ex);
-
-        }
-
-        return categoryNames;
-
-    }
-
-    /**
-     *
-     * @param categoryName
-     * @return
-     */
-    public List<MenuItem> getTopMenuItemsByCategoryName(String categoryName) {
-
-        List<MenuItem> list = new ArrayList<>();
-
-        try {
-
-            String query = "SELECT TOP 6\n"
-                    + " mi.menu_item_id, mi.category_id, mi.item_name, \n"
-                    + " mi.image_url, mi.price, mi.description, mi.status \n"
-                    + "FROM menu_item mi \n"
-                    + "JOIN category c ON mi.category_id = c.category_id \n"
-                    + "WHERE LOWER(c.category_name) = LOWER(?) \n"
-                    + " AND LOWER(mi.status) <> LOWER('Deleted')\n"
-                    + "ORDER BY mi.menu_item_id";
-
-            ResultSet rs = this.executeSelectionQuery(query, new Object[]{categoryName});
-
-            while (rs.next()) {
-
-                int menuItemId = rs.getInt("menu_item_id");
-
-                String itemName = rs.getString("item_name");
-
-                String imageUrl = rs.getString("image_url");
-
-                int price = rs.getInt("price");
-
-                String description = rs.getString("description");
-
-                String status = rs.getString("status");
-
-                int categoryId = rs.getInt("category_id");
-
-                Category category = categoryDAO.getElementByID(categoryId);
- Recipe recipe = recipeDAO.getElementByID(menuItemId);
-                if (category != null) {
-
-                    MenuItem item = new MenuItem(
-                            menuItemId,
-                            category,
-                            itemName,
-                            imageUrl,
-                            price,
-                            description,
-                            status
-                    );
- item.setRecipe(recipe);
-                    list.add(item);
-
-                }
-
-            }
-
-        } catch (SQLException ex) {
-
-            Logger.getLogger(MenuItemDAO.class.getName()).log(Level.SEVERE, "Can't not load object", ex);
-
-        }
-
-        return list;
-
-    }
-
-    /**
-     *
-     *
-     *
-     * @param categoryName
-     *
-     * @return *
-     */
-    public List<MenuItem> getMenuItemsByCategoryName(String categoryName) {
-
-        List<MenuItem> list = new ArrayList<>();
-
-        try {
-
-            String query = "SELECT \n"
-                    + " mi.menu_item_id, mi.category_id, mi.item_name, \n"
-                    + " mi.image_url, mi.price, mi.description, mi.status \n"
-                    + "FROM menu_item mi \n"
-                    + "JOIN category c ON mi.category_id = c.category_id \n"
-                    + "WHERE LOWER(c.category_name) = LOWER(?) \n"
-                    + " AND LOWER(mi.status) = 'active'\n"
-                    + "ORDER BY mi.menu_item_id";
-
-            ResultSet rs = this.executeSelectionQuery(query, new Object[]{categoryName});
-
-            while (rs.next()) {
-
-                int menuItemId = rs.getInt("menu_item_id");
-
-                String itemName = rs.getString("item_name");
-
-                String imageUrl = rs.getString("image_url");
-
-                int price = rs.getInt("price");
-
-                String description = rs.getString("description");
-
-                String status = rs.getString("status");
-
-                int categoryId = rs.getInt("category_id");
-
-                Category category = categoryDAO.getElementByID(categoryId);
-                Recipe recipe = recipeDAO.getElementByID(menuItemId);
-                if (category != null) {
-
-                    MenuItem item = new MenuItem(
-                            menuItemId,
-                            category,
-                            itemName,
-                            imageUrl,
-                            price,
-                            description,
-                            status
-                    );
-                    item.setRecipe(recipe);
-
-                    list.add(item);
-
-                }
-
-            }
-
         } catch (SQLException ex) {
 
             Logger.getLogger(MenuItemDAO.class.getName()).log(Level.SEVERE, "Can't not load object", ex);
@@ -285,34 +94,32 @@ public class MenuItemDAO extends DBContext {
     }
 
     public MenuItem getElementByID(int id) {
-
         try {
-
             String query = "SELECT menu_item_id, category_id, item_name, image_url, price, description, status\n"
-                    + "FROM     menu_item\n"
-                    + "WHERE  (LOWER(status) <> LOWER('Deleted')) AND (menu_item_id = ?)";
-
+                    + "FROM menu_item\n"
+                    + "WHERE (LOWER(status) <> LOWER('Deleted')) AND (menu_item_id = ?)";
             ResultSet rs = this.executeSelectionQuery(query, new Object[]{id});
+            if (rs.next()) {
+                int menuItemId = rs.getInt("menu_item_id");
+                int categoryId = rs.getInt("category_id");
+                String itemName = rs.getString("item_name");
+                String imageUrl = rs.getString("image_url");
+                int price = rs.getInt("price");
+                String description = rs.getString("description");
+                String status = rs.getString("status");
 
-            while (rs.next()) {
+                Category category = categoryDAO.getElementByID(categoryId);
+                MenuItem item = new MenuItem(menuItemId, category, itemName, imageUrl, price, description, status);
 
-                int menuItemId = rs.getInt(1);
-                int categoryId = rs.getInt(2);
-                String itemName = rs.getString(3);
-                String imageUrl = rs.getString(4);
-                int price = rs.getInt(5);
-                String description = rs.getString(6);
-                String status = rs.getString(7);
-
-                MenuItem item = new MenuItem(menuItemId, categoryDAO.getElementByID(categoryId), itemName, imageUrl, price, description, status);
+                // load recipe items for detail view
+                List<RecipeItem> items = recipeDAO.getItemsByMenuItemId(menuItemId);
+                item.setItems(items);
 
                 return item;
-
             }
         } catch (SQLException ex) {
-            System.out.println("Can't not load object");
+            Logger.getLogger(MenuItemDAO.class.getName()).log(Level.SEVERE, "Can't not load object", ex);
         }
-
         return null;
 
     }
@@ -329,7 +136,7 @@ public class MenuItemDAO extends DBContext {
                 + "OFFSET ? ROWS "
                 + "FETCH NEXT ? ROWS ONLY";
 
-        try ( ResultSet rs = this.executeSelectionQuery(query, new Object[]{searchKeyword, searchKeyword, (page - 1) * maxElement, maxElement})) {
+        try (ResultSet rs = this.executeSelectionQuery(query, new Object[]{searchKeyword, searchKeyword, (page - 1) * maxElement, maxElement})) {
             while (rs.next()) {
                 int itemId = rs.getInt("menu_item_id");
                 int categoryId = rs.getInt("category_id");
@@ -342,6 +149,9 @@ public class MenuItemDAO extends DBContext {
                 Category category = categoryDAO.getElementByID(categoryId);
 
                 MenuItem item = new MenuItem(itemId, category, itemName, imageUrl, price, description, status);
+
+                // optionally load recipe items for search detail pages if desired:
+                // item.setItems(recipeDAO.getItemsByMenuItemId(itemId));
                 list.add(item);
             }
         } catch (SQLException ex) {
@@ -472,4 +282,188 @@ public class MenuItemDAO extends DBContext {
         return false;
     }
 
+    public List<String> getAllCategoryNames() {
+
+        List<String> categoryNames = new ArrayList<>();
+
+        try {
+
+            String query = "SELECT category_name FROM category WHERE LOWER(status) <> LOWER('Deleted')  ORDER BY category_id";
+
+            ResultSet rs = this.executeSelectionQuery(query, null);
+
+            while (rs.next()) {
+
+                categoryNames.add(rs.getString("category_name"));
+
+            }
+
+        } catch (SQLException ex) {
+
+            Logger.getLogger(MenuItemDAO.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+
+        return categoryNames;
+
+    }
+
+    public List<String> getTopCategoryNames() {
+
+        List<String> categoryNames = new ArrayList<>();
+
+        try {
+
+            String query = "SELECT TOP 4 category_name FROM category WHERE LOWER(status) <> LOWER('Deleted') ORDER BY category_id";
+
+            ResultSet rs = this.executeSelectionQuery(query, null);
+
+            while (rs.next()) {
+
+                categoryNames.add(rs.getString("category_name"));
+
+            }
+
+        } catch (SQLException ex) {
+
+            Logger.getLogger(MenuItemDAO.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+
+        return categoryNames;
+
+    }
+
+    /**
+     *
+     * @param categoryName
+     * @return
+     */
+    public List<MenuItem> getTopMenuItemsByCategoryName(String categoryName) {
+
+        List<MenuItem> list = new ArrayList<>();
+
+        try {
+
+            String query = "SELECT TOP 6\n"
+                    + " mi.menu_item_id, mi.category_id, mi.item_name, \n"
+                    + " mi.image_url, mi.price, mi.description, mi.status \n"
+                    + "FROM menu_item mi \n"
+                    + "JOIN category c ON mi.category_id = c.category_id \n"
+                    + "WHERE LOWER(c.category_name) = LOWER(?) \n"
+                    + " AND LOWER(mi.status) <> LOWER('Deleted')\n"
+                    + "ORDER BY mi.menu_item_id";
+
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{categoryName});
+
+            while (rs.next()) {
+
+                int menuItemId = rs.getInt("menu_item_id");
+
+                String itemName = rs.getString("item_name");
+
+                String imageUrl = rs.getString("image_url");
+
+                int price = rs.getInt("price");
+
+                String description = rs.getString("description");
+
+                String status = rs.getString("status");
+
+                int categoryId = rs.getInt("category_id");
+
+                Category category = categoryDAO.getElementByID(categoryId);
+                if (category != null) {
+
+                    MenuItem item = new MenuItem(
+                            menuItemId,
+                            category,
+                            itemName,
+                            imageUrl,
+                            price,
+                            description,
+                            status
+                    );
+                    List<RecipeItem> items = recipeDAO.getItemsByMenuItemId(menuItemId);
+                    item.setItems(items);
+                    list.add(item);
+
+                }
+
+            }
+
+        } catch (SQLException ex) {
+
+            Logger.getLogger(MenuItemDAO.class.getName()).log(Level.SEVERE, "Can't not load object", ex);
+
+        }
+
+        return list;
+
+    }
+    
+    public List<MenuItem> getMenuItemsByCategoryName(String categoryName) {
+
+        List<MenuItem> list = new ArrayList<>();
+
+        try {
+
+            String query = "SELECT \n"
+                    + " mi.menu_item_id, mi.category_id, mi.item_name, \n"
+                    + " mi.image_url, mi.price, mi.description, mi.status \n"
+                    + "FROM menu_item mi \n"
+                    + "JOIN category c ON mi.category_id = c.category_id \n"
+                    + "WHERE LOWER(c.category_name) = LOWER(?) \n"
+                    + " AND LOWER(mi.status) = 'active'\n"
+                    + "ORDER BY mi.menu_item_id";
+
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{categoryName});
+
+            while (rs.next()) {
+
+                int menuItemId = rs.getInt("menu_item_id");
+
+                String itemName = rs.getString("item_name");
+
+                String imageUrl = rs.getString("image_url");
+
+                int price = rs.getInt("price");
+
+                String description = rs.getString("description");
+
+                String status = rs.getString("status");
+
+                int categoryId = rs.getInt("category_id");
+
+                Category category = categoryDAO.getElementByID(categoryId);
+                
+                if (category != null) {
+
+                    MenuItem item = new MenuItem(
+                            menuItemId,
+                            category,
+                            itemName,
+                            imageUrl,
+                            price,
+                            description,
+                            status
+                    );
+                    List<RecipeItem> items = recipeDAO.getItemsByMenuItemId(menuItemId);
+                    item.setItems(items);
+
+                    list.add(item);
+
+                }
+
+            }
+
+        } catch (SQLException ex) {
+
+            Logger.getLogger(MenuItemDAO.class.getName()).log(Level.SEVERE, "Can't not load object", ex);
+
+        }
+
+        return list;
+
+    }
 }
