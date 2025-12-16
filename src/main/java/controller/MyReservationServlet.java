@@ -12,6 +12,7 @@ import static constant.CommonFunction.validateInteger;
 import static constant.CommonFunction.validateString;
 import dao.ReservationDAO;
 import dao.TableDAO;
+import dao.VoucherDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -21,7 +22,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.Date;
 import java.sql.Time;
+import java.util.List;
 import model.Reservation;
+import model.Voucher;
 
 /**
  *
@@ -32,6 +35,7 @@ public class MyReservationServlet extends HttpServlet {
 
     ReservationDAO reservationDAO = new ReservationDAO();
     TableDAO tableDAO = new TableDAO();
+    VoucherDAO voucherDAO = new VoucherDAO();
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -73,6 +77,7 @@ public class MyReservationServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String view = request.getParameter("view");
+        List<Voucher> voucherList = voucherDAO.getAllAvailable();
 
         // ----- CUSTOMER EDIT FORM -----
         if ("edit".equalsIgnoreCase(view)) {
@@ -89,6 +94,20 @@ public class MyReservationServlet extends HttpServlet {
                 return;
             }
 
+            if (r.getVoucher() != null) {
+                int curId = r.getVoucher().getVoucherId();
+                boolean exists = false;
+                for (Voucher v : voucherList) {
+                    if (v.getVoucherId() == curId) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    voucherList.add(0, r.getVoucher());
+                }
+            }
+
             // Lấy bàn + các khung giờ đã đặt của bàn đó
             int tableId = r.getTable().getId();
 
@@ -96,6 +115,7 @@ public class MyReservationServlet extends HttpServlet {
             request.setAttribute("selectedTable", tableDAO.getElementByID(tableId));
             request.setAttribute("existingReservations",
                     reservationDAO.getReservationsByTable(tableId));
+            request.setAttribute("voucherList", voucherList);
 
             request.getRequestDispatcher("/WEB-INF/reservation/edit.jsp")
                     .forward(request, response);
@@ -161,6 +181,11 @@ public class MyReservationServlet extends HttpServlet {
             int id, tableId;
             Date date;
             Time timeStart, timeEnd;
+            Integer voucherId = null;
+            String vRaw = request.getParameter("voucherId");
+            if (vRaw != null && !vRaw.isBlank()) {
+                voucherId = Integer.valueOf(vRaw);
+            }
 
             try {
                 id = Integer.parseInt(request.getParameter("reservationId"));
@@ -205,7 +230,7 @@ public class MyReservationServlet extends HttpServlet {
                 return;
             }
 
-            int check = reservationDAO.edit(id, tableId, date, timeStart, timeEnd);
+            int check = reservationDAO.edit(id, tableId, date, timeStart, timeEnd, voucherId);
             if (check < 1) {
                 popupStatus = false;
                 popupMessage = "Edit failed. SQL: " + getSqlErrorCode(check);
@@ -228,6 +253,11 @@ public class MyReservationServlet extends HttpServlet {
             String description = request.getParameter("description");
             if (description == null) {
                 description = "";
+            }
+            Integer voucherId = null;
+            String vRaw = request.getParameter("voucherId");
+            if (vRaw != null && !vRaw.isBlank()) {
+                voucherId = Integer.valueOf(vRaw);
             }
 
             try {
@@ -271,7 +301,7 @@ public class MyReservationServlet extends HttpServlet {
                 popupStatus = false;
                 popupMessage = "This table is currently in use and not available.";
             } else {
-                int check = reservationDAO.add(customerId, tableId, date, timeStart, timeEnd, description);
+                int check = reservationDAO.add(customerId, voucherId, tableId, date, timeStart, timeEnd, description);
                 if (check < 1) {
                     popupStatus = false;
                     popupMessage = "Add failed. SQL error: " + getSqlErrorCode(check);

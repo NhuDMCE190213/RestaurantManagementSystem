@@ -13,7 +13,6 @@ import java.util.List;
  */
 public class Recipe {
 
-    private int recipeId;
     private int menuItemId;
     private String menuItemName;
     private String status;
@@ -24,38 +23,14 @@ public class Recipe {
         items = new ArrayList<>();
     }
 
-//    public Recipe(int recipeId, int menuItemId, String status) {
-//        this.recipeId = recipeId;
-//        this.menuItemId = menuItemId;
-//        this.status = status;
-//
-//    }
-//
-//    public Recipe(int recipeId, int menuItemId, String menuItemName, String status) {
-//        this.recipeId = recipeId;
-//        this.menuItemId = menuItemId;
-//        this.menuItemName = menuItemName;
-//        this.status = status;
-//        this.items = new ArrayList<>();
-//    }
-
-    public Recipe(int recipeId, String recipeName, String status) {
-        this.recipeId = recipeId;
+    public Recipe(int menuItemId, String recipeName, String status) {
+        this.menuItemId = menuItemId;
         this.recipeName = recipeName;
         this.status = status;
         this.items = new ArrayList<>();
     }
-    
 
     // getters & setters
-    public int getRecipeId() {
-        return recipeId;
-    }
-
-    public void setRecipeId(int recipeId) {
-        this.recipeId = recipeId;
-    }
-
     public int getMenuItemId() {
         return menuItemId;
     }
@@ -102,5 +77,4 @@ public class Recipe {
     public void setRecipeName(String recipeName) {
         this.recipeName = recipeName;
     }
-
 }

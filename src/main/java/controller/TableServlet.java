@@ -167,7 +167,7 @@ public class TableServlet extends HttpServlet {
                 } else {
                     int result = tableDAO.edit(id, number, capacity);
                     if (result >= 1) {
-                        popupMessage = "Table with ID=" + id + " edited successfully.";
+                        popupMessage = "Table number" + number + " edited successfully.";
                     } else {
                         popupStatus = false;
                         popupMessage = "The edit action failed. SQL Error: " + getSqlErrorCode(result);
@@ -175,35 +175,48 @@ public class TableServlet extends HttpServlet {
                 }
 
             } else if (action.equalsIgnoreCase("delete")) {
+                String number = request.getParameter("number");
                 int id;
                 try {
                     id = Integer.parseInt(request.getParameter("id"));
                 } catch (NumberFormatException e) {
                     id = -1;
                 }
-//                String status = request.getParameter("status");
-//
-//                // validate  Only tables with status 'Available' can be deleted.
-//                if (!status.equalsIgnoreCase("")
-//                        || status == null) {
-                Table current = tableDAO.getElementByID(id);
+
+                // Lấy thông tin bàn hiện tại và kiểm tra trước khi xóa
                 if (!isValidInteger(id, false, false, true)) {
                     popupStatus = false;
                     popupMessage = "The delete action is NOT successful. Invalid ID.";
-                } else if(!"Available".equalsIgnoreCase(current.getStatus())){
-                    popupStatus = false;
-                    popupMessage = "The delete action is NOT successful. Only tables with status 'Available' can be deleted. Current status: " + current.getStatus();
-                } else{
-                    int result = tableDAO.delete(id);
-                    if (result >= 1) {
-                        popupMessage = "Table with ID=" + id + " deleted successfully.";
-                    } else {
+                } else {
+                    Table current = tableDAO.getElementByID(id);
+                    if (current == null) {
                         popupStatus = false;
-                        popupMessage = "The delete action failed. SQL Error: " + getSqlErrorCode(result);
+                        popupMessage = "The delete action is NOT successful. Table not found or already deleted.";
+                    } else if (!"Available".equalsIgnoreCase(current.getStatus())) {
+                        // Chỉ xóa khi status = Available
+                        popupStatus = false;
+                        popupMessage = "The delete action is NOT successful. Only tables with status 'Available' can be deleted. Current status: " + current.getStatus();
+                    } else {
+                        // Kiểm tra nếu bàn đã từng được sử dụng
+                        boolean used = tableDAO.isTableUsed(id);
+                        if (used) {
+                                popupStatus = false;
+                                popupMessage = "The delete action is NOT successful. This table has been used. You can only delete a new table. ";
+
+                        } else {
+                            // Nếu chưa từng dùng thì cho xóa bình thường (với điều kiện status = 'Available' đã được kiểm tra)
+                            int result = tableDAO.delete(id);
+                            if (result >= 1) {
+                                popupMessage = "Table number" + number + " deleted successfully.";
+                            } else {
+                                popupStatus = false;
+                                popupMessage = "The delete action failed. SQL Error: " + getSqlErrorCode(result);
+                            }
+                        }
                     }
                 }
-//                }
             } else if (action.equalsIgnoreCase("changeStatus")) {
+                String number = request.getParameter("number");
                 // New action: change table status (Available, Reserved, Occupied)
                 int id;
                 String newStatus = request.getParameter("newStatus");
@@ -219,7 +232,6 @@ public class TableServlet extends HttpServlet {
                         || !(newStatus.equalsIgnoreCase("Available")
                         || newStatus.equalsIgnoreCase("Reserved")
                         || newStatus.equalsIgnoreCase("Serving")
-                        || newStatus.equalsIgnoreCase("Request Bill")
                         || newStatus.equalsIgnoreCase("Cleaning"))) {
                     popupStatus = false;
                     popupMessage = "Change status action is NOT successful. Invalid input.";
@@ -228,7 +240,7 @@ public class TableServlet extends HttpServlet {
                     String normalizedStatus = newStatus.substring(0, 1).toUpperCase() + newStatus.substring(1).toLowerCase();
                     int result = tableDAO.updateStatus(id, normalizedStatus);
                     if (result >= 1) {
-                        popupMessage = "Table with ID=" + id + " status changed to " + normalizedStatus + " successfully.";
+                        popupMessage = "Table number" + number + " status changed to " + normalizedStatus + " successfully.";
                     } else {
                         popupStatus = false;
                         popupMessage = "Change status action failed. SQL Error: " + getSqlErrorCode(result);

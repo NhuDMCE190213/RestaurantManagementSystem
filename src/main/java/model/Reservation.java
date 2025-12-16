@@ -16,6 +16,7 @@ public class Reservation {
     private int reservationId;
     private Customer customer;
     private Employee emp;
+    private Voucher voucher;
     private Table table;
     private Date reservationDate;
     private Time timeStart;
@@ -23,10 +24,11 @@ public class Reservation {
     private String description;
     private String Status;
 
-    public Reservation(int reservationId, Customer customer, Employee emp, Table table, Date reservationDate, Time timeStart, Time timeEnd, String description, String Status) {
+    public Reservation(int reservationId, Customer customer, Employee emp, Voucher voucher, Table table, Date reservationDate, Time timeStart, Time timeEnd, String description, String Status) {
         this.reservationId = reservationId;
         this.customer = customer;
         this.emp = emp;
+        this.voucher = voucher;
         this.table = table;
         this.reservationDate = reservationDate;
         this.timeStart = timeStart;
@@ -57,6 +59,14 @@ public class Reservation {
 
     public void setEmp(Employee emp) {
         this.emp = emp;
+    }
+
+    public Voucher getVoucher() {
+        return voucher;
+    }
+
+    public void setVoucher(Voucher voucher) {
+        this.voucher = voucher;
     }
 
     public Table getTable() {
