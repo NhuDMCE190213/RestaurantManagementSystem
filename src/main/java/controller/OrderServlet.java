@@ -92,22 +92,7 @@ public class OrderServlet extends HttpServlet {
         }
 
         Reservation currentReservation = reservationDAO.getElementByID(reservationId);
-
-//        int page;
-//        int totalPages;
-
-//        if (currentReservation != null) {
-//            totalPages = getTotalPages(orderItemDAO.countItembyReservationId(currentReservation.getReservationId()));
-//        } else {
-//            totalPages = 0;
-//        }
-
-//        try {
-//            page = Integer.parseInt(request.getParameter("page"));
-//        } catch (NumberFormatException e) {
-//            page = 1;
-//        }
-
+        
         if (view == null || view.isBlank() || view.equalsIgnoreCase("list")) {
             namepage = "list";
         } else if (view.equalsIgnoreCase("add")) {
@@ -118,15 +103,16 @@ public class OrderServlet extends HttpServlet {
         }
 
         if (currentReservation != null) {
-
             //Process list to map
             List<OrderItem> orderItems = orderItemDAO.getAllByReservationId(currentReservation.getReservationId());
             Map<String, Map<String, Integer>> orderItemsMap = new HashMap<>();
+            Map<String, Map<String, Integer>> orderItemsIdMap = new HashMap<>();
 
             for (OrderItem orderItem : orderItems) {
                 String key = orderItem.getMenuItem().getMenuItemId() + "_" + orderItem.getUnitPrice();
                 String status = orderItem.getStatus();
                 int quantity = orderItem.getQuantity();
+                int id = orderItem.getOrderItemId();
 
                 if (quantity <= 0) {
                     continue;
@@ -134,20 +120,32 @@ public class OrderServlet extends HttpServlet {
 
                 if (!orderItemsMap.containsKey(key)) {
                     orderItemsMap.put(key, new HashMap<>());
+                    orderItemsIdMap.put(key, new HashMap<>());
                 }
 
                 orderItemsMap.get(key).put(status, quantity);
+                orderItemsIdMap.get(key).put(status, id);
             }
             // end
 
             request.setAttribute("orderItemsMap", orderItemsMap);
+            request.setAttribute("orderItemsIdMap", orderItemsIdMap);
         }
+        
+        
+                
+        request.setAttribute("orderItemForMapList", orderItemDAO.getAllByReservationIdForMap(reservationId));
         request.setAttribute("orderItemsList", orderItemDAO.getAllByReservationId(reservationId));
         request.setAttribute("categoryList", categoryDAO.getAll());
         request.setAttribute("itemsList", menuItemDAO.getAll());
         request.setAttribute("vouchersList", voucherDAO.getAllAvailable());
         request.setAttribute("currentReservation", currentReservation);
-//        request.setAttribute("totalPages", totalPages);
+        
+        long subTotal = orderItemDAO.getTotalPrice(reservationId);
+        long vat = subTotal * 10 / 100;
+        
+        request.setAttribute("subTotal", orderItemDAO.getFormatVND(subTotal));
+        request.setAttribute("vat", orderItemDAO.getFormatVND(vat));
 
         request.getRequestDispatcher("/WEB-INF/order/" + namepage + ".jsp").forward(request, response);
         removePopup(request);
@@ -190,12 +188,11 @@ public class OrderServlet extends HttpServlet {
                 add(request, currentReservation);
             } else if (action.equalsIgnoreCase("edit")) {
                 edit(request, currentReservation);
-            } 
-//            else if (action.equalsIgnoreCase("complete")) {
-//                complete(request, currentReservation);
-//            } else if (action.equalsIgnoreCase("cook")) {
-//                cook(request, currentReservation);
-//            } 
+            } else if (action.equalsIgnoreCase("complete")) {
+                complete(request, currentReservation);
+            } else if (action.equalsIgnoreCase("cook")) {
+                cook(request, currentReservation);
+            }
         }
 
         setPopup(request, popupStatus, popupMessage);
@@ -215,7 +212,7 @@ public class OrderServlet extends HttpServlet {
     private int getTotalPages(int countItems) {
         return (int) Math.ceil((double) countItems / MAX_ELEMENTS_PER_PAGE);
     }
-    
+
     private void setPopup(HttpServletRequest request, boolean status, String message) {
         HttpSession session = request.getSession(false);
         session.setAttribute("popupStatus", status);
@@ -261,7 +258,7 @@ public class OrderServlet extends HttpServlet {
                 } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
                         || reservation.getStatus().equalsIgnoreCase("Approved")
                         || reservation.getStatus().equalsIgnoreCase("Serving"))) {
-                    popupMessage += " The reservation is pending or serving. Check information again.";
+                    popupMessage += " The reservation is not pending or serving. Check information again.";
                 } else {
                     popupStatus = true;
                     popupMessage = "The add action is successfull.";
@@ -325,7 +322,7 @@ public class OrderServlet extends HttpServlet {
                 } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
                         || reservation.getStatus().equalsIgnoreCase("Approved")
                         || reservation.getStatus().equalsIgnoreCase("Serving"))) {
-                    popupMessage += " The reservation is pending or serving. Check information again.";
+                    popupMessage += " The reservation is not pending or serving. Check information again.";
                 } else {
                     popupStatus = true;
                     popupMessage = "The edit action is successfull.";
@@ -351,6 +348,88 @@ public class OrderServlet extends HttpServlet {
         } else {
             popupStatus = false;
             popupMessage = "The edit action is NOT successfull. Check the information menu item again.";
+        }
+    }
+
+    private void complete(HttpServletRequest request, Reservation reservation) {
+        int orderItemId;
+
+        try {
+            orderItemId = Integer.parseInt(request.getParameter("orderItemId"));
+        } catch (NumberFormatException e) {
+            orderItemId = -1;
+        }
+
+        OrderItem orderItem = orderItemDAO.getElementByID(orderItemId);
+
+        //validate
+        popupStatus = false;
+        popupMessage = "The complete action is NOT successfull.";
+        if (reservation == null) {
+            popupMessage += " The reservation is not exist. Check information again.";
+        } else if (orderItem == null) {
+            popupMessage += " The order item is not exist. Check information again.";
+        } else if (!orderItem.getStatus().equalsIgnoreCase("Cooking")) {
+            popupMessage += " The order item is not cooking. Check information again.";
+        } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
+                || reservation.getStatus().equalsIgnoreCase("Approved")
+                || reservation.getStatus().equalsIgnoreCase("Serving"))) {
+            popupMessage += " The reservation is not pending or serving. Check information again.";
+        } else {
+            popupStatus = true;
+            popupMessage = "The complete action is successfull.";
+        }
+        //end
+
+        if (popupStatus == true) {
+            int checkError = orderItemDAO.complete(reservation.getReservationId(), orderItemId, orderItem.getMenuItem().getMenuItemId(), orderItem.getMenuItem().getPrice());
+
+            if (checkError >= 1) {
+            } else {
+                popupStatus = false;
+                popupMessage = "The complete action is NOT successfull. Check the information menu item again.";
+            }
+        }
+    }
+
+    private void cook(HttpServletRequest request, Reservation reservation) {
+        int orderItemId;
+
+        try {
+            orderItemId = Integer.parseInt(request.getParameter("orderItemId"));
+        } catch (NumberFormatException e) {
+            orderItemId = -1;
+        }
+
+        OrderItem orderItem = orderItemDAO.getElementByID(orderItemId);
+
+        //validate
+        popupStatus = false;
+        popupMessage = "The cook action is NOT successfull.";
+        if (reservation == null) {
+            popupMessage += " The reservation is not exist. Check information again.";
+        } else if (orderItem == null) {
+            popupMessage += " The order item is not exist. Check information again.";
+        } else if (!orderItem.getStatus().equalsIgnoreCase("Pending")) {
+            popupMessage += " The order item is not pending. Check information again.";
+        } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
+                || reservation.getStatus().equalsIgnoreCase("Approved")
+                || reservation.getStatus().equalsIgnoreCase("Serving"))) {
+            popupMessage += " The reservation is not pending or serving. Check information again.";
+        } else {
+            popupStatus = true;
+            popupMessage = "The cook action is successfull.";
+        }
+        //end
+
+        if (popupStatus == true) {
+            int checkError = orderItemDAO.cook(reservation.getReservationId(), orderItemId, orderItem.getMenuItem().getMenuItemId(), orderItem.getMenuItem().getPrice());
+
+            if (checkError >= 1) {
+            } else {
+                popupStatus = false;
+                popupMessage = "The cook action is NOT successfull. Check the information menu item again.";
+            }
         }
     }
 }
