@@ -27,37 +27,28 @@
         <div class="container" data-aos="fade-up" data-aos-delay="100">
 
             <!-- Legend -->
-            <div class="row align-items-center justify-content-start g-4 table-legend">
-                <div class="col-6 col-md-2">
-                    <div class="legend-item d-flex align-items-center">
-                        <span class="legend-swatch available"></span>
-                        <span>Available</span>
-                    </div>
+            <div class="table-legend d-flex flex-wrap justify-content-center gap-4 my-3">
+
+                <div class="legend-item d-flex align-items-center gap-2">
+                    <span class="legend-swatch available"></span>
+                    <span>Available</span>
                 </div>
-                <div class="col-6 col-md-2">
-                    <div class="legend-item d-flex align-items-center">
-                        <span class="legend-swatch reserved"></span>
-                        <span>Reserved</span>
-                    </div>
+
+                <div class="legend-item d-flex align-items-center gap-2">
+                    <span class="legend-swatch reserved"></span>
+                    <span>Reserved</span>
                 </div>
-                <div class="col-6 col-md-2">
-                    <div class="legend-item d-flex align-items-center">
-                        <span class="legend-swatch serving"></span>
-                        <span>Serving</span>
-                    </div>
+
+                <div class="legend-item d-flex align-items-center gap-2">
+                    <span class="legend-swatch serving"></span>
+                    <span>Serving</span>
                 </div>
-                <div class="col-6 col-md-3">
-                    <div class="legend-item d-flex align-items-center">
-                        <span class="legend-swatch request-bill"></span>
-                        <span>Request Bill</span>
-                    </div>
+
+                <div class="legend-item d-flex align-items-center gap-2">
+                    <span class="legend-swatch cleaning"></span>
+                    <span>Cleaning</span>
                 </div>
-                <div class="col-6 col-md-3">
-                    <div class="legend-item d-flex align-items-center">
-                        <span class="legend-swatch cleaning"></span>
-                        <span>Cleaning</span>
-                    </div>
-                </div>
+
             </div>
 
 

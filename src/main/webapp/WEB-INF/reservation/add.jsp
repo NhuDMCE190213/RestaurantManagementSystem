@@ -55,6 +55,18 @@
                 <input type="hidden" name="tableId" id="tableId" value="<%= (selected != null) ? selected.getId() : ""%>">
 
                 <div class="mb-3">
+                    <label class="form-label">Voucher (optional)</label>
+                    <select class="form-select" name="voucherId">
+                        <option value="">-- No voucher --</option>
+                        <c:forEach var="v" items="${voucherList}">
+                            <option value="${v.voucherId}">
+                                ${v.voucherCode} - ${v.voucherName} (${v.currentDiscount})
+                            </option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label">Date</label>
                     <input type="date" name="reservationDate" id="reservationDate" class="form-control" required>
                 </div>

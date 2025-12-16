@@ -11,6 +11,7 @@ import static constant.CommonFunction.setPopup;
 import static constant.CommonFunction.validateString;
 import dao.ReservationDAO;
 import dao.TableDAO;
+import dao.VoucherDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -35,6 +36,7 @@ public class BookTableServlet extends HttpServlet {
 
     TableDAO tableDAO = new TableDAO();
     ReservationDAO reservationDAO = new ReservationDAO();
+    VoucherDAO voucherDAO = new VoucherDAO();
     public String json;
 
     /**
@@ -88,6 +90,7 @@ public class BookTableServlet extends HttpServlet {
                 Date date = Date.valueOf(LocalDate.now());
                 int tableId = Integer.parseInt(request.getParameter("tableId"));
                 request.setAttribute("selectedTable", tableDAO.getElementByID(tableId));
+                request.setAttribute("voucherList", voucherDAO.getAllAvailable());
                 List<Reservation> list = reservationDAO.getReservationsByTable(tableId);
                 List<Time[]> ranges = reservationDAO.getStartEndTimesByTableAndDate(tableId, date);
                 request.setAttribute("reservedRanges", ranges);
@@ -143,6 +146,9 @@ public class BookTableServlet extends HttpServlet {
             int tableId = Integer.parseInt(request.getParameter("tableId"));
             Date date = Date.valueOf(request.getParameter("reservationDate"));
 
+            String vRaw = request.getParameter("voucherId");
+            Integer voucherId = (vRaw == null || vRaw.isBlank()) ? null : Integer.valueOf(vRaw);
+
             // Lấy timeStart từ form (đã đổi tên input thành timeStart)
             String startStr = request.getParameter("timeStart");
 
@@ -173,6 +179,7 @@ public class BookTableServlet extends HttpServlet {
             // GỌI DAO MỚI — truyền đủ 5 tham số
             int check = reservationDAO.add(
                     customer.getCustomerId(),
+                    voucherId,  
                     tableId,
                     date,
                     timeStart,

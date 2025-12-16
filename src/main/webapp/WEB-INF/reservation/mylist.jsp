@@ -56,6 +56,7 @@
                             <th width="10%">Date</th>
                             <th width="10%">Time</th>
                             <th width="10%">Note</th>
+                            <th width="18%">Voucher</th>
                             <th width="2%">Status</th>
                             <th width="15%" class="text-end">Action</th>
                         </tr>
@@ -74,6 +75,14 @@
                                             ${fn:substring(r.timeStart, 0, 5)} - ${fn:substring(r.timeEnd, 0, 5)}
                                         </td>
                                         <td>${r.description}</td>   
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${empty r.voucher}">None</c:when>
+                                                <c:otherwise>
+                                                    ${r.voucher.voucherCode} - ${r.voucher.voucherName}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
                                         <td>
                                             <span class="badge
                                                   ${r.status == 'Approved' ? 'bg-success' : 
@@ -99,7 +108,7 @@
                                                                <c:param name='reservationId' value='${r.reservationId}'/>
                                                            </c:url>"
                                                            title="Add Order" aria-label="Add Order">
-                                                           <i class="bi bi-cart-plus-fill"></i>
+                                                            <i class="bi bi-cart-plus-fill"></i>
                                                         </a>
                                                         <a class="btn btn-outline-warning btn-icon btn-view"
                                                            href="<c:url value='/myOrder'>
@@ -107,7 +116,7 @@
                                                                <c:param name='reservationId' value='${r.reservationId}'/>
                                                            </c:url>"
                                                            title="Edit Order" aria-label="Edit Order">
-                                                           <i class="bi bi-cart-check"></i>
+                                                            <i class="bi bi-cart-check"></i>
 
                                                         </a>
                                                     </c:if>

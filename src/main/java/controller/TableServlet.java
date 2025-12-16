@@ -232,7 +232,6 @@ public class TableServlet extends HttpServlet {
                         || !(newStatus.equalsIgnoreCase("Available")
                         || newStatus.equalsIgnoreCase("Reserved")
                         || newStatus.equalsIgnoreCase("Serving")
-                        || newStatus.equalsIgnoreCase("Request Bill")
                         || newStatus.equalsIgnoreCase("Cleaning"))) {
                     popupStatus = false;
                     popupMessage = "Change status action is NOT successful. Invalid input.";

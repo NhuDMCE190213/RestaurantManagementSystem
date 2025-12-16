@@ -9,6 +9,50 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%@include file="/WEB-INF/include/headerDashboard.jsp" %>
+<style>
+    .admin-table {
+        table-layout: fixed; /* cột cố định, không bị nhảy */
+    }
+    .admin-table th, .admin-table td {
+        vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .admin-table .note-cell {
+        white-space: normal; /* note được xuống dòng */
+    }
+    .admin-table .time-cell {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        letter-spacing: .2px;
+    }
+    .admin-table .btn-icon {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .admin-table{
+        width: 100%;
+        table-layout: fixed; /* QUAN TRỌNG: ép theo colgroup */
+    }
+
+    .admin-table th, .admin-table td{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .admin-table td.note-cell{
+        white-space: normal;       /* NOTE cho xuống dòng */
+        word-break: break-word;
+    }
+
+</style>
+
 
 <section class="col-12 col-lg-9 col-xxl-10 table-section" aria-label="Listing table">
     <div class="content-card shadow-sm">
@@ -32,53 +76,82 @@
 
         <div class="table-responsive px-4 pb-2">
             <table class="table align-middle admin-table">
+                <colgroup>
+                    <col style="width:60px;">   <!-- ID -->
+                    <col style="width:160px;">  <!-- Customer -->
+                    <col style="width:160px;">  <!-- Employee -->
+                    <col style="width:220px;">  <!-- Voucher -->
+                    <col style="width:90px;">   <!-- Table -->
+                    <col style="width:120px;">  <!-- Date -->
+                    <col style="width:140px;">  <!-- Time -->
+                    <col style="width:180px;">   <!-- Note -->
+                    <col style="width:120px;">  <!-- Status -->
+                    <col style="width:150px;">  <!-- Action -->
+                </colgroup>
+
                 <thead>
                     <tr>
-                        <th width="5%">ID</th>
-                        <th width="15%">Customer</th>
-                        <th width="15%">Employee</th>
-                        <th width="10%">Table</th>
-                        <th width="10%">Date</th>
-                        <th width="10%">Time</th>
-                        <th width="15%">Note</th>
-                        <th width="5%">Status</th>
-                        <th width="15%" class="text-end">Action</th>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Employee</th>
+                        <th>Voucher</th>
+                        <th>Table</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Note</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     <c:choose>
                         <c:when test="${reservationList == null || empty reservationList}">
-                            <tr><td colspan="8" style="color:red;">No data to display</td></tr>
+                            <tr><td colspan="9" style="color:red;">No data to display</td></tr>
                         </c:when>
                         <c:otherwise>
                             <c:forEach var="r" items="${reservationList}">
                                 <tr>
                                     <td><c:out value="${r.reservationId}"/></td>
                                     <td><c:out value="${r.customer.customerName}"/></td>
-                                    <td><c:out value="${r.emp.empName}"/></td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${empty r.emp}">N/A</c:when>
+                                            <c:otherwise><c:out value="${r.emp.empName}"/></c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${empty r.voucher}">None</c:when>
+                                            <c:otherwise>
+                                                <c:out value="${r.voucher.voucherCode}"/> - <c:out value="${r.voucher.voucherName}"/>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
                                     <td><c:out value="${r.table.number}"/></td>
                                     <td><c:out value="${r.reservationDate}"/></td>
                                     <td>
                                         ${fn:substring(r.timeStart, 0, 5)} - ${fn:substring(r.timeEnd, 0, 5)}
                                     </td>
-                                    <td>${r.description}</td>
+                                    <td class="note-cell">${r.description}</td>
 
                                     <td>
                                         <span class="badge
                                               ${r.status == 'Approved' ? 'bg-success' :
                                                 (r.status == 'Rejected' ? 'bg-danger' :
                                                 (r.status == 'Cancelled' ? 'bg-secondary' :
-                                                (r.status == 'Complete' ? 'bg-primary' :
-                                                (r.status == 'Request Bill' ? 'badge-request-bill' :
-                                                (r.status == 'Cleaning' ? 'badge-cleaning' : 'bg-warning text-dark')))))}">
+                                                (r.status == 'Serving' ? 'bg-info' :
+                                                (r.status == 'Completed' ? 'bg-primary' :
+                                                'bg-warning text-dark'))))}">
                                               <c:out value="${r.status}"/>
                                         </span>
                                     </td>
 
+
                                     <td class="text-end">
                                         <div class="action-button-group d-flex justify-content-end gap-2">
 
-                                            <!-- Nút View Order (giữ nguyên từ remote) -->
+                                            <!-- View Order -->
                                             <a class="btn btn-outline-success btn-icon btn-view"
                                                href="<c:url value='/order'>
                                                    <c:param name='view' value='list'/>
@@ -88,40 +161,42 @@
                                                 <i class="bi bi-eye-fill"></i>
                                             </a>
 
-                                            <!-- ========================= PENDING ========================= -->
-                                            <!-- Khi trạng thái là PENDING thì hiện APPROVE + REJECT -->
+                                            <!-- PENDING: Approve + Reject -->
                                             <c:if test="${r.status eq 'Pending'}">
-
-                                                <!-- Approve -->
                                                 <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
                                                     <input type="hidden" name="action" value="approve"/>
                                                     <input type="hidden" name="id" value="${r.reservationId}"/>
-                                                    <button type="submit" class="btn btn-success btn-icon"
-                                                            title="Approve" aria-label="Approve">
+                                                    <button type="submit" class="btn btn-success btn-icon" title="Approve">
                                                         <i class="bi bi-check2-circle"></i>
                                                     </button>
                                                 </form>
 
-                                                <!-- Reject -->
                                                 <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
                                                     <input type="hidden" name="action" value="reject"/>
                                                     <input type="hidden" name="id" value="${r.reservationId}"/>
-                                                    <button type="submit" class="btn btn-danger btn-icon"
-                                                            title="Reject" aria-label="Reject">
+                                                    <button type="submit" class="btn btn-danger btn-icon" title="Reject">
                                                         <i class="bi bi-x-octagon"></i>
                                                     </button>
                                                 </form>
-
                                             </c:if>
 
-                                            <!-- ========================= APPROVED ========================= -->
-                                            <!-- Khi trạng thái đã Approved thì chỉ hiện COMPLETE -->
+                                            <!-- APPROVED: show Reserving -->
                                             <c:if test="${r.status eq 'Approved'}">
+                                                <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
+                                                    <input type="hidden" name="action" value="serving"/>
+                                                    <input type="hidden" name="id" value="${r.reservationId}"/>
+                                                    <button type="submit" class="btn btn-info btn-icon" title="Serving">
+                                                        <i class="bi bi-hourglass-split"></i>
+                                                    </button>
+                                                </form>
+                                            </c:if>
+
+                                            <!-- RESERVING: show Complete -->
+                                            <c:if test="${r.status eq 'Serving'}">
                                                 <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
                                                     <input type="hidden" name="action" value="complete"/>
                                                     <input type="hidden" name="id" value="${r.reservationId}"/>
-                                                    <button type="submit" class="btn btn-warning btn-icon"
-                                                            title="Complete" aria-label="Complete">
+                                                    <button type="submit" class="btn btn-warning btn-icon" title="Complete">
                                                         <i class="bi bi-check2-square"></i>
                                                     </button>
                                                 </form>
@@ -129,6 +204,7 @@
 
                                         </div>
                                     </td>
+
 
                                 </tr>
                             </c:forEach>

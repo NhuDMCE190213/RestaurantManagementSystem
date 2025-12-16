@@ -71,10 +71,6 @@
                                                 <span class="badge" style="background:#dc3545; color:white;">Serving</span>
                                             </c:when>
 
-                                            <c:when test="${fn:toLowerCase(table.status) == 'request bill'}">
-                                                <span class="badge" style="background:#6f42c1; color:white;">Request Bill</span>
-                                            </c:when>
-
                                             <c:when test="${fn:toLowerCase(table.status) == 'cleaning'}">
                                                 <span class="badge" style="background:#0dcaf0; color:#003b47;">Cleaning</span>
                                             </c:when>
@@ -131,15 +127,6 @@
                                                             <input type="hidden" name="newStatus" value="Serving" />
                                                             <button type="submit" name="action" value="changeStatus" class="dropdown-item" ${fn:toLowerCase(table.status) == 'serving' ? 'disabled' : ''}>
                                                                 Set Serving
-                                                            </button>
-                                                        </form>
-                                                    </li>
-                                                    <li>
-                                                        <form method="post" action="<c:url value='table'/>" class="px-2 py-1">
-                                                            <input type="hidden" name="id" value="${table.id}" />
-                                                            <input type="hidden" name="newStatus" value="Request Bill" />
-                                                            <button type="submit" name="action" value="changeStatus" class="dropdown-item" ${fn:toLowerCase(table.status) == 'request bill' ? 'disabled' : ''}>
-                                                                Set Request Bill
                                                             </button>
                                                         </form>
                                                     </li>

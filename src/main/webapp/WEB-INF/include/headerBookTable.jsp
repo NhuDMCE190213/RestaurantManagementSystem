@@ -56,8 +56,6 @@
                                 My Reservation
                             </a>
                         </li>
-
-                        <li><a href="<c:url value="myOrder"/>">My Order</a></li>
                     </ul>
                     <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
                 </nav>
