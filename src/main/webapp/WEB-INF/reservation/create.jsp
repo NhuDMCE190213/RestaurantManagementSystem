@@ -117,6 +117,32 @@
                 <textarea name="description" class="form-control"
                           placeholder="Eg: Vegetarian, no spicy, seafood allergy..."></textarea>
 
+                <c:if test="${not empty existingReservations}">
+                    <div class="mt-3">
+                        <label class="form-label fw-semibold">Booked time slots (Approved / Serving)</label>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 40%;">Date</th>
+                                        <th style="width: 30%;">Start</th>
+                                        <th style="width: 30%;">End</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach var="r" items="${existingReservations}">
+                                        <tr>
+                                            <td>${r.reservationDate}</td>
+                                            <td>${r.timeStart}</td>
+                                            <td>${r.timeEnd}</td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </c:if>
+
                 <!-- MESSAGE -->
                 <div id="availabilityMsg" class="mb-3"></div>
 
@@ -128,14 +154,48 @@
         </div>
 
         <script src="${pageContext.request.contextPath}/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <c:if test="${not empty sessionScope.popupMessage}">
+            <div class="modal fade show" id="popupModal" tabindex="-1" style="display:block; background:rgba(0,0,0,.4);">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <c:choose>
+                                    <c:when test="${sessionScope.popupStatus}">Success</c:when>
+                                    <c:otherwise>Action Fail</c:otherwise>
+                                </c:choose>
+                            </h5>
+                            <a href="${pageContext.request.contextPath}/reservation?view=add&tableId=${param.tableId}" class="btn-close"></a>
+                        </div>
+                        <div class="modal-body">
+                            <p style="color:${sessionScope.popupStatus ? 'green' : 'red'};">
+                                ${sessionScope.popupMessage}
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <a class="btn btn-secondary" href="${pageContext.request.contextPath}/reservation?view=add&tableId=${param.tableId}">
+                                Close
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <!-- DATA reservation đã có của bàn này -->
+            <%-- clear popup after show --%>
+            <%
+                session.removeAttribute("popupMessage");
+                session.removeAttribute("popupStatus");
+            %>
+        </c:if>
+
+
         <script>
             const existingReservations = [
             <c:forEach var="r" items="${existingReservations}" varStatus="loop">
             {
             date: '${r.reservationDate}',
-                    timeStart: '${r.timeStart}'
+                    start: '${r.timeStart}',
+                    end: '${r.timeEnd}'
             }<c:if test="${!loop.last}">,</c:if>
             </c:forEach>
             ];
@@ -156,7 +216,6 @@
                 const noCustomerHint = document.getElementById('noCustomerHint');
                 const quickCustomerPhone = document.getElementById('quickCustomerPhone');
 
-                // LƯU DANH SÁCH OPTION GỐC (chỉ khai báo 1 lần)
                 const originalCustomerOptions = Array.from(customerSelect.options);
 
                 dateEl.setAttribute('min', today);
@@ -165,7 +224,6 @@
                 searchPhoneInput.addEventListener('keyup', function () {
                     const keyword = this.value.trim().toLowerCase();
 
-                    // giữ lại option đầu tiên "-- Select customer --"
                     customerSelect.innerHTML = '';
                     customerSelect.appendChild(originalCustomerOptions[0]);
 
@@ -180,12 +238,10 @@
                         }
                     }
 
-                    // nếu không tìm thấy ai và có nhập số điện thoại -> hiện gợi ý tạo mới
                     if (keyword.length >= 3 && matchCount === 0) {
                         noCustomerHint.style.display = 'block';
-                        if (quickCustomerPhone) {
-                            quickCustomerPhone.value = this.value;   // đổ sẵn vào modal
-                        }
+                        if (quickCustomerPhone)
+                            quickCustomerPhone.value = this.value;
                     } else {
                         noCustomerHint.style.display = 'none';
                     }
@@ -198,23 +254,32 @@
                     availMsg.innerHTML = '<span class="' + cls + '">' + text + '</span>';
                 }
 
-                function toMinutes(timeStr) {
-                    if (!timeStr)
+                function toMinutes(t) {
+                    if (!t)
                         return 0;
-                    const parts = timeStr.split(':');
-                    return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                    const parts = t.split(':');
+                    const h = parseInt(parts[0], 10) || 0;
+                    const m = parseInt(parts[1], 10) || 0;
+                    return h * 60 + m;
                 }
 
-                // Check trùng (cùng ngày, lệch <= 195 phút)
-                function isConflict(selectedDate, selectedTime) {
-                    if (!selectedDate || !selectedTime)
+                function isOverlap(aStart, aEnd, bStart, bEnd) {
+                    return aStart < bEnd && aEnd > bStart;
+                }
+
+                // ✅ Check trùng theo overlap + trừ 15' cho slot đã đặt
+                function isConflict(selectedDate, selectedStart, selectedEnd) {
+                    if (!selectedDate || !selectedStart || !selectedEnd)
                         return false;
-                    const selectedMins = toMinutes(selectedTime);
+
+                    const ns = toMinutes(selectedStart);
+                    const ne = toMinutes(selectedEnd);
+
                     for (const r of existingReservations) {
                         if (r.date === selectedDate) {
-                            const existingMins = toMinutes(r.timeStart);
-                            const diff = Math.abs(selectedMins - existingMins);
-                            if (diff <= 195)
+                            const es = toMinutes(r.start) - 15; // trừ 15 phút
+                            const ee = toMinutes(r.end);        // end giữ nguyên
+                            if (isOverlap(ns, ne, es, ee))
                                 return true;
                         }
                     }
@@ -223,42 +288,58 @@
 
                 function validate() {
                     const date = dateEl.value;
-                    const timeStart = timeStartEl.value;
-                    const timeEnd = timeEndEl.value;
+                    const start = timeStartEl.value;
+                    const end = timeEndEl.value;
 
-                    if (!date || !timeStart || !timeEnd) {
-                        showMessage('Please select a date and time.', 'danger');
+                    if (!date || !start || !end) {
+                        showMessage('Please select date, start time and end time.', 'danger');
                         btnSubmit.disabled = true;
                         return;
                     }
+
+                    const startM = toMinutes(start);
+                    const endM = toMinutes(end);
 
                     // Giờ mở cửa 05:00 - 22:00
-                    if (timeStart < '05:00' || timeStart >= '22:00') {
-                        showMessage('Cannot book between 22:00 - 05:00.', 'danger');
+                    if (startM < 5 * 60 || startM >= 22 * 60) {
+                        showMessage('Start time must be between 05:00 and 21:59.', 'danger');
                         btnSubmit.disabled = true;
                         return;
                     }
 
-                    if (timeEnd <= timeStart) {
+                    if (endM <= 5 * 60 || endM > 22 * 60) {
+                        showMessage('End time must be between 05:01 and 22:00.', 'danger');
+                        btnSubmit.disabled = true;
+                        return;
+                    }
+
+                    if (endM <= startM) {
                         showMessage('End time must be later than start time.', 'danger');
                         btnSubmit.disabled = true;
                         return;
                     }
 
-                    if (isConflict(date, timeStart)) {
+                    if (isConflict(date, start, end)) {
                         showMessage('This time has already been booked. Please choose another time slot.', 'danger');
                         btnSubmit.disabled = true;
-                    } else {
-                        showMessage('Available time.', 'success');
-                        btnSubmit.disabled = false;
+                        return;
                     }
+
+                    showMessage('Available time.', 'success');
+                    btnSubmit.disabled = false;
                 }
 
                 dateEl.addEventListener('change', validate);
                 timeStartEl.addEventListener('change', validate);
                 timeEndEl.addEventListener('change', validate);
 
+                timeStartEl.addEventListener('input', validate);
+                timeEndEl.addEventListener('input', validate);
+
+                setTimeout(validate, 100);
+
                 document.getElementById('createForm').addEventListener('submit', function (e) {
+                    validate();
                     if (btnSubmit.disabled) {
                         e.preventDefault();
                         showMessage('Unable to submit because the time is unavailable.', 'danger');

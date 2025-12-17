@@ -7,6 +7,7 @@
 <%@page import="model.Table"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%
     Table selected = (Table) request.getAttribute("selectedTable");
@@ -111,7 +112,7 @@
                         <strong>️The time slots have been booked:</strong>
                         <ul class="mb-0">
                             <c:forEach var="r" items="${reservedRanges}">
-                                <li>${r[0]} → ${r[1]}</li>
+                                <li><fmt:formatDate value="${r[0]}" pattern="dd/MM/yyyy"/> : ${r[1]} → ${r[2]}</li>
                                 </c:forEach>
                         </ul>
                     </div>
@@ -144,11 +145,13 @@
             {
             id: ${r.reservationId},
                     date: '${r.reservationDate}',
-                    timeStart: '${r.timeStart}'
+                    start: '${r.timeStart}',
+                    end: '${r.timeEnd}'
             }<c:if test="${!loop.last}">,</c:if>
             </c:forEach>
             ];
         </script>
+
 
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -187,26 +190,31 @@
                     return h * 60 + m;
                 }
 
-                function isConflict(selectedDate, selectedTime) {
-                    if (!selectedDate || !selectedTime)
+                function isOverlap(aStart, aEnd, bStart, bEnd) {
+                    return aStart < bEnd && aEnd > bStart;
+                }
+
+                function isConflict(selectedDate, selectedStart, selectedEnd) {
+                    if (!selectedDate || !selectedStart || !selectedEnd)
                         return false;
 
-                    const selectedMins = toMinutes(selectedTime);
+                    const ns = toMinutes(selectedStart);
+                    const ne = toMinutes(selectedEnd);
 
                     for (const r of existingReservations) {
                         if (r.id === currentReservationId)
                             continue; // ✅ bỏ qua chính nó
 
                         if (r.date === selectedDate) {
-                            const existingMins = toMinutes(r.timeStart);
-                            const diff = Math.abs(selectedMins - existingMins);
-
-                            if (diff <= 195)
-                                return true; // trong 3h15p
+                            const es = toMinutes(r.start) - 15; // ✅ trừ 15 phút
+                            const ee = toMinutes(r.end);
+                            if (isOverlap(ns, ne, es, ee))
+                                return true;
                         }
                     }
                     return false;
                 }
+
 
                 function validate() {
                     const date = dateEl.value;
@@ -243,18 +251,19 @@
                         return;
                     }
 
-                    // ✅ Check conflict theo start time (như bạn đang làm)
-                    if (isConflict(date, start)) {
+                    
+                    if (isConflict(date, start, end)) {
                         showMessage('This time has already been booked. Please choose another time slot.', 'danger');
                         btnSubmit.disabled = true;
                         return;
                     }
 
+
                     showMessage('Available time.', 'success');
                     btnSubmit.disabled = false;
                 }
 
-                // ✅ Bắt event cho cả 3 input
+                
                 dateEl.addEventListener('change', validate);
                 timeStartEl.addEventListener('change', validate);
                 timeEndEl.addEventListener('change', validate);

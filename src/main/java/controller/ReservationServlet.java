@@ -132,6 +132,8 @@ public class ReservationServlet extends HttpServlet {
             // gửi bàn đã chọn + danh sách customer + reservation hiện có của bàn đó
             request.setAttribute("selectedTable", selectedTable);
             request.setAttribute("listCustomer", customerDAO.getAll());
+            request.setAttribute("reservedRanges",
+                    reservationDAO.getStartEndTimesByTableAndDate(tableId, Date.valueOf(java.time.LocalDate.now().toString())));
             request.setAttribute("existingReservations", reservationDAO.getReservationsByTable(tableId));
 
             request.getRequestDispatcher("/WEB-INF/reservation/create.jsp").forward(request, response);
@@ -271,13 +273,25 @@ public class ReservationServlet extends HttpServlet {
 
                 if (!timeEnd.after(timeStart)) {
                     setPopup(request, false, "End time must be later than start time.");
-                    response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                    response.sendRedirect(request.getContextPath() + "/reservation?view=add&tableId=" + tableId);
+                    return;
+                }
+
+                boolean ok = reservationDAO.isTimeSlotAvailable(tableId, date, timeStart, timeEnd, null);
+                if (!ok) {
+                    setPopup(request, false, "This table has already been booked in the selected time range.");
+                    response.sendRedirect(request.getContextPath() + "/reservation?view=add&tableId=" + tableId);
                     return;
                 }
 
             } catch (Exception e) {
                 setPopup(request, false, "Invalid input for Add Reservation.");
-                response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                String t = request.getParameter("tableId");
+                if (t != null && !t.isBlank()) {
+                    response.sendRedirect(request.getContextPath() + "/reservation?view=add&tableId=" + t);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/reservation?view=bookatable");
+                }
                 return;
             }
 
@@ -287,14 +301,14 @@ public class ReservationServlet extends HttpServlet {
             Customer customer = customerDAO.getElementByID(customerId);
             if (customer == null) {
                 setPopup(request, false, "Customer not found.");
-                response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                response.sendRedirect(request.getContextPath() + "/reservation?view=add&tableId=" + tableId);
                 return;
             }
 
             model.Table selectedTable = tableDAO.getElementByID(tableId);
             if (selectedTable == null) {
                 setPopup(request, false, "Table not found.");
-                response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                response.sendRedirect(request.getContextPath() + "/reservation?view=add&tableId=" + tableId);
                 return;
             }
 
@@ -304,14 +318,14 @@ public class ReservationServlet extends HttpServlet {
             jakarta.servlet.http.HttpSession session = request.getSession(false);
             if (session == null) {
                 setPopup(request, false, "Employee is not logged in.");
-                response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                response.sendRedirect(request.getContextPath() + "/reservation?view=add&tableId=" + tableId);
                 return;
             }
 
             Employee emp = (Employee) session.getAttribute("employeeSession");
             if (emp == null) {
                 setPopup(request, false, "Employee is not logged in.");
-                response.sendRedirect(request.getContextPath() + "/reservation?view=add");
+                response.sendRedirect(request.getContextPath() + "/reservation?view=add&tableId=" + tableId);
                 return;
             }
 
@@ -432,7 +446,7 @@ public class ReservationServlet extends HttpServlet {
                                     ex.printStackTrace();
                                 }
                             }
-                            
+
                             if ("serving".equalsIgnoreCase(action)) {
                                 try {
                                     int tableId = current.getTable().getId();

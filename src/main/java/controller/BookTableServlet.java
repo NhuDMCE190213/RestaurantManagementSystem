@@ -92,7 +92,7 @@ public class BookTableServlet extends HttpServlet {
                 request.setAttribute("selectedTable", tableDAO.getElementByID(tableId));
                 request.setAttribute("voucherList", voucherDAO.getAllAvailable());
                 List<Reservation> list = reservationDAO.getReservationsByTable(tableId);
-                List<Time[]> ranges = reservationDAO.getStartEndTimesByTableAndDate(tableId, date);
+                List<Object[]> ranges = reservationDAO.getStartEndTimesByTableAndDate(tableId, date);
                 request.setAttribute("reservedRanges", ranges);
 
                 if (list == null) {
@@ -179,7 +179,7 @@ public class BookTableServlet extends HttpServlet {
             // GỌI DAO MỚI — truyền đủ 5 tham số
             int check = reservationDAO.add(
                     customer.getCustomerId(),
-                    voucherId,  
+                    voucherId,
                     tableId,
                     date,
                     timeStart,
@@ -189,7 +189,7 @@ public class BookTableServlet extends HttpServlet {
 
             if (check < 1) {
                 popupStatus = false;
-                popupMessage = "Booking failed. SQL error: " + getSqlErrorCode(check);
+                popupMessage = "You cannot make a reservation in the past. Please choose a time after the present";
             } else {
                 if (selectedTable != null
                         && ("Serving".equalsIgnoreCase(selectedTable.getStatus())
