@@ -6,110 +6,98 @@
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<c:set var="title" value="My Profile - Yummy Restaurant"/>
-
+<c:set var="title" value="Employee Profile - Yummy Dashboard"/>
 <%@ include file="/WEB-INF/include/headerDashboard.jsp" %>
 
-<section class="col-12 col-lg-9 col-xxl-10" aria-label="Profile section">
+<section class="col-12 col-lg-9 col-xxl-10">
     <div class="content-card shadow-sm p-4 p-md-5 mt-3">
-
-        <%-- Messages --%>
+        <!-- Messages -->
         <c:if test="${not empty successMessage}">
-            <div class="alert alert-success d-flex align-items-center" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <div>${successMessage}</div>
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle me-2"></i>${successMessage}
             </div>
         </c:if>
-
         <c:if test="${not empty errorMessage}">
-            <div class="alert alert-danger d-flex align-items-center" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                <div>${errorMessage}</div>
+            <div class="alert alert-danger d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>${errorMessage}
             </div>
         </c:if>
 
-        <h3 class="mb-4 text-center">Profile Information</h3>
+        <h3 class="mb-4 text-center">Employee Profile</h3>
 
-        <div class="profile-info">
-            <div class="row py-3 border-bottom">
+        <div>
+            <!-- Username -->
+            <div class="row border-bottom py-3">
                 <div class="col-sm-4 fw-semibold text-secondary">Username</div>
-                <div class="col-sm-8"><strong>${employee.empAccount}</strong></div>
+                <div class="col-sm-8">${employee.empAccount}</div>
             </div>
 
-            <div class="row py-3 border-bottom">
+            <!-- Role -->
+            <div class="row border-bottom py-3">
                 <div class="col-sm-4 fw-semibold text-secondary">Role</div>
                 <div class="col-sm-8">
                     <c:choose>
                         <c:when test="${not empty employee.role.name}">
                             ${employee.role.name}
                         </c:when>
-                        <c:otherwise><span class="text-muted fst-italic">Not provided</span></c:otherwise>
+                        <c:otherwise><span class="text-muted">Not provided</span></c:otherwise>
                     </c:choose>
                 </div>
             </div>
 
-            <div class="row py-3 border-bottom">
+            <!-- Full Name -->
+            <div class="row border-bottom py-3">
                 <div class="col-sm-4 fw-semibold text-secondary">Full Name</div>
                 <div class="col-sm-8">
                     <c:choose>
                         <c:when test="${not empty employee.empName}">
                             ${employee.empName}
                         </c:when>
-                        <c:otherwise><span class="text-muted fst-italic">Not provided</span></c:otherwise>
+                        <c:otherwise><span class="text-muted">Not provided</span></c:otherwise>
                     </c:choose>
                 </div>
             </div>
 
-            <div class="row py-3 border-bottom">
+            <!-- Gender -->
+            <div class="row border-bottom py-3">
                 <div class="col-sm-4 fw-semibold text-secondary">Gender</div>
                 <div class="col-sm-8">
                     <c:choose>
                         <c:when test="${not empty employee.gender}">
                             ${employee.gender}
                         </c:when>
-                        <c:otherwise><span class="text-muted fst-italic">Not provided</span></c:otherwise>
+                        <c:otherwise><span class="text-muted">Not provided</span></c:otherwise>
                     </c:choose>
                 </div>
             </div>
 
-            <div class="row py-3 border-bottom">
+            <!-- Phone -->
+            <div class="row border-bottom py-3">
                 <div class="col-sm-4 fw-semibold text-secondary">Phone Number</div>
-                <div class="col-sm-8">
-                    <c:choose>
-                        <c:when test="${not empty employee.phoneNumber}">
-                            ${employee.phoneNumber}
-                        </c:when>
-                        <c:otherwise><span class="text-muted fst-italic">Not provided</span></c:otherwise>
-                    </c:choose>
-                </div>
+                <div class="col-sm-8">${employee.phoneNumber}</div>
             </div>
 
-            <div class="row py-3 border-bottom">
-                <div class="col-sm-4 fw-semibold text-secondary">Email Address</div>
-                <div class="col-sm-8">
-                    <c:choose>
-                        <c:when test="${not empty employee.email}">
-                            ${employee.email}
-                        </c:when>
-                        <c:otherwise><span class="text-muted fst-italic">Not provided</span></c:otherwise>
-                    </c:choose>
-                </div>
+            <!-- Email -->
+            <div class="row border-bottom py-3">
+                <div class="col-sm-4 fw-semibold text-secondary">Email</div>
+                <div class="col-sm-8">${employee.email}</div>
             </div>
 
-            <div class="row py-3 border-bottom">
+            <!-- Address -->
+            <div class="row border-bottom py-3">
                 <div class="col-sm-4 fw-semibold text-secondary">Address</div>
                 <div class="col-sm-8">
                     <c:choose>
                         <c:when test="${not empty employee.address}">
                             ${employee.address}
                         </c:when>
-                        <c:otherwise><span class="text-muted fst-italic">Not provided</span></c:otherwise>
+                        <c:otherwise><span class="text-muted">Not provided</span></c:otherwise>
                     </c:choose>
                 </div>
             </div>
 
+            <!-- DOB -->
             <div class="row py-3">
                 <div class="col-sm-4 fw-semibold text-secondary">Date of Birth</div>
                 <div class="col-sm-8">
@@ -117,12 +105,13 @@
                         <c:when test="${not empty employee.dob}">
                             ${employee.dob}
                         </c:when>
-                        <c:otherwise><span class="text-muted fst-italic">Not provided</span></c:otherwise>
+                        <c:otherwise><span class="text-muted">Not provided</span></c:otherwise>
                     </c:choose>
                 </div>
             </div>
         </div>
 
+        <!-- Actions -->
         <div class="text-center mt-4 pt-4 border-top">
             <a href="employee-profile?action=edit" class="btn btn-danger px-5 py-2 me-3">
                 <i class="bi bi-pencil-square me-1"></i> Edit Profile

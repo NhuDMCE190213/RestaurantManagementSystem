@@ -6,6 +6,7 @@ package controller;
 
 import constant.HashUtil;
 import dao.EmployeeDAO;
+import db.DBContext;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -17,9 +18,11 @@ import jakarta.servlet.http.HttpSession;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Employee;
+import utils.EmailSender;
 
 /**
  *
@@ -28,9 +31,11 @@ import model.Employee;
 @WebServlet(name = "MyEmployeeProfileServlet", urlPatterns = {"/employee-profile"})
 public class MyEmployeeProfileServlet extends HttpServlet {
 
+    private static final int OTP_LENGTH = 6;
     private EmployeeDAO employeeDAO = new EmployeeDAO();
-    
-    
+    private DBContext db = new DBContext();
+    private EmailSender emailSender = new EmailSender();
+
     private boolean isNullOrEmpty(String str) {
         return str == null || str.trim().isEmpty();
     }
@@ -84,7 +89,6 @@ public class MyEmployeeProfileServlet extends HttpServlet {
         request.removeAttribute("popupStatus");
         request.removeAttribute("popupMessage");
     }
-
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -174,9 +178,49 @@ public class MyEmployeeProfileServlet extends HttpServlet {
         }
     }
 
+    private String generateOTP() {
+        Random random = new Random();
+        int min = (int) Math.pow(10, OTP_LENGTH - 1);
+        int max = (int) Math.pow(10, OTP_LENGTH) - 1;
+        int code = random.nextInt(max - min + 1) + min;
+        return String.valueOf(code);
+    }
+
     private void updateProfile(HttpServletRequest request, HttpServletResponse response,
             HttpSession session, Employee employee)
             throws ServletException, IOException {
+        String submittedOtp = request.getParameter("otp_code");
+        String storedOtp = (String) session.getAttribute("otpCode");
+        String newEmailPending = (String) session.getAttribute("newEmailPending");
+        Employee tempEmpData = (Employee) session.getAttribute("tempEmpData");
+
+        if (!isNullOrEmpty(submittedOtp) && storedOtp != null && newEmailPending != null && tempEmpData != null) {
+            if (!storedOtp.equals(submittedOtp)) {
+                setErrorPopup(request, "Invalid verification code. Please check your email and try again.");
+                request.setAttribute("employee", tempEmpData);
+                request.getRequestDispatcher("/WEB-INF/profile/edit-emp.jsp").forward(request, response);
+                return;
+            }
+
+            int result = employeeDAO.edit(employee.getEmpId(), employee.getEmpAccount(),
+                    tempEmpData.getEmpName(), tempEmpData.getGender(),
+                    tempEmpData.getDob(), tempEmpData.getPhoneNumber(),
+                    newEmailPending, tempEmpData.getAddress());
+
+            if (result > 0) {
+                Employee updated = employeeDAO.getElementByID(employee.getEmpId());
+                session.setAttribute("employeeSession", updated);
+                setSuccessPopup(request, "Profile and email updated successfully.");
+            } else {
+                setErrorPopup(request, "Email verified but profile update failed due to a database error.");
+            }
+
+            session.removeAttribute("otpCode");
+            session.removeAttribute("newEmailPending");
+            session.removeAttribute("tempEmpData");
+            response.sendRedirect(request.getContextPath() + "/employee-profile?action=view");
+            return;
+        }
 
         String name = request.getParameter("emp_name");
         String gender = request.getParameter("gender");
@@ -184,66 +228,76 @@ public class MyEmployeeProfileServlet extends HttpServlet {
         String email = request.getParameter("email");
         String address = request.getParameter("address");
         String dobStr = request.getParameter("dob");
-
         Date dob = null;
         String errorMessage = null;
+
+        Employee submittedData = new Employee(employee.getEmpId(), employee.getEmpAccount(), employee.getPassword(),
+                name, gender, dob, phone, email, address);
 
         if (!isNullOrEmpty(dobStr)) {
             try {
                 dob = Date.valueOf(dobStr);
-            } catch (Exception e) {
+                submittedData.setDob(dob);
+            } catch (IllegalArgumentException e) {
                 errorMessage = "Invalid date format for Date of Birth.";
             }
         }
-        
         if (isNullOrEmpty(name)) {
             errorMessage = "Full Name is required.";
-
         } else if (errorMessage == null && !isValidEmail(email)) {
             errorMessage = "Invalid email format.";
-
         } else if (errorMessage == null && !isValidPhone(phone)) {
-            errorMessage = "Invalid phone number format. Must be 10 digits.";
-
+            errorMessage = "Invalid phone number format.";
         } else if (errorMessage == null && dob != null && !isValidAgeRange(dob, 18, 70)) {
             errorMessage = "Age must be between 18 and 70 years old.";
         }
-        
-        if (errorMessage == null && !email.equalsIgnoreCase(employee.getEmail())) {
-            try {
-                if (employeeDAO.checkEmailExist(email)) {
-                    errorMessage = "This email is already in use.";
-                }
-            } catch (Exception e) {
-                Logger.getLogger(MyEmployeeProfileServlet.class.getName())
-                        .log(Level.SEVERE, "Email check failed", e);
-                errorMessage = "Error checking email.";
-            }
-        }
-        
-        if (errorMessage == null && !phone.equals(employee.getPhoneNumber())) {
+
+        // Check if phone or email already exists
+        if (errorMessage == null && phone != null && !phone.equals(employee.getPhoneNumber())) {
             try {
                 if (employeeDAO.checkPhoneExist(phone)) {
                     errorMessage = "This phone number is already registered.";
                 }
-            } catch (Exception e) {
-                Logger.getLogger(MyEmployeeProfileServlet.class.getName())
-                        .log(Level.SEVERE, "Phone check failed", e);
-                errorMessage = "Error checking phone number.";
+            } catch (Exception ex) {
+                Logger.getLogger(MyEmployeeProfileServlet.class.getName()).log(Level.SEVERE, "Error checking phone existence", ex);
+                errorMessage = "Error checking phone number existence.";
             }
         }
-        
+
+        boolean emailChanged = email != null && !email.equalsIgnoreCase(employee.getEmail());
+
+        if (errorMessage == null && emailChanged) {
+            try {
+                if (employeeDAO.checkEmailExist(email)) {
+                    errorMessage = "This email address is already in use by another account.";
+                } else {
+                    String otpCode = generateOTP();
+                    String subject = "Email Change Verification Code";
+                    String content = "Your verification code to update your email address is: " + otpCode;
+
+                    emailSender.authenticatebyEmail(email, subject, content);
+
+                    session.setAttribute("otpCode", otpCode);
+                    session.setAttribute("newEmailPending", email);
+                    session.setAttribute("tempEmpData", submittedData);
+
+                    setSuccessPopup(request, "A verification code has been sent to your new email (" + email + "). Please enter it below to confirm the change.");
+                    request.setAttribute("employee", submittedData);
+                    request.getRequestDispatcher("/WEB-INF/profile/edit-emp.jsp").forward(request, response);
+                    return;
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(MyEmployeeProfileServlet.class.getName()).log(Level.SEVERE, "Error during email check or sending OTP", ex);
+                errorMessage = "Error processing email change: " + ex.getMessage();
+            }
+        }
+
         if (errorMessage != null) {
             setErrorPopup(request, errorMessage);
-
-            Employee temp = new Employee(
-                    employee.getEmpId(),
-                    employee.getEmpAccount(),
-                    employee.getPassword(),
-                    name, gender, dob, phone, email, address
-            );
-
-            request.setAttribute("employee", temp);
+            request.setAttribute("employee", submittedData);
+            session.removeAttribute("otpCode");
+            session.removeAttribute("newEmailPending");
+            session.removeAttribute("tempEmpData");
             request.getRequestDispatcher("/WEB-INF/profile/edit-emp.jsp").forward(request, response);
             return;
         }
@@ -262,10 +316,12 @@ public class MyEmployeeProfileServlet extends HttpServlet {
         if (result > 0) {
             Employee updated = employeeDAO.getElementByID(employee.getEmpId());
             session.setAttribute("employeeSession", updated);
+            session.removeAttribute("otpCode");
+            session.removeAttribute("newEmailPending");
+            session.removeAttribute("tempEmpData");
 
             setSuccessPopup(request, "Profile updated successfully.");
             response.sendRedirect(request.getContextPath() + "/employee-profile?action=view");
-
         } else {
             setErrorPopup(request, "Failed to update profile. Database error.");
             request.setAttribute("employee", employee);
@@ -276,25 +332,28 @@ public class MyEmployeeProfileServlet extends HttpServlet {
     private void changePassword(HttpServletRequest request, HttpServletResponse response,
             HttpSession session, Employee employee)
             throws ServletException, IOException {
-        String oldPass = request.getParameter("oldPassword");
-        String newPass = request.getParameter("newPassword");
-        String confirm = request.getParameter("confirmPassword");
+
+        String oldPassword = request.getParameter("oldPassword");
+        String newPassword = request.getParameter("newPassword");
+        String confirmPassword = request.getParameter("confirmPassword");
 
         String errorMessage = null;
 
-        if (isNullOrEmpty(oldPass) || isNullOrEmpty(newPass) || isNullOrEmpty(confirm)) {
+        if (isNullOrEmpty(oldPassword) || isNullOrEmpty(newPassword) || isNullOrEmpty(confirmPassword)) {
             errorMessage = "Please fill all fields.";
         }
 
         if (errorMessage == null) {
-            String hashedOld = HashUtil.toMD5(oldPass);
+            String hashedOld = db.hashToMD5(oldPassword);
             if (!hashedOld.equals(employee.getPassword())) {
                 errorMessage = "Old password is incorrect.";
             }
         }
 
-        if (errorMessage == null && !newPass.equals(confirm)) {
-            errorMessage = "New password and confirmation do not match.";
+        if (errorMessage == null) {
+            if (!newPassword.equals(confirmPassword)) {
+                errorMessage = "New password and confirmation do not match.";
+            }
         }
 
         if (errorMessage != null) {
@@ -303,16 +362,15 @@ public class MyEmployeeProfileServlet extends HttpServlet {
             return;
         }
 
-        String hashedNew = HashUtil.toMD5(newPass);
+        String hashedNew = db.hashToMD5(newPassword);
         int result = employeeDAO.edit(employee.getEmpId(), hashedNew);
 
         if (result > 0) {
             employee.setPassword(hashedNew);
             session.setAttribute("employeeSession", employee);
-
             setSuccessPopup(request, "Password changed successfully.");
             response.sendRedirect(request.getContextPath() + "/employee-profile?action=view");
-
+            return;
         } else {
             setErrorPopup(request, "Failed to change password. Database error.");
             request.getRequestDispatcher("/WEB-INF/profile/changepassword-emp.jsp").forward(request, response);

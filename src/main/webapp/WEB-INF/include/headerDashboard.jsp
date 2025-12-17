@@ -109,8 +109,6 @@
                                     <li><a href="reservation"><i class="bi bi-calendar-check"></i> Reservation List</a></li>
                                     <li><a href="table"><i class="bi bi-grid-3x3"></i> Table List</a></li>
                                     <li><a href="ingredient"><i class="bi bi-basket"></i> Ingredient List</a></li>
-
-                                    <li><a href="order"><i class="bi bi-receipt"></i> Order List</a></li>
                                     </c:if>
 
                                 <%-- Chef (ID: 4) Access --%>
