@@ -227,7 +227,7 @@ public class VoucherDAO extends DBContext {
         return 0;
     }
 
-    public int decrease1Quantity(int id) {
+    public int increaseUsed(int id) {
         try {
             String query = "UPDATE Voucher\n"
                     + "SET used = used + 1\n"
