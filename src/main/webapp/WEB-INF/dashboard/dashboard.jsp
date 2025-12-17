@@ -133,7 +133,7 @@
                 data: {
                     labels: [
                         'Waiting Deposit',
-                        'Reserving',
+                        'Serving',
                         'Approved',
                         'Unpaid',
                         'Completed',
@@ -145,7 +145,7 @@
                     datasets: [{
                             data: [
             ${waitingDepositCount},
-            ${reservingCount},
+            ${servingCount},
             ${approvedCount},
             ${unpaidCount},
             ${completedCount},
