@@ -20,7 +20,7 @@ import model.Employee;
  *
  * @author Dai Minh Nhu - CE190213
  */
-@WebFilter(filterName = "ManagerFilter", urlPatterns = {"/menuItem", "/supplier", "/employee", "/customer"})
+@WebFilter(filterName = "ManagerFilter", urlPatterns = {"/menuItem", "/employee", "/customer"})
 public class ManagerFilter implements Filter {
 
     @Override

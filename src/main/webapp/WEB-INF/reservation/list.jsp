@@ -126,14 +126,19 @@
                                     <td class="note-cell">${r.description}</td>
 
                                     <td>
+                                        <c:set var="st" value="${r.status}" />
                                         <span class="badge
-                                              ${r.status == 'Approved' ? 'bg-success' :
-                                                (r.status == 'Rejected' ? 'bg-danger' :
-                                                (r.status == 'Cancelled' ? 'bg-secondary' :
-                                                (r.status == 'Serving' ? 'bg-info' :
-                                                (r.status == 'Completed' ? 'bg-primary' :
-                                                'bg-warning text-dark'))))}">
-                                              <c:out value="${r.status}"/>
+                                              ${st == 'Approved' ? 'bg-success' :
+                                                (st == 'Waiting_deposit' ? 'bg-warning text-dark' :
+                                                (st == 'Cancelled_before_deposit' ? 'bg-secondary' :
+                                                (st == 'Cancelled_after_deposit' ? 'bg-secondary' :
+                                                (st == 'Rejected' ? 'bg-danger' :
+                                                (st == 'No_show' ? 'bg-dark' :
+                                                (st == 'Reserving' || st == 'Serving' ? 'bg-info' :
+                                                (st == 'Unpaid' ? 'bg-danger' :
+                                                (st == 'Completed' || st == 'Complete' ? 'bg-primary' :
+                                                'bg-light text-dark'))))))))}">
+                                              <c:out value="${st}"/>
                                         </span>
                                     </td>
 
@@ -152,7 +157,7 @@
                                             </a>
 
                                             <!-- PENDING: Approve + Reject -->
-                                            <c:if test="${r.status eq 'Pending'}">
+                                            <c:if test="${r.status eq 'Waiting_deposit'}">
                                                 <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
                                                     <input type="hidden" name="action" value="approve"/>
                                                     <input type="hidden" name="id" value="${r.reservationId}"/>
@@ -172,6 +177,8 @@
 
                                             <!-- APPROVED: show Reserving -->
                                             <c:if test="${r.status eq 'Approved'}">
+
+                                                <!-- Serving -->
                                                 <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
                                                     <input type="hidden" name="action" value="serving"/>
                                                     <input type="hidden" name="id" value="${r.reservationId}"/>
@@ -179,10 +186,22 @@
                                                         <i class="bi bi-hourglass-split"></i>
                                                     </button>
                                                 </form>
+
+                                                <!-- No_show -->
+                                                <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
+                                                    <input type="hidden" name="action" value="no_show"/>
+                                                    <input type="hidden" name="id" value="${r.reservationId}"/>
+                                                    <button type="submit" class="btn btn-dark btn-icon" title="No show">
+                                                        <i class="bi bi-person-x-fill"></i>
+                                                    </button>
+                                                </form>
+
                                             </c:if>
 
-                                            <!-- RESERVING: show Complete -->
+                                            <!-- SERVING: show Complete + Unpaid -->
                                             <c:if test="${r.status eq 'Serving'}">
+
+                                                <!-- Complete -->
                                                 <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
                                                     <input type="hidden" name="action" value="complete"/>
                                                     <input type="hidden" name="id" value="${r.reservationId}"/>
@@ -190,6 +209,16 @@
                                                         <i class="bi bi-check2-square"></i>
                                                     </button>
                                                 </form>
+
+                                                <!-- Unpaid -->
+                                                <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
+                                                    <input type="hidden" name="action" value="unpaid"/>
+                                                    <input type="hidden" name="id" value="${r.reservationId}"/>
+                                                    <button type="submit" class="btn btn-danger btn-icon" title="Unpaid">
+                                                        <i class="bi bi-exclamation-circle"></i>
+                                                    </button>
+                                                </form>
+
                                             </c:if>
 
                                         </div>

@@ -186,6 +186,10 @@ public class MyReservationServlet extends HttpServlet {
             if (vRaw != null && !vRaw.isBlank()) {
                 voucherId = Integer.valueOf(vRaw);
             }
+            String description = request.getParameter("description");
+            if (description == null) {
+                description = "";
+            }
 
             try {
                 id = Integer.parseInt(request.getParameter("reservationId"));
@@ -230,7 +234,7 @@ public class MyReservationServlet extends HttpServlet {
                 return;
             }
 
-            int check = reservationDAO.edit(id, tableId, date, timeStart, timeEnd, voucherId);
+            int check = reservationDAO.edit(id, tableId, date, timeStart, timeEnd, voucherId, description);
             if (check < 1) {
                 popupStatus = false;
                 popupMessage = "Edit failed. SQL: " + getSqlErrorCode(check);

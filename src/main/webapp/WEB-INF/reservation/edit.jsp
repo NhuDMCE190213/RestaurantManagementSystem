@@ -101,6 +101,11 @@
                     </select>
                 </div>
 
+                <label class="form-label">Note</label>
+                <textarea name="description" class="form-control" rows="3"
+                          placeholder="Your note...">${currentReservation.description}</textarea>
+
+
                 <c:if test="${not empty reservedRanges}">
                     <div class="alert alert-warning mt-3">
                         <strong>️The time slots have been booked:</strong>

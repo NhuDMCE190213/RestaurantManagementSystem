@@ -20,7 +20,7 @@ import model.Employee;
  *
  * @author Dai Minh Nhu - CE190213
  */
-@WebFilter(filterName = "ChefFilter", urlPatterns = {"/ingredient", "/recipe", "/import"})
+@WebFilter(filterName = "ChefFilter", urlPatterns = {"/ingredient", "/recipe"})
 public class ChefFilter implements Filter {
 
     @Override
