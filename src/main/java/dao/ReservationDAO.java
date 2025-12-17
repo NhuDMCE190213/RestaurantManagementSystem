@@ -1,6 +1,6 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+     * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+     * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package dao;
 
@@ -27,6 +27,8 @@ import model.Voucher;
  * @author You
  */
 public class ReservationDAO extends DBContext {
+
+    public static final int ERR_PAST_TIME = -9999;
 
     public Reservation getElementByTableId(int id) {
         try {
@@ -192,6 +194,9 @@ public class ReservationDAO extends DBContext {
     }
 
     public int add(int customerId, Integer voucherId, int tableId, Date date, Time time_start, Time time_end, String description) {
+        if (checkDateRealTime(date, time_start) <= 0) {
+            return ERR_PAST_TIME;
+        }
         try {
             String sql = "INSERT INTO reservation (customer_id, voucher_id, table_id, reservation_date, time_start, time_end, description, status) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -328,19 +333,23 @@ public class ReservationDAO extends DBContext {
     public List<Reservation> getReservationsByTable(int tableId) {
         List<Reservation> list = new ArrayList<>();
         try {
-            String sql = "SELECT reservation_id, reservation_date, time_start, time_end "
+            String sql = "SELECT reservation_id, reservation_date, time_start, time_end, status "
                     + "FROM reservation "
-                    + "WHERE table_id = ? AND LOWER(status) IN ('approved','pending')";
+                    + "WHERE table_id = ? AND LOWER(status) IN ('approved','serving') "
+                    + "ORDER BY reservation_date DESC, time_start";
+
             ResultSet rs = this.executeSelectionQuery(sql, new Object[]{tableId});
             while (rs.next()) {
-                list.add(new Reservation(
+                Reservation r = new Reservation(
                         rs.getInt("reservation_id"),
                         null, null, null, null,
                         rs.getDate("reservation_date"),
                         rs.getTime("time_start"),
                         rs.getTime("time_end"),
-                        null, null
-                ));
+                        null,
+                        rs.getString("status")
+                );
+                list.add(r);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -348,21 +357,23 @@ public class ReservationDAO extends DBContext {
         return list;
     }
 
-    public List<Time[]> getStartEndTimesByTableAndDate(int tableId, Date date) {
-        List<Time[]> list = new ArrayList<>();
+    public List<Object[]> getStartEndTimesByTableAndDate(int tableId, Date date) {
+        List<Object[]> list = new ArrayList<>();
         try {
-            String sql = "SELECT "
-                    + "DATEADD(MINUTE, -15, time_start) AS start_time, "
-                    + "DATEADD(HOUR, 3, time_start) AS end_time "
+            String sql = "SELECT reservation_date, "
+                    + "CAST(DATEADD(MINUTE, -15, CAST(time_start AS datetime)) AS time) AS start_time, "
+                    + "CAST(DATEADD(HOUR, 2,  CAST(time_end   AS datetime)) AS time) AS end_time "
                     + "FROM reservation "
                     + "WHERE table_id = ? AND reservation_date = ? "
-                    + "AND LOWER(status) IN ('approved') "
+                    + "AND LOWER(status) IN ('approved', 'serving') "
                     + "ORDER BY time_start";
+
             ResultSet rs = this.executeSelectionQuery(sql, new Object[]{tableId, date});
             while (rs.next()) {
+                Date d = rs.getDate("reservation_date");
                 Time start = rs.getTime("start_time");
                 Time end = rs.getTime("end_time");
-                list.add(new Time[]{start, end});
+                list.add(new Object[]{d, start, end});
             }
         } catch (SQLException ex) {
             Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -533,5 +544,98 @@ public class ReservationDAO extends DBContext {
         }
 
         return monthIncomeMap;
+    }
+
+    public boolean isTimeSlotAvailable(int tableId, Date date, Time newStart, Time newEnd, Integer excludeReservationId) {
+        try {
+            String sql
+                    = "SELECT COUNT(*) "
+                    + "FROM reservation "
+                    + "WHERE table_id = ? AND reservation_date = ? "
+                    + "  AND LOWER(status) IN ('approved','serving') "
+                    + "  AND (? IS NULL OR reservation_id <> ?) "
+                    + "  AND ( "
+                    + "       CAST(DATEADD(MINUTE, -15, CAST(time_start AS datetime)) AS time) < CAST(? AS time) "
+                    + // blockStart < newEnd
+                    "   AND CAST(DATEADD(HOUR,   2, CAST(time_end   AS datetime)) AS time) > CAST(? AS time) "
+                    + // blockEnd   > newStart
+                    "  )";
+
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{
+                tableId, date,
+                excludeReservationId, excludeReservationId,
+                newEnd, newStart
+            });
+
+            if (rs.next()) {
+                return rs.getInt(1) == 0;
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    public List<Time[]> getBlockedRangesByTableAndDate(int tableId, Date date) {
+        List<Time[]> list = new ArrayList<>();
+        try {
+            String sql
+                    = "SELECT "
+                    + " CAST(DATEADD(MINUTE, -15, CAST(time_start AS datetime)) AS time) AS block_start, "
+                    + " CAST(DATEADD(HOUR, 2,  CAST(time_end   AS datetime)) AS time) AS block_end "
+                    + "FROM reservation "
+                    + "WHERE table_id = ? AND reservation_date = ? "
+                    + "  AND LOWER(status) IN ('approved','serving') "
+                    + "ORDER BY time_start";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{tableId, date});
+            while (rs.next()) {
+                list.add(new Time[]{rs.getTime("block_start"), rs.getTime("block_end")});
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public int checkDateRealTime(Date date, Time startTime) {
+        try {
+            String sql
+                    = "SELECT CASE "
+                    + " WHEN CAST(? AS datetime) + CAST(? AS datetime) < GETDATE() THEN -1 "
+                    + " WHEN CAST(? AS datetime) + CAST(? AS datetime) = GETDATE() THEN 0 "
+                    + " ELSE 1 "
+                    + " END AS result";
+
+            ResultSet rs = this.executeSelectionQuery(
+                    sql,
+                    new Object[]{date, startTime, date, startTime}
+            );
+
+            if (rs.next()) {
+                return rs.getInt("result");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
+    }
+
+    public int beforeRealTime(Date date, Time time) {
+        try {
+            String sql = "SELECT CAST(GETDATE() AS DATE), CAST(GETDATE() AS TIME)";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
+            while (rs.next()) {
+                Date currentDate = rs.getDate(1);
+                Time now = rs.getTime(2);
+
+                if (currentDate.equals(date) && time.after(now)) {
+                    return 1;
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
     }
 }
