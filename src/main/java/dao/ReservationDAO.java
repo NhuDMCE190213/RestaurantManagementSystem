@@ -207,12 +207,17 @@ public class ReservationDAO extends DBContext {
         return -1;
     }
 
-    public int edit(int reservationId, int tableId, Date date, Time time_start, Time time_end, Integer voucherId) {
+    public int edit(int reservationId, int tableId, Date date, Time time_start, Time time_end,
+            Integer voucherId, String description) {
         try {
             String sql = "UPDATE reservation "
-                    + "SET table_id = ?, reservation_date = ?, time_start = ?, time_end = ?, voucher_id = ? "
+                    + "SET table_id = ?, reservation_date = ?, time_start = ?, time_end = ?, "
+                    + "    voucher_id = ?, description = ? "
                     + "WHERE reservation_id = ?";
-            return this.executeQuery(sql, new Object[]{tableId, date, time_start, time_end, voucherId, reservationId});
+
+            return this.executeQuery(sql, new Object[]{
+                tableId, date, time_start, time_end, voucherId, description, reservationId
+            });
         } catch (SQLException ex) {
             int err = checkErrorSQL(ex);
             if (err != 0) {
@@ -237,11 +242,28 @@ public class ReservationDAO extends DBContext {
         return -1;
     }
 
-    public int cancelByCustomer(int id, int customerId) {
+    public int cancelByCustomer(int reservationId, int customerId) {
         try {
-            String sql = "UPDATE reservation SET status = 'Cancelled' "
-                    + "WHERE reservation_id = ? AND customer_id = ?";
-            return this.executeQuery(sql, new Object[]{id, customerId});
+            // lấy status hiện tại
+            String sqlGet = "SELECT status FROM reservation WHERE reservation_id = ? AND customer_id = ?";
+            ResultSet rs = this.executeSelectionQuery(sqlGet, new Object[]{reservationId, customerId});
+            if (!rs.next()) {
+                return 0; // không thấy reservation hoặc không đúng chủ
+            }
+            String cur = rs.getString("status");
+            String cancelStatus;
+
+            // Chưa cọc (waiting_deposit) hoặc pending => cancel_before_deposit
+            if (cur != null && (cur.equalsIgnoreCase("Waiting_deposit") || cur.equalsIgnoreCase("Pending"))) {
+                cancelStatus = "Cancelled_before_deposit";
+            } else {
+                cancelStatus = "Cancelled_after_deposit";
+            }
+
+            // update status
+            String sqlUpd = "UPDATE reservation SET status = ? WHERE reservation_id = ? AND customer_id = ?";
+            return this.executeQuery(sqlUpd, new Object[]{cancelStatus, reservationId, customerId});
+
         } catch (SQLException ex) {
             int err = checkErrorSQL(ex);
             if (err != 0) {
