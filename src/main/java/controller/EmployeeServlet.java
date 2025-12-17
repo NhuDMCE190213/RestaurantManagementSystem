@@ -176,6 +176,7 @@ public class EmployeeServlet extends HttpServlet {
         String password = request.getParameter("password");
         String empName = request.getParameter("empName");
         String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
         int roleId;
 
         try {
@@ -194,13 +195,15 @@ public class EmployeeServlet extends HttpServlet {
             popupMessage += " The password has been blank.";
         } else if (empName == null || empName.isBlank()) {
             popupMessage += " The name has been blank.";
+        } else if (phone == null || phone.isBlank()) {
+            popupMessage += " The phone has been blank.";
         } else if (email == null || email.isBlank()) {
             popupMessage += " The email has been blank.";
         } else if (role == null) {
             popupMessage += " The role is not exist.";
         } else {
             popupStatus = true;
-            popupMessage = "The object with name=" + empName + " added successfull<br>"
+            popupMessage = "The object with name=" + empName + " added successfull;"
                     + "(Account: " + empAccount + "; "
                     + "Password: " + password + ")";
         }
@@ -210,7 +213,7 @@ public class EmployeeServlet extends HttpServlet {
 
         if (popupStatus == true) {
 //            int checkError = employeeDAO.add(empAccount, passwordHarshMd5, empName, roleId);
-            int checkError = employeeDAO.add(empAccount, passwordHarshMd5, empName, null, null, null, email, null, role.getId());
+            int checkError = employeeDAO.add(empAccount, passwordHarshMd5, empName, null, null, phone, email, null, role.getId());
             if (checkError >= 1) {
                 emailSender.sendPasswordToEmployeeEmail(email, "New employee account has been registered",
                         "Dear " + empName + ",\n\n"
@@ -220,6 +223,7 @@ public class EmployeeServlet extends HttpServlet {
                         + "Account: " + empAccount + "\n"
                         + "Password: " + password + "\n"
                         + "Role: " + role.getName() + "\n"
+                        + "Link: http://localhost:8080/SWP391_RMS/login_employee \n"
                         + "----------------------------------------\n\n"
                         + "For security reasons, please log in and change your password as soon as possible.\n\n"
                         + "If you have any questions or need technical assistance, feel free to contact the IT Support team.\n\n"
@@ -264,7 +268,7 @@ public class EmployeeServlet extends HttpServlet {
             int checkError = employeeDAO.edit(empId, role.getId());
 
             if (checkError >= 1) {
-                
+
             } else {
                 popupStatus = false;
                 popupMessage = "The edit action is NOT successfull. Check the information again.";

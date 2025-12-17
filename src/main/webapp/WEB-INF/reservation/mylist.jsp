@@ -23,9 +23,9 @@
     <c:remove var="popupStatus" scope="session"/>
     <c:remove var="popupPage" scope="session"/>
 </c:if>
-<main class="d-flex justify-content-center align-items-center vh-100 bg-light">
+<!--<main class="d-flex justify-content-center align-items-center vh-100 bg-light">-->
 
-    <section class="col-12 col-lg-9 col-xxl-10 table-section" aria-label="My reservation">
+    <section class="col-12 col-lg-9 col-xxl-10 table-section" style="padding-left: 250px" aria-label="My reservation">
         <div class="content-card shadow-sm">
 
             <!-- Header -->

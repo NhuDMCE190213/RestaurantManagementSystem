@@ -16,8 +16,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -70,12 +68,23 @@ public class DashboardServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        Date startDate;
+        Date endDate;
+
+        try {
+        startDate = Date.valueOf(request.getParameter("startDate"));
+        endDate = Date.valueOf(request.getParameter("endDate"));
+        } catch (Exception e) {
+            startDate = null;
+            endDate = null;
+        }
+
         request.setAttribute("totalReservations", reservationDAO.totalReservation());
         request.setAttribute("totalIncome", orderItemDAO.getFormatVND(orderItemDAO.getTotalIncome()));
         request.setAttribute("activeTables", tableDAO.getTotalTableAvailable());
 
         //income table
-        Map<String, Integer> monthIncomeMap = reservationDAO.getMonthIncomeList();
+        Map<String, Integer> monthIncomeMap = reservationDAO.getMonthIncomeList(startDate, endDate);
         String[] monthLabels = new String[monthIncomeMap.size()];
         int[] monthlyIncome = new int[monthIncomeMap.size()];
 
@@ -89,9 +98,9 @@ public class DashboardServlet extends HttpServlet {
         request.setAttribute("monthLabels", gson.toJson(monthLabels));
         request.setAttribute("monthlyIncome", gson.toJson(monthlyIncome));
         //end
-        
+
         //table chart
-        Map<String, Integer> tableMap = reservationDAO.getTableListOfUsed();
+        Map<String, Integer> tableMap = reservationDAO.getTableListOfUsed(startDate, endDate);
         String[] numberTableList = new String[tableMap.size()];
         int[] usedTableList = new int[tableMap.size()];
 
@@ -101,13 +110,13 @@ public class DashboardServlet extends HttpServlet {
             usedTableList[i] = entry.getValue();
             i++;
         }
-        
+
         request.setAttribute("tableNames", gson.toJson(numberTableList));
         request.setAttribute("tableUsage", gson.toJson(usedTableList));
         //end
 
         //reservation status
-        Map<String, Integer> statusMap = reservationDAO.getStatusList();
+        Map<String, Integer> statusMap = reservationDAO.getStatusList(startDate, endDate);
 
         request.setAttribute("waitingDepositCount", AutoNumber(statusMap.get("Waiting_deposit")));
         request.setAttribute("servingCount", AutoNumber(statusMap.get("Serving")));

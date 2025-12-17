@@ -71,22 +71,17 @@
 
             <div class="row gy-4">
 
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="stats-item text-center w-100 h-100">
                         <span data-purecounter-start="0" data-purecounter-end="${numberOfCustomer}" data-purecounter-duration="1" class="purecounter"></span>
                         <p>Clients</p>
                     </div>
-                </div><div class="col-lg-3 col-md-6">
+                </div><div class="col-lg-4 col-md-6">
                     <div class="stats-item text-center w-100 h-100">
                         <span data-purecounter-start="0" data-purecounter-end="${numberOfReservation}" data-purecounter-duration="1" class="purecounter"></span>
                         <p>Reservations</p>
                     </div>
-                </div><div class="col-lg-3 col-md-6">
-                    <div class="stats-item text-center w-100 h-100">
-                        <span data-purecounter-start="0" data-purecounter-end="${numberOfOrder}" data-purecounter-duration="1" class="purecounter"></span>
-                        <p>Orders</p>
-                    </div>
-                </div><div class="col-lg-3 col-md-6">
+                </div><div class="col-lg-4 col-md-6">
                     <div class="stats-item text-center w-100 h-100">
                         <span data-purecounter-start="0" data-purecounter-end="${numberOfEmployee}" data-purecounter-duration="1" class="purecounter"></span>
                         <p>Workers</p>

@@ -13,7 +13,7 @@
     <div class="content-card shadow-sm ">
         <div class="border-0 px-4 py-3">
             <div class="card-header">
-                <h1 class="section-title mb-1 text-start">My Order</h1>
+                <h1 class="section-title mb-1 text-start">Order List</h1>
             </div>
 
             <c:choose>
