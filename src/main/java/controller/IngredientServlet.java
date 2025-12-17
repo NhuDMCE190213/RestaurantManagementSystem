@@ -3,7 +3,7 @@
  */
 package controller;
 
-import dao.ImportDAO;
+
 import dao.IngredientDAO;
 import dao.TypeDAO;
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class IngredientServlet extends HttpServlet {
 
     IngredientDAO ingredientDAO = new IngredientDAO();
     TypeDAO typeDAO = new TypeDAO();
-    ImportDAO importDAO = new ImportDAO();
+
 
     public boolean validateString(String str, int limitLength) {
 

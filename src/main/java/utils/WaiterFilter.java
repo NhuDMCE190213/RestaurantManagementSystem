@@ -32,9 +32,11 @@ public class WaiterFilter implements Filter {
         HttpSession session = req.getSession(false);
 
         if (session == null || session.getAttribute("employeeSession") == null
-                || (((Employee) session.getAttribute("employeeSession")).getRole().getId() != 1 // admin
-                && ((Employee) session.getAttribute("employeeSession")).getRole().getId() != 2 //manager
-                && ((Employee) session.getAttribute("employeeSession")).getRole().getId() != 3)) {   //manager
+//                || (((Employee) session.getAttribute("employeeSession")).getRole().getId() != 1 // admin
+//                && ((Employee) session.getAttribute("employeeSession")).getRole().getId() != 2 //manager
+//                && ((Employee) session.getAttribute("employeeSession")).getRole().getId() != 3)
+//                
+                ) {   //manager
             resp.sendRedirect(req.getContextPath() + "/login_employee");
             return;
         }
