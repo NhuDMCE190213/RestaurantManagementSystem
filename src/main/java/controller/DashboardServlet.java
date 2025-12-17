@@ -110,7 +110,7 @@ public class DashboardServlet extends HttpServlet {
         Map<String, Integer> statusMap = reservationDAO.getStatusList();
 
         request.setAttribute("waitingDepositCount", AutoNumber(statusMap.get("Waiting_deposit")));
-        request.setAttribute("reservingCount", AutoNumber(statusMap.get("Reserving")));
+        request.setAttribute("servingCount", AutoNumber(statusMap.get("Serving")));
         request.setAttribute("approvedCount", AutoNumber(statusMap.get("Approved")));
         request.setAttribute("unpaidCount", AutoNumber(statusMap.get("Unpaid")));
         request.setAttribute("completedCount", AutoNumber(statusMap.get("Completed")));
