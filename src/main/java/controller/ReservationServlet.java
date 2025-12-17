@@ -345,9 +345,9 @@ public class ReservationServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/reservation");
             return;
             // ====== APPROVE / REJECT / COMPLETE (ADMIN) ======
-            // ====== APPROVE / REJECT / COMPLETE (ADMIN) ======
         } else if ("approve".equalsIgnoreCase(action)
                 || "reject".equalsIgnoreCase(action)
+                || "serving".equalsIgnoreCase(action)
                 || "complete".equalsIgnoreCase(action)) {
 
             int id;
@@ -373,15 +373,18 @@ public class ReservationServlet extends HttpServlet {
                         targetStatus = "Approved";
                     } else if ("reject".equalsIgnoreCase(action)) {
                         targetStatus = "Rejected";
+                    } else if ("serving".equalsIgnoreCase(action)) {
+                        targetStatus = "Serving";
                     } else if ("complete".equalsIgnoreCase(action)) {
-                        targetStatus = "Complete";    // reservation hiển thị Complete
+                        targetStatus = "Completed";    // reservation hiển thị Complete
                     }
 
                     // ====== RULE NGHIỆP VỤ ======
                     if ("Cleaning".equalsIgnoreCase(currentStatus)
-                            || "Cancelled".equalsIgnoreCase(currentStatus)) {
+                            || "Cancelled".equalsIgnoreCase(currentStatus)
+                            || "Completed".equalsIgnoreCase(currentStatus)) {
                         popupStatus = false;
-                        popupMessage = "Cannot change status of a cancelled/cleaning reservation.";
+                        popupMessage = "Cannot change status of this reservation.";
                     } else if ("approve".equalsIgnoreCase(action)
                             && !"Pending".equalsIgnoreCase(currentStatus)) {
                         popupStatus = false;
@@ -390,10 +393,14 @@ public class ReservationServlet extends HttpServlet {
                             && !"Pending".equalsIgnoreCase(currentStatus)) {
                         popupStatus = false;
                         popupMessage = "Only pending reservations can be rejected.";
-                    } else if ("complete".equalsIgnoreCase(action)
+                    } else if ("serving".equalsIgnoreCase(action)
                             && !"Approved".equalsIgnoreCase(currentStatus)) {
                         popupStatus = false;
-                        popupMessage = "Only approved reservations can be completed.";
+                        popupMessage = "Only approved reservations can be moved to reserving.";
+                    } else if ("complete".equalsIgnoreCase(action)
+                            && !"Serving".equalsIgnoreCase(currentStatus)) {
+                        popupStatus = false;
+                        popupMessage = "Only serving reservations can be completed.";
                     } else {
                         int check = reservationDAO.updateStatus(id, targetStatus);
                         if (check < 1) {

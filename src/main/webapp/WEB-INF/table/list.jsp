@@ -68,7 +68,6 @@
                                                 <span class="badge bg-warning text-dark">Serving</span>
                                             </c:when>
 
-
                                             <c:when test="${fn:toLowerCase(table.status) == 'cleaning'}">
                                                 <span class="badge" style="background:#0dcaf0; color:#003b47;">Cleaning</span>
                                             </c:when>

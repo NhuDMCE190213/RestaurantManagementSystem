@@ -116,8 +116,10 @@ public class MyOrderServlet extends HttpServlet {
                 String key = orderItem.getMenuItem().getMenuItemId() + "_" + orderItem.getUnitPrice();
                 String status = orderItem.getStatus();
                 int quantity = orderItem.getQuantity();
-                
-                if (quantity <= 0) continue;
+
+                if (quantity <= 0) {
+                    continue;
+                }
 
                 if (!orderItemsMap.containsKey(key)) {
                     orderItemsMap.put(key, new HashMap<>());
@@ -129,12 +131,53 @@ public class MyOrderServlet extends HttpServlet {
 
             request.setAttribute("orderItemsMap", orderItemsMap);
         }
+        request.setAttribute("orderItemForMapList", orderItemDAO.getAllByReservationIdForMap(reservationId));
         request.setAttribute("orderItemsList", orderItemDAO.getAllByReservationId(reservationId));
         request.setAttribute("categoryList", categoryDAO.getAll());
         request.setAttribute("itemsList", menuItemDAO.getAll());
         request.setAttribute("vouchersList", voucherDAO.getAllAvailable());
         request.setAttribute("currentReservation", currentReservation);
-        request.setAttribute("totalPages", totalPages);
+
+        if (currentReservation.getStatus().equalsIgnoreCase("Waiting_deposit")) {
+            long subTotal = orderItemDAO.getTotalDeposit(reservationId);
+            long deposit = subTotal * 20 / 100;
+
+            request.setAttribute("orderItemBill", orderItemDAO.getAllByReservationId(reservationId, "Pending"));
+            request.setAttribute("subTotal", orderItemDAO.getFormatVND(subTotal));
+            request.setAttribute("deposit", orderItemDAO.getFormatVND(deposit));
+            request.setAttribute("totalBillVND", orderItemDAO.getFormatVND(deposit));
+            request.setAttribute("totalBillReal", deposit);
+        } else {
+
+            long subTotal = orderItemDAO.getTotalPrice(reservationId);
+            long deposit = reservationDAO.getDeposit(reservationId);
+            Voucher voucher = currentReservation.getVoucher();
+            long voucherDiscount = 0;
+            if (voucher != null) {
+                if (voucher.getDiscountType().equalsIgnoreCase("percent")) {
+                    voucherDiscount = subTotal * voucher.getDiscountValue() / 100;
+                } else {
+                    voucherDiscount = voucher.getDiscountValue();
+                }
+            }
+            long subTotalAfterDiscount = subTotal - voucherDiscount;
+            if (subTotalAfterDiscount < 0) {
+                subTotalAfterDiscount = 0;
+            }
+            long vat = subTotalAfterDiscount * 10 / 100;
+            long totalPrice = subTotal - voucherDiscount - deposit + vat;
+            if (totalPrice < 0) {
+                totalPrice = 0;
+            }
+
+            request.setAttribute("orderItemBill", orderItemDAO.getAllByReservationId(reservationId, "Completed"));
+            request.setAttribute("subTotal", orderItemDAO.getFormatVND(subTotal));
+            request.setAttribute("vat", orderItemDAO.getFormatVND(vat));
+            request.setAttribute("voucherDiscount", orderItemDAO.getFormatVND(voucherDiscount));
+            request.setAttribute("deposit", orderItemDAO.getFormatVND(deposit));
+            request.setAttribute("totalBillVND", orderItemDAO.getFormatVND(totalPrice));
+            request.setAttribute("totalBillReal", totalPrice);
+        }
 
         request.getRequestDispatcher("/WEB-INF/myOrder/" + namepage + ".jsp").forward(request, response);
         removePopup(request);
@@ -240,8 +283,7 @@ public class MyOrderServlet extends HttpServlet {
                     popupMessage += " The reservation is not exist. Check information again.";
                 } else if (menuItem == null) {
                     popupMessage += " The item is not exist. Check information again.";
-                } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
-                        || reservation.getStatus().equalsIgnoreCase("Approved")
+                } else if (!(reservation.getStatus().equalsIgnoreCase("Waiting_deposit")
                         || reservation.getStatus().equalsIgnoreCase("Serving"))) {
                     popupMessage += " The reservation is pending or serving. Check information again.";
                 } else {
@@ -305,8 +347,7 @@ public class MyOrderServlet extends HttpServlet {
                     popupMessage += " The reservation is not exist. Check information again.";
                 } else if (menuItem == null) {
                     popupMessage += " The item is not exist. Check information again.";
-                } else if (!(reservation.getStatus().equalsIgnoreCase("Pending")
-                        || reservation.getStatus().equalsIgnoreCase("Approved")
+                } else if (!(reservation.getStatus().equalsIgnoreCase("Waiting_deposit")
                         || reservation.getStatus().equalsIgnoreCase("Serving"))) {
                     popupMessage += " The reservation is pending or serving. Check information again.";
                 } else {

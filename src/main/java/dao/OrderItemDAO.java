@@ -5,9 +5,6 @@
 package dao;
 
 import db.DBContext;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -66,7 +63,7 @@ public class OrderItemDAO extends DBContext {
         try {
             String query = "SELECT order_item_id, reservation_id, menu_item_id, unit_price, quantity, status\n"
                     + "FROM     order_item\n"
-                    + "WHERE  (reservation_id = ?)\n"
+                    + "WHERE  (reservation_id = ? and quantity > 0)\n"
                     + "ORDER BY menu_item_id\n";
 
             ResultSet rs = this.executeSelectionQuery(query, new Object[]{reservationId});
@@ -77,6 +74,70 @@ public class OrderItemDAO extends DBContext {
                 int unitPrice = rs.getInt(4);
                 int quantity = rs.getInt(5);
                 String status = rs.getString(6);
+
+                OrderItem orderItem = new OrderItem(orderItemId, reservationDAO.getElementByID(reservationId),
+                        menuItemDAO.getElementByID(menuItemId), unitPrice, quantity, status);
+
+                list.add(orderItem);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            System.out.println("Can't not load list");
+        }
+
+        return list;
+    }
+
+    public List<OrderItem> getAllByReservationId(int reservationId, String status) {
+
+        List<OrderItem> list = new ArrayList<>();
+
+        try {
+            String query = "SELECT order_item_id, reservation_id, menu_item_id, unit_price, quantity, status\n"
+                    + "FROM     order_item\n"
+                    + "WHERE  (reservation_id = ? and quantity > 0 and LOWER(status) = LOWER(?))\n"
+                    + "ORDER BY menu_item_id\n";
+
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{reservationId, status});
+
+            while (rs.next()) {
+                int orderItemId = rs.getInt(1);
+                int menuItemId = rs.getInt(3);
+                int unitPrice = rs.getInt(4);
+                int quantity = rs.getInt(5);
+
+                OrderItem orderItem = new OrderItem(orderItemId, reservationDAO.getElementByID(reservationId),
+                        menuItemDAO.getElementByID(menuItemId), unitPrice, quantity, status);
+
+                list.add(orderItem);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            System.out.println("Can't not load list");
+        }
+
+        return list;
+    }
+
+    public List<OrderItem> getAllByReservationIdForMap(int reservationId) {
+
+        List<OrderItem> list = new ArrayList<>();
+
+        try {
+            String query = "SELECT Min(order_item_id) as x, reservation_id, menu_item_id, unit_price\n"
+                    + "FROM     order_item\n"
+                    + "WHERE  (reservation_id = ?) AND (quantity > 0)\n"
+                    + "group by reservation_id, menu_item_id, unit_price\n"
+                    + "ORDER BY menu_item_id";
+
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{reservationId});
+
+            while (rs.next()) {
+                int orderItemId = rs.getInt(1);
+                int menuItemId = rs.getInt(3);
+                int unitPrice = rs.getInt(4);
+                int quantity = -1;
+                String status = "";
 
                 OrderItem orderItem = new OrderItem(orderItemId, reservationDAO.getElementByID(reservationId),
                         menuItemDAO.getElementByID(menuItemId), unitPrice, quantity, status);
@@ -155,61 +216,33 @@ public class OrderItemDAO extends DBContext {
         return null;
     }
 
-    public OrderItem getElementByMenuItemID(int reservationId, int menuItemId) {
-
-        try {
-            String query = "SELECT order_item_id, reservation_id, menu_item_id, unit_price, quantity, status\n"
-                    + "FROM     order_item\n"
-                    + "WHERE  (menu_item_id = ?) AND (reservation_id = ?)";
-
-            ResultSet rs = this.executeSelectionQuery(query, new Object[]{menuItemId, reservationId});
-
-            while (rs.next()) {
-                int orderItemId = rs.getInt(1);
-                int unitPrice = rs.getInt(4);
-                int quantity = rs.getInt(5);
-                String status = rs.getString(6);
-
-                OrderItem orderItem = new OrderItem(orderItemId, reservationDAO.getElementByID(reservationId),
-                        menuItemDAO.getElementByID(menuItemId), unitPrice, quantity, status);
-
-                return orderItem;
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            System.out.println("Can't not load object");
-        }
-
-        return null;
-    }
-
-    public OrderItem getElementByMenuItemID(int reservationId, int menuItemId, int unitPrice) {
-
-        try {
-            String query = "SELECT order_item_id, reservation_id, menu_item_id, unit_price, quantity, status\n"
-                    + "FROM     order_item\n"
-                    + "WHERE  (menu_item_id = ?) AND (reservation_id = ?) AND (unit_price = ?)";
-
-            ResultSet rs = this.executeSelectionQuery(query, new Object[]{menuItemId, reservationId, unitPrice});
-
-            while (rs.next()) {
-                int orderItemId = rs.getInt(1);
-                int quantity = rs.getInt(5);
-                String status = rs.getString(6);
-
-                OrderItem orderItem = new OrderItem(orderItemId, reservationDAO.getElementByID(reservationId),
-                        menuItemDAO.getElementByID(menuItemId), unitPrice, quantity, status);
-
-                return orderItem;
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            System.out.println("Can't not load object");
-        }
-
-        return null;
-    }
-
+//    public OrderItem getElementByMenuItemID(int reservationId, int menuItemId) {
+//
+//        try {
+//            String query = "SELECT order_item_id, reservation_id, menu_item_id, unit_price, quantity, status\n"
+//                    + "FROM     order_item\n"
+//                    + "WHERE  (menu_item_id = ?) AND (reservation_id = ?)";
+//
+//            ResultSet rs = this.executeSelectionQuery(query, new Object[]{menuItemId, reservationId});
+//
+//            while (rs.next()) {
+//                int orderItemId = rs.getInt(1);
+//                int unitPrice = rs.getInt(4);
+//                int quantity = rs.getInt(5);
+//                String status = rs.getString(6);
+//
+//                OrderItem orderItem = new OrderItem(orderItemId, reservationDAO.getElementByID(reservationId),
+//                        menuItemDAO.getElementByID(menuItemId), unitPrice, quantity, status);
+//
+//                return orderItem;
+//            }
+//        } catch (SQLException ex) {
+//            ex.printStackTrace();
+//            System.out.println("Can't not load object");
+//        }
+//
+//        return null;
+//    }
     public OrderItem getElementByMenuItemID(int reservationId, int menuItemId, int unitPrice, String status) {
 
         try {
@@ -236,20 +269,41 @@ public class OrderItemDAO extends DBContext {
         return null;
     }
 
-    public int add(int reservationId, int menuItemId, int unitPrice, int quantity) {
+//    public int add(int reservationId, int menuItemId, int unitPrice, int quantity) {
+//
+//        OrderItem orderItemExist = getElementByMenuItemID(reservationId, menuItemId, unitPrice, "Pending");
+//
+//        if (orderItemExist != null) {
+//            return edit(orderItemExist.getOrderItemId(), reservationId, menuItemId, unitPrice, orderItemExist.getQuantity() + quantity, "Pending");
+//        }
+//
+//        try {
+//            String query = "INSERT INTO order_item\n"
+//                    + "(reservation_id, menu_item_id, unit_price, quantity)\n"
+//                    + "VALUES (?, ?, ?, ?)";
+//
+//            return this.executeQuery(query, new Object[]{reservationId, menuItemId, unitPrice, quantity});
+//
+//        } catch (SQLException ex) {
+//            ex.printStackTrace();
+//            System.out.println("Can't not add object");
+//        }
+//        return -1;
+//    }
+    public int add(int reservationId, int menuItemId, int unitPrice, int quantity, String status) {
 
-        OrderItem orderItemExist = getElementByMenuItemID(reservationId, menuItemId, unitPrice);
+        OrderItem orderItemExist = getElementByMenuItemID(reservationId, menuItemId, unitPrice, status);
 
         if (orderItemExist != null) {
-            return edit(orderItemExist.getOrderItemId(), reservationId, menuItemId, unitPrice, orderItemExist.getQuantity() + quantity, "Pending");
+            return edit(orderItemExist.getOrderItemId(), reservationId, menuItemId, unitPrice, orderItemExist.getQuantity() + quantity, status);
         }
 
         try {
             String query = "INSERT INTO order_item\n"
-                    + "(reservation_id, menu_item_id, unit_price, quantity)\n"
-                    + "VALUES (?, ?, ?, ?)";
+                    + "(reservation_id, menu_item_id, unit_price, quantity, status)\n"
+                    + "VALUES (?, ?, ?, ?, ?)";
 
-            return this.executeQuery(query, new Object[]{reservationId, menuItemId, unitPrice, quantity});
+            return this.executeQuery(query, new Object[]{reservationId, menuItemId, unitPrice, quantity, status});
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -547,4 +601,116 @@ public class OrderItemDAO extends DBContext {
 
         return list;
     }
+
+    public int complete(int reservationId, int orderItemId, int menuItemId, int price) {
+        OrderItem completedOrderItem = getElementByMenuItemID(reservationId, menuItemId, price, "Completed");
+        OrderItem cookingOrderItem = getElementByID(orderItemId);
+
+        if (cookingOrderItem != null && cookingOrderItem.getStatus().equalsIgnoreCase("Cooking")) {
+            int cookingQuantity = cookingOrderItem.getQuantity();
+            if (edit(cookingOrderItem.getOrderItemId(), reservationId, menuItemId, price, 0, "Cooking") <= 0) {
+                return -1;
+            }
+            if (completedOrderItem == null) {
+                return add(reservationId, menuItemId, price, cookingQuantity, "Completed");
+            }
+
+            if (edit(completedOrderItem.getOrderItemId(), reservationId, menuItemId, price,
+                    cookingQuantity + completedOrderItem.getQuantity(), "Completed") <= 0) {
+                return -1;
+            }
+            return 2;
+        } else {
+            return -1;
+        }
+    }
+
+    public int cook(int reservationId, int orderItemId, int menuItemId, int price) {
+        OrderItem cookingOrderItem = getElementByMenuItemID(reservationId, menuItemId, price, "Cooking");
+        OrderItem pendingOrderItem = getElementByID(orderItemId);
+
+        if (pendingOrderItem != null && pendingOrderItem.getStatus().equalsIgnoreCase("Pending")) {
+            int pendingQuantity = pendingOrderItem.getQuantity();
+            if (edit(pendingOrderItem.getOrderItemId(), reservationId, menuItemId, price, 0, "Pending") <= 0) {
+                return -1;
+            }
+            if (cookingOrderItem == null) {
+                return add(reservationId, menuItemId, price, pendingQuantity, "Cooking");
+            }
+
+            if (edit(cookingOrderItem.getOrderItemId(), reservationId, menuItemId, price,
+                    pendingQuantity + cookingOrderItem.getQuantity(), "Cooking") <= 0) {
+                return -1;
+            }
+            return 2;
+        } else {
+            return -1;
+        }
+    }
+
+    public long getTotalPrice(int reservationId) {
+        try {
+            String query = "SELECT SUM(quantity * unit_price) AS totalPrice\n"
+                    + "FROM     order_item\n"
+                    + "WHERE  (reservation_id = ?) AND (LOWER(status) = LOWER('Completed'))";
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{reservationId});
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error");
+        }
+
+        return 0;
+    }
+
+    public long getTotalDeposit(int reservationId) {
+        try {
+            String query = "SELECT SUM(quantity * unit_price) AS totalPrice\n"
+                    + "FROM     order_item\n"
+                    + "WHERE  (reservation_id = ?) AND (LOWER(status) = LOWER('Pending'))";
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{reservationId});
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error");
+        }
+
+        return 0;
+    }
+
+    public long getTotalIncome(int reservationId) {
+        try {
+            String query = "SELECT SUM(quantity * unit_price) AS totalPrice\n"
+                    + "FROM     order_item\n"
+                    + "WHERE  (reservation_id = ?) AND (LOWER(status) = LOWER('Pending'))";
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{reservationId});
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error");
+        }
+
+        return 0;
+    }
+
+    public long getTotalIncome() {
+        try {
+            String query = "SELECT SUM(oi.quantity * oi.unit_price) AS totalPrice\n"
+                    + "FROM     order_item AS oi INNER JOIN\n"
+                    + "                  reservation AS r ON oi.reservation_id = r.reservation_id\n"
+                    + "WHERE  (LOWER(oi.status) = LOWER('Completed')) AND (LOWER(r.status) = LOWER('Completed'))";
+            ResultSet rs = this.executeSelectionQuery(query, new Object[]{});
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error");
+        }
+
+        return 0;
+    }
+
 }

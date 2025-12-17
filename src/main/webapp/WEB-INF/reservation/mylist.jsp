@@ -56,6 +56,7 @@
                             <th width="10%">Date</th>
                             <th width="10%">Time</th>
                             <th width="10%">Note</th>
+                            <th width="18%">Voucher</th>
                             <th width="2%">Status</th>
                             <th width="15%" class="text-end">Action</th>
                         </tr>
@@ -75,6 +76,14 @@
                                         </td>
                                         <td>${r.description}</td>   
                                         <td>
+                                            <c:choose>
+                                                <c:when test="${empty r.voucher}">None</c:when>
+                                                <c:otherwise>
+                                                    ${r.voucher.voucherCode} - ${r.voucher.voucherName}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
                                             <span class="badge
                                                   ${r.status == 'Approved' ? 'bg-success' : 
                                                     (r.status == 'Rejected' ? 'bg-danger' :
@@ -92,14 +101,14 @@
                                                        title="View Order" aria-label="View Order">
                                                         <i class="bi bi-eye-fill"></i>
                                                     </a>
-                                                    <c:if test="${r.status eq 'Pending' or r.status eq 'Approved' or r.status eq 'Reserving'}">
+                                                    <c:if test="${r.status eq 'Waiting_deposit' or r.status eq 'Reserving'}">
                                                         <a class="btn btn-outline-success btn-icon btn-view"
                                                            href="<c:url value='/myOrder'>
                                                                <c:param name='view' value='add'/>
                                                                <c:param name='reservationId' value='${r.reservationId}'/>
                                                            </c:url>"
                                                            title="Add Order" aria-label="Add Order">
-                                                           <i class="bi bi-cart-plus-fill"></i>
+                                                            <i class="bi bi-cart-plus-fill"></i>
                                                         </a>
                                                         <a class="btn btn-outline-warning btn-icon btn-view"
                                                            href="<c:url value='/myOrder'>
@@ -107,7 +116,7 @@
                                                                <c:param name='reservationId' value='${r.reservationId}'/>
                                                            </c:url>"
                                                            title="Edit Order" aria-label="Edit Order">
-                                                           <i class="bi bi-cart-check"></i>
+                                                            <i class="bi bi-cart-check"></i>
 
                                                         </a>
                                                     </c:if>

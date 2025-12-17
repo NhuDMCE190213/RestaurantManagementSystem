@@ -12,13 +12,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Customer;
 import model.Employee;
 import model.Reservation;
 import model.Table;
+import model.Voucher;
 
 /**
  * @author You
@@ -27,7 +30,7 @@ public class ReservationDAO extends DBContext {
 
     public Reservation getElementByTableId(int id) {
         try {
-            String sql = "SELECT r.reservation_id, r.customer_id, emp_id, r.table_id, r.reservation_date, r.time_start, r.time_end, r.description, r.status "
+            String sql = "SELECT r.reservation_id, r.customer_id, emp_id, r.voucher_id, r.table_id, r.reservation_date, r.time_start, r.time_end, r.description, r.status "
                     + "FROM reservation AS r INNER JOIN [table] AS t ON r.table_id = t.table_id "
                     + "WHERE t.table_id = ? AND LOWER(r.status) = LOWER('Approved') "
                     + "ORDER BY r.reservation_id DESC";
@@ -44,7 +47,7 @@ public class ReservationDAO extends DBContext {
     public List<Reservation> getAllSeated() {
         List<Reservation> list = new ArrayList<>();
         try {
-            String sql = "SELECT reservation_id, customer_id, emp_id, table_id, reservation_date, r.time_start, r.time_end, r.description, status "
+            String sql = "SELECT reservation_id, customer_id, emp_id, r.voucher_id, table_id, reservation_date, r.time_start, r.time_end, r.description, status "
                     + "FROM reservation WHERE LOWER(status) = LOWER('Seated') "
                     + "ORDER BY reservation_id DESC";
             ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
@@ -66,7 +69,7 @@ public class ReservationDAO extends DBContext {
         String kw = "%" + keyword + "%";
 
         try {
-            String sql = "SELECT r.reservation_id, r.customer_id, emp_id, r.table_id, "
+            String sql = "SELECT r.reservation_id, r.customer_id, emp_id, r.voucher_id, r.table_id, "
                     + "r.reservation_date, r.time_start, r.time_end, r.description, r.status "
                     + "FROM reservation AS r "
                     + "WHERE (CAST(r.reservation_id AS VARCHAR) LIKE ? OR "
@@ -111,7 +114,7 @@ public class ReservationDAO extends DBContext {
         List<Reservation> list = new ArrayList<>();
 
         try {
-            String sql = "SELECT reservation_id, customer_id, emp_id, table_id, reservation_date, time_start, time_end, r.description, status\n"
+            String sql = "SELECT reservation_id, customer_id, emp_id, r.voucher_id, table_id, reservation_date, time_start, time_end, r.description, status\n"
                     + "FROM     reservation\n"
                     + "WHERE  (customer_id = ?) AND (LOWER(status) = 'pending' OR\n"
                     + "LOWER(status) = 'approved')\n"
@@ -135,7 +138,7 @@ public class ReservationDAO extends DBContext {
         }
         String kw = "%" + keyword + "%";
         try {
-            String sql = "SELECT r.reservation_id, r.customer_id, emp_id, r.table_id, "
+            String sql = "SELECT r.reservation_id, r.customer_id, emp_id, r.voucher_id, r.table_id, "
                     + "r.reservation_date, r.time_start, r.time_end, r.description, r.status "
                     + "FROM reservation AS r "
                     + "WHERE r.customer_id = ? "
@@ -175,7 +178,7 @@ public class ReservationDAO extends DBContext {
     /* ===================== CRUD / STATUS ===================== */
     public Reservation getElementByID(int id) {
         try {
-            String sql = "SELECT r.reservation_id, r.customer_id, emp_id, r.table_id, "
+            String sql = "SELECT r.reservation_id, r.customer_id, emp_id, r.voucher_id, r.table_id, "
                     + "r.reservation_date, r.time_start, r.time_end, r.description, r.status "
                     + "FROM reservation r WHERE r.reservation_id = ?";
             ResultSet rs = this.executeSelectionQuery(sql, new Object[]{id});
@@ -188,11 +191,12 @@ public class ReservationDAO extends DBContext {
         return null;
     }
 
-    public int add(int customerId, int tableId, Date date, Time time_start, Time time_end, String description) {
+    public int add(int customerId, Integer voucherId, int tableId, Date date, Time time_start, Time time_end, String description) {
         try {
-            String sql = "INSERT INTO reservation (customer_id, table_id, reservation_date, time_start, time_end, description, status) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?)";
-            return this.executeQuery(sql, new Object[]{customerId, tableId, date, time_start, time_end, description, "Pending"});
+            String sql = "INSERT INTO reservation (customer_id, voucher_id, table_id, reservation_date, time_start, time_end, description, status) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            return this.executeQuery(sql, new Object[]{
+                customerId, voucherId, tableId, date, time_start, time_end, description, "Waiting_deposit"});
         } catch (SQLException ex) {
             int err = checkErrorSQL(ex);
             if (err != 0) {
@@ -203,12 +207,12 @@ public class ReservationDAO extends DBContext {
         return -1;
     }
 
-    public int edit(int reservationId, int tableId, Date date, Time time_start, Time time_end) {
+    public int edit(int reservationId, int tableId, Date date, Time time_start, Time time_end, Integer voucherId) {
         try {
             String sql = "UPDATE reservation "
-                    + "SET table_id = ?, reservation_date = ?, time_start = ?, time_end = ? "
+                    + "SET table_id = ?, reservation_date = ?, time_start = ?, time_end = ?, voucher_id = ? "
                     + "WHERE reservation_id = ?";
-            return this.executeQuery(sql, new Object[]{tableId, date, time_start, time_end, reservationId});
+            return this.executeQuery(sql, new Object[]{tableId, date, time_start, time_end, voucherId, reservationId});
         } catch (SQLException ex) {
             int err = checkErrorSQL(ex);
             if (err != 0) {
@@ -252,22 +256,17 @@ public class ReservationDAO extends DBContext {
     private Reservation extract(ResultSet rs) throws SQLException {
         int id = rs.getInt("reservation_id");
         int customerId = rs.getInt("customer_id");
-        int tableId = rs.getInt("table_id");
 
-        int employeeId = 0;
-        try {
-            employeeId = rs.getInt("emp_id");
-            if (rs.wasNull()) {
-                employeeId = 0;
-            }
-        } catch (SQLException ignored) {
-        }
+        int employeeId = rs.getInt("emp_id");
+        Integer voucherId = rs.getObject("voucher_id") != null ? rs.getInt("voucher_id") : null;
+
+        int tableId = rs.getInt("table_id");
 
         Date date = rs.getDate("reservation_date");
         Time timeStart = rs.getTime("time_start");
         Time timeEnd = rs.getTime("time_end");
-        String status = rs.getString("status");
         String description = rs.getString("description");
+        String status = rs.getString("status");
 
         Customer customer = new CustomerDAO().getElementByID(customerId);
         Table table = new TableDAO().getElementByID(tableId);
@@ -277,11 +276,17 @@ public class ReservationDAO extends DBContext {
             emp = new EmployeeDAO().getElementByID(employeeId);
         }
 
-        return new Reservation(
-                id, customer, emp, table,
+        Voucher voucher = null;
+        if (voucherId != null) {
+            voucher = new VoucherDAO().getById(voucherId);
+        }
+
+        Reservation r = new Reservation(
+                id, customer, emp, voucher, table,
                 date, timeStart, timeEnd,
                 description, status
         );
+        return r;
     }
 
     public boolean hasActiveReservationForTable(int tableId) {
@@ -301,11 +306,19 @@ public class ReservationDAO extends DBContext {
     public List<Reservation> getReservationsByTable(int tableId) {
         List<Reservation> list = new ArrayList<>();
         try {
-            String sql = "SELECT reservation_date, time_start, time_end FROM reservation "
+            String sql = "SELECT reservation_id, reservation_date, time_start, time_end "
+                    + "FROM reservation "
                     + "WHERE table_id = ? AND LOWER(status) IN ('approved','pending')";
             ResultSet rs = this.executeSelectionQuery(sql, new Object[]{tableId});
             while (rs.next()) {
-                list.add(new Reservation(0, null, null, null, rs.getDate("reservation_date"), rs.getTime("time_start"), rs.getTime("time_end"),null, null));
+                list.add(new Reservation(
+                        rs.getInt("reservation_id"),
+                        null, null, null, null,
+                        rs.getDate("reservation_date"),
+                        rs.getTime("time_start"),
+                        rs.getTime("time_end"),
+                        null, null
+                ));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -350,7 +363,7 @@ public class ReservationDAO extends DBContext {
                 time_start,
                 time_end,
                 description,
-                "Pending"
+                "Waiting_deposit"
             });
         } catch (SQLException ex) {
             return checkErrorSQL(ex);
@@ -377,5 +390,126 @@ public class ReservationDAO extends DBContext {
         } catch (SQLException ex) {
             return checkErrorSQL(ex);
         }
+    }
+
+    public int deposit(int reservationId, String status, int deposit) {
+        try {
+            String sql = "UPDATE reservation "
+                    + "SET status = ?, deposit = ?\n"
+                    + "WHERE reservation_id = ?";
+            return this.executeQuery(sql, new Object[]{status, deposit, reservationId});
+        } catch (SQLException ex) {
+            int err = checkErrorSQL(ex);
+            if (err != 0) {
+                return err;
+            }
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
+    }
+
+    public int complete(int reservationId, String status) {
+        try {
+            String sql = "UPDATE reservation "
+                    + "SET status = ?\n"
+                    + "WHERE reservation_id = ?";
+            return this.executeQuery(sql, new Object[]{status, reservationId});
+        } catch (SQLException ex) {
+            int err = checkErrorSQL(ex);
+            if (err != 0) {
+                return err;
+            }
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
+    }
+
+    public int getDeposit(int reservationId) {
+        try {
+            String sql = "SELECT deposit\n"
+                    + "FROM reservation\n"
+                    + "WHERE reservation_id = ? ";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{reservationId});
+            while (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+
+    public int totalReservation() {
+        try {
+            String sql = "SELECT COUNT(*) AS Expr1\n"
+                    + "FROM     reservation";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
+            while (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+
+    public Map<String, Integer> getTableListOfUsed() {
+        Map<String, Integer> tableMap = new HashMap<>();
+
+        try {
+            String sql = "SELECT Top(5) t.table_number, COUNT(r.table_id) AS used\n"
+                    + "FROM     reservation AS r INNER JOIN\n"
+                    + "                  [table] AS t ON r.table_id = t.table_id\n"
+                    + "GROUP BY t.table_number\n"
+                    + "ORDER BY used DESC";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
+            while (rs.next()) {
+                tableMap.put(rs.getString(1), rs.getInt(2));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return tableMap;
+    }
+
+    public Map<String, Integer> getStatusList() {
+        Map<String, Integer> statusMap = new HashMap<>();
+
+        try {
+            String sql = "SELECT status, COUNT(*) AS appeared\n"
+                    + "FROM     reservation\n"
+                    + "GROUP BY status\n"
+                    + "ORDER BY appeared DESC";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
+            while (rs.next()) {
+                statusMap.put(rs.getString(1), rs.getInt(2));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return statusMap;
+    }
+
+    public Map<String, Integer> getMonthIncomeList() {
+        Map<String, Integer> monthIncomeMap = new HashMap<>();
+
+        try {
+            String sql = "SELECT DATENAME(MONTH, r.reservation_date) AS month_name, sum(oi.unit_price * oi.quantity) as total, MONTH(r.reservation_date) AS month_number\n"
+                    + "FROM     reservation AS r INNER JOIN\n"
+                    + "                  order_item AS oi ON r.reservation_id = oi.reservation_id\n"
+                    + "WHERE  (YEAR(r.reservation_date) = YEAR(GETDATE())) AND (LOWER(r.status) = LOWER('Completed')) AND (LOWER(oi.status) = LOWER('Completed'))\n"
+                    + "group by DATENAME(MONTH, r.reservation_date), MONTH(r.reservation_date)\n"
+                    + "order by month_number";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
+            while (rs.next()) {
+                monthIncomeMap.put(rs.getString(1), rs.getInt(2));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return monthIncomeMap;
     }
 }
