@@ -63,12 +63,9 @@
                                                 <span class="badge bg-success">Available</span>
                                             </c:when>
 
-                                            <c:when test="${fn:toLowerCase(table.status) == 'reserved'}">
-                                                <span class="badge bg-warning text-dark">Reserved</span>
-                                            </c:when>
 
                                             <c:when test="${fn:toLowerCase(table.status) == 'serving'}">
-                                                <span class="badge" style="background:#dc3545; color:white;">Serving</span>
+                                                <span class="badge bg-warning text-dark">Serving</span>
                                             </c:when>
 
                                             <c:when test="${fn:toLowerCase(table.status) == 'cleaning'}">
@@ -109,15 +106,6 @@
                                                             <input type="hidden" name="newStatus" value="Available" />
                                                             <button type="submit" name="action" value="changeStatus" class="dropdown-item" ${fn:toLowerCase(table.status) == 'available' ? 'disabled' : ''}>
                                                                 Set Available
-                                                            </button>
-                                                        </form>
-                                                    </li>
-                                                    <li>
-                                                        <form method="post" action="<c:url value='table'/>" class="px-2 py-1">
-                                                            <input type="hidden" name="id" value="${table.id}" />
-                                                            <input type="hidden" name="newStatus" value="Reserved" />
-                                                            <button type="submit" name="action" value="changeStatus" class="dropdown-item" ${fn:toLowerCase(table.status) == 'reserved' ? 'disabled' : ''}>
-                                                                Set Reserved
                                                             </button>
                                                         </form>
                                                     </li>
