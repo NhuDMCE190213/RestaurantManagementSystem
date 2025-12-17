@@ -419,6 +419,9 @@ public class ReservationDAO extends DBContext {
             String sql = "UPDATE reservation "
                     + "SET status = ?, deposit = ?\n"
                     + "WHERE reservation_id = ?";
+            
+            
+            
             return this.executeQuery(sql, new Object[]{status, deposit, reservationId});
         } catch (SQLException ex) {
             int err = checkErrorSQL(ex);
@@ -515,7 +518,7 @@ public class ReservationDAO extends DBContext {
     }
 
     public Map<String, Integer> getMonthIncomeList() {
-        Map<String, Integer> monthIncomeMap = new HashMap<>();
+        Map<String, Integer> monthIncomeMap = new HashMap<String, Integer>();
 
         try {
             String sql = "SELECT DATENAME(MONTH, r.reservation_date) AS month_name, sum(oi.unit_price * oi.quantity) as total, MONTH(r.reservation_date) AS month_number\n"
@@ -526,7 +529,7 @@ public class ReservationDAO extends DBContext {
                     + "order by month_number";
             ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
             while (rs.next()) {
-                monthIncomeMap.put(rs.getString(1), rs.getInt(2));
+                monthIncomeMap.put(rs.getInt(3) + "-" + rs.getString(1), rs.getInt(2));
             }
         } catch (SQLException ex) {
             Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);

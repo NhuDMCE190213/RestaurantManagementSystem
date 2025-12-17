@@ -14,6 +14,7 @@ import dao.CustomerDAO;
 
 import dao.ReservationDAO;
 import dao.TableDAO;
+import dao.VoucherDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -26,6 +27,7 @@ import java.sql.Time;
 import model.Customer;
 import model.Employee;
 import model.Reservation;
+import model.Voucher;
 
 /**
  *
@@ -37,6 +39,7 @@ public class ReservationServlet extends HttpServlet {
     ReservationDAO reservationDAO = new ReservationDAO();
     TableDAO tableDAO = new TableDAO();
     CustomerDAO customerDAO = new CustomerDAO();
+    VoucherDAO voucherDAO = new VoucherDAO();
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -139,6 +142,7 @@ public class ReservationServlet extends HttpServlet {
         }
 
         response.sendRedirect(request.getContextPath() + "/reservation");
+        removePopup(request);
     }
 
     /**
@@ -416,7 +420,19 @@ public class ReservationServlet extends HttpServlet {
                         popupStatus = false;
                         popupMessage = "Only serving reservations can be completed.";
                     } else {
-                        int check = reservationDAO.updateStatus(id, targetStatus);
+                        int check = 1;
+                        if (targetStatus.equalsIgnoreCase("approved")) {
+                            Reservation reservation = reservationDAO.getElementByID(id);
+                            Voucher voucher = reservation.getVoucher();
+                            if (voucher != null) {
+                                if (voucherDAO.decrease1Quantity(voucher.getVoucherId()) <= 0) {
+                                    check = -1;
+                                }
+                            }
+                        }
+                        if (check == 1) {
+                            check = reservationDAO.updateStatus(id, targetStatus);
+                        }
                         if (check < 1) {
                             popupStatus = false;
                             popupMessage = "Update failed. SQL error: " + getSqlErrorCode(check);
@@ -432,7 +448,7 @@ public class ReservationServlet extends HttpServlet {
                                     ex.printStackTrace();
                                 }
                             }
-                            
+
                             if ("serving".equalsIgnoreCase(action)) {
                                 try {
                                     int tableId = current.getTable().getId();
