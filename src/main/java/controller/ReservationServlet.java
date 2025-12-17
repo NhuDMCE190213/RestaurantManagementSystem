@@ -427,6 +427,15 @@ public class ReservationServlet extends HttpServlet {
                             if ("approve".equalsIgnoreCase(action)) {
                                 try {
                                     int tableId = current.getTable().getId();
+                                    tableDAO.updateStatus(tableId, "Reserved");
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+                            
+                            if ("serving".equalsIgnoreCase(action)) {
+                                try {
+                                    int tableId = current.getTable().getId();
                                     tableDAO.updateStatus(tableId, "Serving");
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
