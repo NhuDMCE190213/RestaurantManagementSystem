@@ -84,147 +84,154 @@
                                             </c:choose>
                                         </td>
                                         <td>
+                                            <c:set var="st" value="${r.status}" />
                                             <span class="badge
-                                                  ${r.status == 'Approved' ? 'bg-success' : 
-                                                    (r.status == 'Rejected' ? 'bg-danger' :
-                                                    (r.status == 'Cancelled' ? 'bg-secondary' : 'bg-warning text-dark'))}">
-                                                      ${r.status}
-                                                  </span>
-                                            </td>
-                                            <td class="text-end">
-                                                <div class="action-button-group d-flex justify-content-end gap-2">
+                                                  ${st == 'Approved' ? 'bg-success' :
+                                                    (st == 'Waiting_deposit' ? 'bg-warning text-dark' :
+                                                    (st == 'Cancelled_before_deposit' ? 'bg-secondary' :
+                                                    (st == 'Cancelled_after_deposit' ? 'bg-secondary' :
+                                                    (st == 'Rejected' ? 'bg-danger' :
+                                                    (st == 'No_show' ? 'bg-dark' :
+                                                    (st == 'Reserving' || st == 'Serving' ? 'bg-info' :
+                                                    (st == 'Unpaid' ? 'bg-danger' :
+                                                    (st == 'Completed' || st == 'Complete' ? 'bg-primary' :
+                                                    'bg-light text-dark'))))))))}">
+                                                  <c:out value="${st}"/>
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="action-button-group d-flex justify-content-end gap-2">
+                                                <a class="btn btn-outline-success btn-icon btn-view"
+                                                   href="<c:url value='/myOrder'>
+                                                       <c:param name='view' value='list'/>
+                                                       <c:param name='reservationId' value='${r.reservationId}'/>
+                                                   </c:url>"
+                                                   title="View Order" aria-label="View Order">
+                                                    <i class="bi bi-eye-fill"></i>
+                                                </a>
+                                                <c:if test="${r.status eq 'Waiting_deposit' or r.status eq 'Reserving'}">
                                                     <a class="btn btn-outline-success btn-icon btn-view"
                                                        href="<c:url value='/myOrder'>
-                                                           <c:param name='view' value='list'/>
+                                                           <c:param name='view' value='add'/>
                                                            <c:param name='reservationId' value='${r.reservationId}'/>
                                                        </c:url>"
-                                                       title="View Order" aria-label="View Order">
-                                                        <i class="bi bi-eye-fill"></i>
+                                                       title="Add Order" aria-label="Add Order">
+                                                        <i class="bi bi-cart-plus-fill"></i>
                                                     </a>
-                                                    <c:if test="${r.status eq 'Waiting_deposit' or r.status eq 'Reserving'}">
-                                                        <a class="btn btn-outline-success btn-icon btn-view"
-                                                           href="<c:url value='/myOrder'>
-                                                               <c:param name='view' value='add'/>
-                                                               <c:param name='reservationId' value='${r.reservationId}'/>
-                                                           </c:url>"
-                                                           title="Add Order" aria-label="Add Order">
-                                                            <i class="bi bi-cart-plus-fill"></i>
-                                                        </a>
-                                                        <a class="btn btn-outline-warning btn-icon btn-view"
-                                                           href="<c:url value='/myOrder'>
-                                                               <c:param name='view' value='edit'/>
-                                                               <c:param name='reservationId' value='${r.reservationId}'/>
-                                                           </c:url>"
-                                                           title="Edit Order" aria-label="Edit Order">
-                                                            <i class="bi bi-cart-check"></i>
-
-                                                        </a>
-                                                    </c:if>
-                                                    <!-- Edit -->
-                                                    <a class="btn btn-outline-secondary btn-icon"
-                                                       <a class="btn btn-outline-secondary btn-icon"
-                                                       href="<c:url value='/my-reservation'>
+                                                    <a class="btn btn-outline-warning btn-icon btn-view"
+                                                       href="<c:url value='/myOrder'>
                                                            <c:param name='view' value='edit'/>
-                                                           <c:param name='id' value='${r.reservationId}'/>
-                                                           <c:param name='from' value='mylist'/>
-                                                           <c:param name='customerId' value='${requestScope.customerId}'/>
+                                                           <c:param name='reservationId' value='${r.reservationId}'/>
                                                        </c:url>"
-                                                       title="Edit" aria-label="Edit"
-                                                       ${r.status != 'Pending' ? 'disabled' : ''}>
-                                                        <i class="bi bi-pencil-square"></i>
+                                                       title="Edit Order" aria-label="Edit Order">
+                                                        <i class="bi bi-cart-check"></i>
+
                                                     </a>
+                                                </c:if>
+                                                <!-- Edit -->
+                                                <a class="btn btn-outline-secondary btn-icon ${r.status ne 'Waiting_deposit' ? 'disabled' : ''}"
+                                                   href="<c:url value='/my-reservation'>
+                                                       <c:param name='view' value='edit'/>
+                                                       <c:param name='id' value='${r.reservationId}'/>
+                                                       <c:param name='from' value='mylist'/>
+                                                       <c:param name='customerId' value='${requestScope.customerId}'/>
+                                                   </c:url>"
+                                                   title="Edit" aria-label="Edit">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
 
+                                                <!-- Cancel -->
+                                                <c:set var="canCancel" value="${r.status eq 'Pending' or r.status eq 'Waiting_deposit' or r.status eq 'Approved'}" />
 
-                                                    <!-- Cancel -->
-                                                    <button type="button" class="btn btn-outline-danger btn-icon"
-                                                            title="Cancel" aria-label="Cancel"
-                                                            onclick="showCancelPopup('${r.reservationId}', '${requestScope.customerId}')"
-                                                            ${r.status != 'Pending' ? 'disabled' : ''}>
-                                                        <i class="bi bi-x-circle"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </c:otherwise>
-                            </c:choose>
-                        </tbody>
-                    </table>
-
-                    <!-- Pagination -->
-                    <nav aria-label="Page navigation example">
-                        <ul class="pagination">
-                            <li class="page-item ${((empty param.page) || param.page <= 1)?"disabled":""}">
-                                <a class="page-link" href="<c:url value='/my-reservation'>
-                                       <c:param name='view' value='mylist'/>
-                                       <c:param name='customerId' value='${requestScope.customerId}'/>
-                                       <c:param name='page' value='${param.page - 1}'/>
-                                       <c:param name='keyword' value='${param.keyword}'/>
-                                   </c:url>" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-
-                            <c:forEach begin="1" end="${requestScope.totalPages}" var="i">
-                                <li class="page-item ${((empty param.page && i == 1) || param.page == i)?"active":""}">
-                                    <a class="page-link" href="<c:url value='/my-reservation'>
-                                           <c:param name='view' value='mylist'/>
-                                           <c:param name='customerId' value='${requestScope.customerId}'/>
-                                           <c:param name='page' value='${i}'/>
-                                           <c:param name='keyword' value='${param.keyword}'/>
-                                       </c:url>">${i}</a></li>
+                                                <button type="button" class="btn btn-outline-danger btn-icon"
+                                                        title="Cancel" aria-label="Cancel"
+                                                        onclick="showCancelPopup('${r.reservationId}', '${requestScope.customerId}')"
+                                                        ${!canCancel ? 'disabled' : ''}>
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 </c:forEach>
+                            </c:otherwise>
+                        </c:choose>
+                    </tbody>
+                </table>
 
-                            <li class="page-item ${(requestScope.totalPages <= param.page || requestScope.totalPages eq 1)?"disabled":""}">
+                <!-- Pagination -->
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        <li class="page-item ${((empty param.page) || param.page <= 1)?"disabled":""}">
+                            <a class="page-link" href="<c:url value='/my-reservation'>
+                                   <c:param name='view' value='mylist'/>
+                                   <c:param name='customerId' value='${requestScope.customerId}'/>
+                                   <c:param name='page' value='${param.page - 1}'/>
+                                   <c:param name='keyword' value='${param.keyword}'/>
+                               </c:url>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+
+                        <c:forEach begin="1" end="${requestScope.totalPages}" var="i">
+                            <li class="page-item ${((empty param.page && i == 1) || param.page == i)?"active":""}">
                                 <a class="page-link" href="<c:url value='/my-reservation'>
                                        <c:param name='view' value='mylist'/>
                                        <c:param name='customerId' value='${requestScope.customerId}'/>
-                                       <c:param name='page' value='${(empty param.page)?2:param.page + 1}'/>
+                                       <c:param name='page' value='${i}'/>
                                        <c:param name='keyword' value='${param.keyword}'/>
-                                   </c:url>" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </section>
-    </main>
+                                   </c:url>">${i}</a></li>
+                            </c:forEach>
 
-    <!-- Cancel confirmation modal -->
-    <div class="modal" id="cancelPopup" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirm Cancellation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-danger">
-                    <h6 id="idForCancelPopup">Are you sure you want to cancel this reservation?</h6>
-                    <small class="text-muted">This action cannot be undone.</small>
-                </div>
-                <form method="post" action="<c:url value='/my-reservation'/>">
-                    <input type="hidden" name="action" value="cancel"/>
-                    <input type="hidden" id="hiddenReservationId" name="id" value=""/>
-                    <input type="hidden" id="hiddenCustomerId" name="customerId" value="${requestScope.customerId}"/>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-danger">Cancel Reservation</button>
-                    </div>
-                </form>
+                        <li class="page-item ${(requestScope.totalPages <= param.page || requestScope.totalPages eq 1)?"disabled":""}">
+                            <a class="page-link" href="<c:url value='/my-reservation'>
+                                   <c:param name='view' value='mylist'/>
+                                   <c:param name='customerId' value='${requestScope.customerId}'/>
+                                   <c:param name='page' value='${(empty param.page)?2:param.page + 1}'/>
+                                   <c:param name='keyword' value='${param.keyword}'/>
+                               </c:url>" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
+    </section>
+</main>
+
+<!-- Cancel confirmation modal -->
+<div class="modal" id="cancelPopup" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Cancellation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-danger">
+                <h6 id="idForCancelPopup">Are you sure you want to cancel this reservation?</h6>
+                <small class="text-muted">This action cannot be undone.</small>
+            </div>
+            <form method="post" action="<c:url value='/my-reservation'/>">
+                <input type="hidden" name="action" value="cancel"/>
+                <input type="hidden" id="hiddenReservationId" name="id" value=""/>
+                <input type="hidden" id="hiddenCustomerId" name="customerId" value="${requestScope.customerId}"/>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Cancel Reservation</button>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 
-    <script>
-        function showCancelPopup(resId, cusId) {
-            document.getElementById('hiddenReservationId').value = resId;
-            document.getElementById('hiddenCustomerId').value = cusId;
-            document.getElementById('idForCancelPopup').innerText = 'Cancel reservation #' + resId + '?';
-            var modal = new bootstrap.Modal(document.getElementById('cancelPopup'));
-            modal.show();
-        }
-    </script>
+<script>
+    function showCancelPopup(resId, cusId) {
+        document.getElementById('hiddenReservationId').value = resId;
+        document.getElementById('hiddenCustomerId').value = cusId;
+        document.getElementById('idForCancelPopup').innerText = 'Cancel reservation #' + resId + '?';
+        var modal = new bootstrap.Modal(document.getElementById('cancelPopup'));
+        modal.show();
+    }
+</script>
 
-    <%@include file="/WEB-INF/include/footerCustomer.jsp" %>
+<%@include file="/WEB-INF/include/footerCustomer.jsp" %>

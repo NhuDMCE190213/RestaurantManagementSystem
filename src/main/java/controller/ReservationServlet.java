@@ -348,6 +348,8 @@ public class ReservationServlet extends HttpServlet {
         } else if ("approve".equalsIgnoreCase(action)
                 || "reject".equalsIgnoreCase(action)
                 || "serving".equalsIgnoreCase(action)
+                || "unpaid".equalsIgnoreCase(action)
+                || "no_show".equalsIgnoreCase(action)
                 || "complete".equalsIgnoreCase(action)) {
 
             int id;
@@ -375,6 +377,10 @@ public class ReservationServlet extends HttpServlet {
                         targetStatus = "Rejected";
                     } else if ("serving".equalsIgnoreCase(action)) {
                         targetStatus = "Serving";
+                    } else if ("unpaid".equalsIgnoreCase(action)) {
+                        targetStatus = "Unpaid";
+                    } else if ("no_show".equalsIgnoreCase(action)) {
+                        targetStatus = "No_show";
                     } else if ("complete".equalsIgnoreCase(action)) {
                         targetStatus = "Completed";    // reservation hiển thị Complete
                     }
@@ -386,17 +392,25 @@ public class ReservationServlet extends HttpServlet {
                         popupStatus = false;
                         popupMessage = "Cannot change status of this reservation.";
                     } else if ("approve".equalsIgnoreCase(action)
-                            && !"Pending".equalsIgnoreCase(currentStatus)) {
+                            && !"Waiting_deposit".equalsIgnoreCase(currentStatus)) {
                         popupStatus = false;
-                        popupMessage = "Only pending reservations can be approved.";
+                        popupMessage = "Only Waiting_deposit reservations can be approved.";
                     } else if ("reject".equalsIgnoreCase(action)
-                            && !"Pending".equalsIgnoreCase(currentStatus)) {
+                            && !"Waiting_deposit".equalsIgnoreCase(currentStatus)) {
                         popupStatus = false;
-                        popupMessage = "Only pending reservations can be rejected.";
+                        popupMessage = "Only Waiting_deposit reservations can be rejected.";
                     } else if ("serving".equalsIgnoreCase(action)
                             && !"Approved".equalsIgnoreCase(currentStatus)) {
                         popupStatus = false;
                         popupMessage = "Only approved reservations can be moved to reserving.";
+                    } else if ("no_show".equalsIgnoreCase(action)
+                            && !"Approved".equalsIgnoreCase(currentStatus)) {
+                        popupStatus = false;
+                        popupMessage = "Only approved reservations can be marked no-show.";
+                    } else if ("unpaid".equalsIgnoreCase(action)
+                            && !"Serving".equalsIgnoreCase(currentStatus)) {
+                        popupStatus = false;
+                        popupMessage = "Only serving reservations can be marked unpaid.";
                     } else if ("complete".equalsIgnoreCase(action)
                             && !"Serving".equalsIgnoreCase(currentStatus)) {
                         popupStatus = false;
