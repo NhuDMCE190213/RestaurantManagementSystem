@@ -27,7 +27,6 @@ public class VoucherDAO extends DBContext {
             String query = "SELECT voucher_id, voucher_code, voucher_name, discount_type, discount_value, quantity, used, start_date, end_date, status "
                     + "FROM Voucher WHERE LOWER(status) <> 'deleted'\n"
                     + "AND CAST(GETDATE() AS DATE) BETWEEN start_date AND end_date\n"
-                    + "AND quantity > 0\n"
                     + "ORDER BY voucher_id";
             ResultSet rs = this.executeSelectionQuery(query, null);
             while (rs.next()) {
@@ -228,12 +227,11 @@ public class VoucherDAO extends DBContext {
         return 0;
     }
 
-    public int decrease1Quantity(int id) {
+    public int increaseUsed(int id) {
         try {
             String query = "UPDATE Voucher\n"
                     + "SET used = used + 1\n"
-                    + "WHERE voucher_id = ?\n"
-                    + "  AND quantity > 0;";
+                    + "WHERE voucher_id = ?\n";
             return this.executeQuery(query, new Object[]{id});
         } catch (SQLException ex) {
             ex.printStackTrace();
