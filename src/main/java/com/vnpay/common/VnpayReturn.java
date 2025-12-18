@@ -5,6 +5,7 @@
 package com.vnpay.common;
 
 import dao.ReservationDAO;
+import dao.VoucherDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import model.Employee;
 import model.Reservation;
+import model.Voucher;
 
 /**
  *
@@ -29,6 +31,7 @@ import model.Reservation;
 public class VnpayReturn extends HttpServlet {
     
     private final ReservationDAO reservationDAO = new ReservationDAO();
+    private final VoucherDAO voucherDAO = new VoucherDAO();
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -84,6 +87,12 @@ public class VnpayReturn extends HttpServlet {
                         reservationDAO.complete(reservationId, "Completed");
                     } else if (reservation.getStatus().equalsIgnoreCase("waiting_deposit")) {
                         reservationDAO.deposit(reservationId, "Approved", deposit);
+                        
+                        Voucher voucher = reservation.getVoucher();
+                        if (voucher != null ){
+                             voucherDAO.decrease1Quantity(voucher.getVoucherId());
+                        }
+                        
                     }
                 } else {
 //                    reservationDAO.deposit(reservationId, "Failed");

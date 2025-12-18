@@ -5,6 +5,8 @@
  */
 package com.vnpay.common;
 
+import dao.ReservationDAO;
+import dao.VoucherDAO;
 import jakarta.servlet.annotation.WebServlet;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -22,6 +24,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import model.Customer;
+import model.Employee;
+import model.Reservation;
+import model.Voucher;
 
 /**
  *
@@ -30,12 +37,16 @@ import jakarta.servlet.http.HttpServletResponse;
 @WebServlet(name = "ajaxServlet", urlPatterns = {"/payment"})
 public class ajaxServlet extends HttpServlet {
 
+    ReservationDAO ReservationDAO = new ReservationDAO();
+    VoucherDAO VoucherDAO = new VoucherDAO();
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String bankCode = req.getParameter("bankCode");
         double totalBill;
         int reservationId;
+
         String tmp = req.getParameter("reservationId");
         String tmp2 = req.getParameter("totalBill");
         try {
@@ -44,6 +55,26 @@ public class ajaxServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             totalBill = -1;
             reservationId = -1;
+        }
+
+        Reservation reservation = ReservationDAO.getElementByID(reservationId);
+        if (reservation != null) {
+            Voucher voucher = reservation.getVoucher();
+            if (voucher != null) {
+                HttpSession session = req.getSession(false);
+                if (session != null) {
+                    Customer customer = (Customer) session.getAttribute("customerSession");
+                    Employee employee = (Employee) session.getAttribute("employeeSession");
+                    if (voucher.getUsed() >= voucher.getQuantity()) {
+                        if (customer != null) {
+                            resp.sendRedirect("http://localhost:8080/SWP391_RMS/my-reservation?view=edit&id=" + reservationId + "&from=mylist&customerId=" + customer.getCustomerId());
+                        } else
+                        if (employee != null) {
+                            resp.sendRedirect("http://localhost:8080/SWP391_RMS/reservation");
+                        }
+                    }
+                }
+            }
         }
 
         String vnp_Version = "2.1.0";
