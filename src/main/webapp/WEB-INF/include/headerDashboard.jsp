@@ -122,7 +122,6 @@
 
                                 <%-- Chef (ID: 4) Access --%>
                                 <c:if test="${roleId == 4}">
-                                    <li><a href="category"><i class="bi bi-tags"></i> Category List</a></li>
                                     <li><a href="menuitem"><i class="bi bi-list-ul"></i> Menu Item List</a></li>
                                     <li><a href="ingredient"><i class="bi bi-basket"></i> Ingredient List</a></li>
                                     <li><a href="reservation"><i class="bi bi-calendar-check"></i> Reservation List</a></li>
@@ -130,14 +129,12 @@
 
                                 <%-- Waiter (ID: 3) Access --%>
                                 <c:if test="${roleId == 3}">
-                                    <li><a href="order"><i class="bi bi-receipt"></i> Order List</a></li>
                                     <li><a href="reservation"><i class="bi bi-calendar-check"></i> Reservation List</a></li>
                                     <li><a href="table"><i class="bi bi-list-ul"></i> Table List</a></li>
                                 </c:if>
 
                                 <%-- Cashier (ID: 5) Access --%>
                                 <c:if test="${roleId == 5}">
-                                    <li><a href="order"><i class="bi bi-receipt"></i> Order List</a></li>
                                     <li><a href="reservation"><i class="bi bi-calendar-check"></i> Reservation List</a></li>
                                 </c:if>
 

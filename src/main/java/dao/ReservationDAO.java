@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -576,7 +577,7 @@ public class ReservationDAO extends DBContext {
     }
 
     public Map<String, Integer> getMonthIncomeList() {
-        Map<String, Integer> monthIncomeMap = new HashMap<String, Integer>();
+        Map<String, Integer> monthIncomeMap = new LinkedHashMap<>();
 
         try {
             String sql = "SELECT DATENAME(MONTH, r.reservation_date) AS month_name, sum(oi.unit_price * oi.quantity) as total, MONTH(r.reservation_date) AS month_number\n"
@@ -601,7 +602,7 @@ public class ReservationDAO extends DBContext {
             return getMonthIncomeList();
         }
 
-        Map<String, Integer> monthIncomeMap = new HashMap<String, Integer>();
+        Map<String, Integer> monthIncomeMap = new LinkedHashMap<>();
 
         try {
             String sql = "SELECT DATENAME(MONTH, r.reservation_date) AS month_name, sum(oi.unit_price * oi.quantity) as total, MONTH(r.reservation_date) AS month_number\n"
