@@ -26,7 +26,7 @@
                     <tr>
                         <th><label for="password">Password</label></th>
                         <td>
-                            <input type="text" name="password" id="password" class="form-control" required>
+                            <input type="text" name="password" id="password" class="form-control" minlength="6" required>
                         </td>
                     </tr>
                     <tr>
@@ -44,8 +44,12 @@
                         </td>
                     </tr>
                     <tr>
-                        <th><label for="email">email</label></th>
+                        <th><label for="email">Email</label></th>
                         <td><input type="text" name="email" id="email" class="form-control" required></td>
+                    </tr>
+                    <tr>
+                        <th><label for="phone">Phone</label></th>
+                        <td><input type="number" name="phone" id="phone" class="form-control" required></td>
                     </tr>
                     <tr>
                         <td></td>

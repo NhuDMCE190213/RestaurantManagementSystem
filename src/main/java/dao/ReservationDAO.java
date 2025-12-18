@@ -430,6 +430,7 @@ public class ReservationDAO extends DBContext {
             String sql = "UPDATE reservation "
                     + "SET status = ?, deposit = ?\n"
                     + "WHERE reservation_id = ?";
+
             return this.executeQuery(sql, new Object[]{status, deposit, reservationId});
         } catch (SQLException ex) {
             int err = checkErrorSQL(ex);
@@ -505,6 +506,31 @@ public class ReservationDAO extends DBContext {
 
         return tableMap;
     }
+    
+    public Map<String, Integer> getTableListOfUsed(Date startDate, Date endDate) {
+        if (startDate == null || endDate == null) {
+            return getTableListOfUsed();
+        }
+        
+        Map<String, Integer> tableMap = new HashMap<>();
+
+        try {
+            String sql = "SELECT Top(5) t.table_number, COUNT(r.table_id) AS used\n"
+                    + "FROM     reservation AS r INNER JOIN\n"
+                    + "                  [table] AS t ON r.table_id = t.table_id\n"
+                    + "WHERE r.reservation_date BETWEEN ? AND ?\n"
+                    + "GROUP BY t.table_number\n"
+                    + "ORDER BY used DESC";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{startDate, endDate});
+            while (rs.next()) {
+                tableMap.put(rs.getString(1), rs.getInt(2));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return tableMap;
+    }
 
     public Map<String, Integer> getStatusList() {
         Map<String, Integer> statusMap = new HashMap<>();
@@ -524,9 +550,33 @@ public class ReservationDAO extends DBContext {
 
         return statusMap;
     }
+    
+    public Map<String, Integer> getStatusList(Date startDate, Date endDate) {
+        if (startDate == null || endDate == null) {
+            return getStatusList();
+        }
+        
+        Map<String, Integer> statusMap = new HashMap<>();
+
+        try {
+            String sql = "SELECT status, COUNT(*) AS appeared\n"
+                    + "FROM     reservation\n"
+                    + "WHERE reservation_date BETWEEN ? AND ?\n"
+                    + "GROUP BY status\n"
+                    + "ORDER BY appeared DESC";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{startDate, endDate});
+            while (rs.next()) {
+                statusMap.put(rs.getString(1), rs.getInt(2));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return statusMap;
+    }
 
     public Map<String, Integer> getMonthIncomeList() {
-        Map<String, Integer> monthIncomeMap = new HashMap<>();
+        Map<String, Integer> monthIncomeMap = new HashMap<String, Integer>();
 
         try {
             String sql = "SELECT DATENAME(MONTH, r.reservation_date) AS month_name, sum(oi.unit_price * oi.quantity) as total, MONTH(r.reservation_date) AS month_number\n"
@@ -537,7 +587,34 @@ public class ReservationDAO extends DBContext {
                     + "order by month_number";
             ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
             while (rs.next()) {
-                monthIncomeMap.put(rs.getString(1), rs.getInt(2));
+                monthIncomeMap.put(rs.getInt(3) + "-" + rs.getString(1), rs.getInt(2));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return monthIncomeMap;
+    }
+
+    public Map<String, Integer> getMonthIncomeList(Date startDate, Date endDate) {
+        if (startDate == null || endDate == null) {
+            return getMonthIncomeList();
+        }
+
+        Map<String, Integer> monthIncomeMap = new HashMap<String, Integer>();
+
+        try {
+            String sql = "SELECT DATENAME(MONTH, r.reservation_date) AS month_name, sum(oi.unit_price * oi.quantity) as total, MONTH(r.reservation_date) AS month_number\n"
+                    + "FROM     reservation AS r INNER JOIN\n"
+                    + "                  order_item AS oi ON r.reservation_id = oi.reservation_id\n"
+                    + "WHERE  (r.reservation_date BETWEEN ? AND ?)\n"
+                    + " AND (LOWER(r.status) = LOWER('Completed'))\n"
+                    + " AND (LOWER(oi.status) = LOWER('Completed'))\n"
+                    + "group by DATENAME(MONTH, r.reservation_date), MONTH(r.reservation_date)\n"
+                    + "order by month_number";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{startDate, endDate});
+            while (rs.next()) {
+                monthIncomeMap.put(rs.getInt(3) + "-" + rs.getString(1), rs.getInt(2));
             }
         } catch (SQLException ex) {
             Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);

@@ -38,6 +38,50 @@
         </li>
     </ul>
 
+    <form id="filterForm" action="dashboard" method="get"
+          class="row g-3 align-items-end mb-4">
+
+        <div class="col-md-4">
+            <label for="startDate" class="form-label fw-semibold">Start date</label>
+            <input type="date" class="form-control"
+                   id="startDate" name="startDate"
+                   value="${param.startDate}">
+        </div>
+
+        <div class="col-md-4">
+            <label for="endDate" class="form-label fw-semibold">End date</label>
+            <input type="date" class="form-control"
+                   id="endDate" name="endDate"
+                   value="${param.endDate}">
+        </div>
+
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-funnel-fill me-1"></i> Apply
+            </button>
+
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    onclick="resetFilter()">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+            </button>
+        </div>
+    </form>
+
+    <script>
+        function resetFilter() {
+            const form = document.getElementById("filterForm");
+
+            form.startDate.value = "";
+            form.endDate.value = "";
+
+            form.submit();
+        }
+    </script>
+
+
+
+
     <div class="container-fluid mt-4">
         <h3 class="mb-4">Manage Statistic Dashboard</h3>
 
