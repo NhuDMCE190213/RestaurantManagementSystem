@@ -439,7 +439,7 @@ public class ReservationServlet extends HttpServlet {
                             Reservation reservation = reservationDAO.getElementByID(id);
                             Voucher voucher = reservation.getVoucher();
                             if (voucher != null) {
-                                if (voucherDAO.decrease1Quantity(voucher.getVoucherId()) <= 0) {
+                                if (voucherDAO.increaseUsed(voucher.getVoucherId()) <= 0) {
                                     check = -1;
                                 }
                             }
