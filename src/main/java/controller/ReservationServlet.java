@@ -453,20 +453,38 @@ public class ReservationServlet extends HttpServlet {
                         } else {
                             popupMessage = "Reservation (ID: " + id + ") updated -> " + targetStatus;
 
-                            // ✅ Sau khi APPROVE -> Table = Serving
-                            if ("approve".equalsIgnoreCase(action)) {
-                                try {
-                                    int tableId = current.getTable().getId();
-                                    tableDAO.updateStatus(tableId, "Reserved");
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
-                                }
-                            }
+//                            // ✅ Sau khi APPROVE -> Table = Serving
+//                            if ("approve".equalsIgnoreCase(action)) {
+//                                try {
+//                                    int tableId = current.getTable().getId();
+//                                    tableDAO.updateStatus(tableId, "Reserved");
+//                                } catch (Exception ex) {
+//                                    ex.printStackTrace();
+//                                }
+//                            }
 
                             if ("serving".equalsIgnoreCase(action)) {
                                 try {
                                     int tableId = current.getTable().getId();
                                     tableDAO.updateStatus(tableId, "Serving");
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+
+                            if ("unpaid".equalsIgnoreCase(action)) {
+                                try {
+                                    int tableId = current.getTable().getId();
+                                    tableDAO.updateStatus(tableId, "Available");
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+
+                            if ("no_show".equalsIgnoreCase(action)) {
+                                try {
+                                    int tableId = current.getTable().getId();
+                                    tableDAO.updateStatus(tableId, "Available");
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }

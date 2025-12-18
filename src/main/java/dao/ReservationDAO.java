@@ -715,4 +715,21 @@ public class ReservationDAO extends DBContext {
         }
         return -1;
     }
+
+    public Map<Integer, Time> getNearestTodayByTableId() {
+        Map<Integer, Time> result = new HashMap<>();
+        try {
+            String sql = "SELECT table_id, MIN(time_start) AS Expr1\n"
+                    + "FROM     reservation\n"
+                    + "WHERE  (reservation_date = CAST(GETDATE() AS DATE)) AND (time_start > CAST(GETDATE() AS Time))\n"
+                    + "GROUP BY table_id";
+            ResultSet rs = this.executeSelectionQuery(sql, new Object[]{});
+            while (rs.next()) {
+                result.put(rs.getInt(1), rs.getTime(2));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ReservationDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return result;
+    }
 }
