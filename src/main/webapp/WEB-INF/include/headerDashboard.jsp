@@ -92,13 +92,13 @@
                 <div class="row">
                     <aside class="col-12 col-lg-3 col-xxl-2 left-menu" aria-label="Admin navigation">
                         <nav class="menu-panel">
-                            
+
                             <h1 class="menu-title">Browse Lists</h1>
                             <ul class="menu-links list-unstyled mb-0">
                                 <c:set var="roleId" value="${sessionScope.employeeSession.role.id}"/>
 
-                                <%-- Admin (ID: 1) and Manager (ID: 2) have access to ALL LISTS --%>
-                                <c:if test="${roleId == 1 || roleId == 2}">
+                                <%-- Admin (ID: 1) have access to ALL LISTS --%>
+                                <c:if test="${roleId == 1}">
                                     <li><a href="role"><i class="bi bi-shield-lock"></i> Role List</a></li>
                                     <li><a href="category"><i class="bi bi-tags"></i> Category List</a></li>
                                     <li><a href="type"><i class="bi bi-diagram-2"></i> Type List</a></li>
@@ -109,7 +109,16 @@
                                     <li><a href="reservation"><i class="bi bi-calendar-check"></i> Reservation List</a></li>
                                     <li><a href="table"><i class="bi bi-grid-3x3"></i> Table List</a></li>
                                     <li><a href="ingredient"><i class="bi bi-basket"></i> Ingredient List</a></li>
-                                    </c:if>
+                                </c:if>
+
+                                <c:if test="${roleId == 2}">
+                                    <li><a href="menuitem"><i class="bi bi-list-ul"></i> Menu Item List</a></li>
+                                    <li><a href="employee"><i class="bi bi-person-badge"></i> Employee List</a></li>
+                                    <li><a href="customer"><i class="bi bi-person-badge"></i> Customer List</a></li>
+                                    <li><a href="reservation"><i class="bi bi-calendar-check"></i> Reservation List</a></li>
+                                    <li><a href="table"><i class="bi bi-grid-3x3"></i> Table List</a></li>
+                                    <li><a href="ingredient"><i class="bi bi-basket"></i> Ingredient List</a></li>
+                                </c:if>
 
                                 <%-- Chef (ID: 4) Access --%>
                                 <c:if test="${roleId == 4}">
@@ -117,21 +126,20 @@
                                     <li><a href="menuitem"><i class="bi bi-list-ul"></i> Menu Item List</a></li>
                                     <li><a href="ingredient"><i class="bi bi-basket"></i> Ingredient List</a></li>
                                     <li><a href="reservation"><i class="bi bi-calendar-check"></i> Reservation List</a></li>
-                                    </c:if>
+                                </c:if>
 
                                 <%-- Waiter (ID: 3) Access --%>
                                 <c:if test="${roleId == 3}">
                                     <li><a href="order"><i class="bi bi-receipt"></i> Order List</a></li>
                                     <li><a href="reservation"><i class="bi bi-calendar-check"></i> Reservation List</a></li>
-                                    <li><a href="category"><i class="bi bi-tags"></i> Category List</a></li>
-                                    <li><a href="menuitem"><i class="bi bi-list-ul"></i> Menu Item List</a></li>
-                                    </c:if>
+                                    <li><a href="table"><i class="bi bi-list-ul"></i> Table List</a></li>
+                                </c:if>
 
                                 <%-- Cashier (ID: 5) Access --%>
                                 <c:if test="${roleId == 5}">
                                     <li><a href="order"><i class="bi bi-receipt"></i> Order List</a></li>
                                     <li><a href="reservation"><i class="bi bi-calendar-check"></i> Reservation List</a></li>
-                                    </c:if>
+                                </c:if>
 
                             </ul>
                         </nav>
