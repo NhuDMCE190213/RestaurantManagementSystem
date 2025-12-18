@@ -90,7 +90,7 @@ public class VnpayReturn extends HttpServlet {
                         
                         Voucher voucher = reservation.getVoucher();
                         if (voucher != null ){
-                             voucherDAO.decrease1Quantity(voucher.getVoucherId());
+                             voucherDAO.increaseUsed(voucher.getVoucherId());
                         }
                         
                     }

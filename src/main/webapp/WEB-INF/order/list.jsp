@@ -168,7 +168,8 @@
                                                                 </td>
                                                                 <td>
                                                                     <c:choose>
-                                                                        <c:when test="${(not empty orderItem['Cooking']) and orderItem['Cooking'] > 0 and (currentReservation.status eq 'Approved' or currentReservation.status eq 'Serving')}">
+                                                                        <c:when test="${(not empty orderItem['Cooking']) and orderItem['Cooking'] > 0 and (currentReservation.status eq 'Approved' or currentReservation.status eq 'Serving')
+                                                                                and (sessionScope.employeeSession.empId == 1 or sessionScope.employeeSession.empId == 2 or sessionScope.employeeSession.empId == 3)}">
                                                                             <button class="form-control btn btn-outline-success"
                                                                                     title="Complete" aria-label="Complete"
                                                                                     onclick="showPopupComplete(<c:out value="${orderItemId['Cooking']}"/>, '<c:out value="${item.menuItem.itemName}"/>')"
@@ -185,7 +186,8 @@
                                                                 </td>
                                                                 <td>
                                                                     <c:choose>
-                                                                        <c:when test="${(not empty orderItem['Pending']) and orderItem['Pending'] > 0  and (currentReservation.status eq 'Approved' or currentReservation.status eq 'Serving')}">
+                                                                        <c:when test="${(not empty orderItem['Pending']) and orderItem['Pending'] > 0  and (currentReservation.status eq 'Approved' or currentReservation.status eq 'Serving')
+                                                                                and (sessionScope.employeeSession.empId == 1 or sessionScope.employeeSession.empId == 2 or sessionScope.employeeSession.empId == 4)}">
                                                                             <button class="form-control btn btn-outline-success"
                                                                                     title="Cook" aria-label="Cook"
                                                                                     onclick="showPopupCook(<c:out value="${orderItemId['Pending']}"/>, '<c:out value="${item.menuItem.itemName}"/>')"
@@ -326,7 +328,8 @@
             </div>
 
             <div class="modal-footer">
-                <c:if test="${currentReservation.status eq 'Waiting_deposit' or currentReservation.status eq 'Serving'}">
+                <c:if test="${(currentReservation.status eq 'Waiting_deposit' or currentReservation.status eq 'Serving')
+                      and (sessionScope.employeeSession.empId == 1 or sessionScope.employeeSession.empId == 2 or sessionScope.employeeSession.empId == 5)}">
                     <form method="post" action="<c:url value="payment">
                               <c:param name="reservationId" value="${param.reservationId}"/>
                               <c:param name="totalBill" value="${totalBillReal}"/>

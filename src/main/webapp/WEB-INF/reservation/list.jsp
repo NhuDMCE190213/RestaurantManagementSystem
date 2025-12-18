@@ -200,15 +200,16 @@
 
                                             <!-- SERVING: show Complete + Unpaid -->
                                             <c:if test="${r.status eq 'Serving'}">
-
-                                                <!-- Complete -->
-                                                <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
-                                                    <input type="hidden" name="action" value="complete"/>
-                                                    <input type="hidden" name="id" value="${r.reservationId}"/>
-                                                    <button type="submit" class="btn btn-warning btn-icon" title="Complete">
-                                                        <i class="bi bi-check2-square"></i>
-                                                    </button>
-                                                </form>
+                                                <c:if test="${sessionScope.employeeSession.empId == 1 or sessionScope.employeeSession.empId == 2 or sessionScope.employeeSession.empId == 5}">
+                                                    <!-- Complete -->
+                                                    <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
+                                                        <input type="hidden" name="action" value="complete"/>
+                                                        <input type="hidden" name="id" value="${r.reservationId}"/>
+                                                        <button type="submit" class="btn btn-warning btn-icon" title="Complete">
+                                                            <i class="bi bi-check2-square"></i>
+                                                        </button>
+                                                    </form>
+                                                </c:if>
 
                                                 <!-- Unpaid -->
                                                 <form action="<c:url value='/reservation'/>" method="post" style="display:inline;">
