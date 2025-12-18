@@ -41,6 +41,7 @@
                             <th>Number</th>
                             <th>Capacity</th>
                             <th>Status</th>
+                            <th>Time</th>
                             <th class="text-end">Action</th>
                         </tr>
                     </thead>
@@ -77,6 +78,19 @@
                                             </c:otherwise>
                                         </c:choose>
                                     </td>
+                                    
+                                    <td>
+                                        <c:set var="nearTime" value="${nearTimeReservation[table.id]}"/>
+                                        <c:choose>
+                                            <c:when test="${empty nearTime}">
+                                                -
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:out value="${nearTime}"/>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2 align-items-center">
                                             <a class="btn btn-outline-secondary btn-icon btn-edit" title="Edit"

@@ -456,6 +456,24 @@ public class ReservationServlet extends HttpServlet {
                                 }
                             }
 
+                            if ("unpaid".equalsIgnoreCase(action)) {
+                                try {
+                                    int tableId = current.getTable().getId();
+                                    tableDAO.updateStatus(tableId, "Available");
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+
+                            if ("no_show".equalsIgnoreCase(action)) {
+                                try {
+                                    int tableId = current.getTable().getId();
+                                    tableDAO.updateStatus(tableId, "Available");
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+
                             // ✅ Sau khi COMPLETE -> Table = Cleaning
                             if ("complete".equalsIgnoreCase(action)) {
                                 try {

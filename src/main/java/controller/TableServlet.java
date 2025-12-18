@@ -5,6 +5,7 @@
 package controller;
 
 import static constant.Constants.*;
+import dao.ReservationDAO;
 import dao.TableDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,6 +25,7 @@ import model.Table;
 public class TableServlet extends HttpServlet {
 
     TableDAO tableDAO = new TableDAO();
+    ReservationDAO reservationDAO = new ReservationDAO();
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -99,6 +101,7 @@ public class TableServlet extends HttpServlet {
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("keyword", keyword);
         request.setAttribute("tablesList", tableDAO.getAll(page, keyword));
+        request.setAttribute("nearTimeReservation", reservationDAO.getNearestTodayByTableId());
 
         request.getRequestDispatcher("/WEB-INF/table/" + namepage + ".jsp").forward(request, response);
 
