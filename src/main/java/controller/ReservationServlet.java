@@ -353,11 +353,11 @@ public class ReservationServlet extends HttpServlet {
             } else {
                 setPopup(request, true, "Reservation created successfully.");
 
-                try {
-                    tableDAO.updateStatus(tableId, "Reserved");
-                } catch (Exception ex) {
-                    ex.printStackTrace(); // log nhẹ, không làm crash flow
-                }
+//                try {
+//                    tableDAO.updateStatus(tableId, "Reserved");
+//                } catch (Exception ex) {
+//                    ex.printStackTrace(); // log nhẹ, không làm crash flow
+//                }
             }
 
             response.sendRedirect(request.getContextPath() + "/reservation");
