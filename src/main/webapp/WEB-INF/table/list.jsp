@@ -65,8 +65,8 @@
                                             </c:when>
 
 
-                                            <c:when test="${fn:toLowerCase(table.status) == 'serving'}">
-                                                <span class="badge bg-warning text-dark">Serving</span>
+                                            <c:when test="${fn:toLowerCase(table.status) == 'reserved'}">
+                                                <span class="badge bg-warning text-dark">Reserved</span>
                                             </c:when>
 
                                             <c:when test="${fn:toLowerCase(table.status) == 'cleaning'}">
@@ -126,9 +126,9 @@
                                                     <li>
                                                         <form method="post" action="<c:url value='table'/>" class="px-2 py-1">
                                                             <input type="hidden" name="id" value="${table.id}" />
-                                                            <input type="hidden" name="newStatus" value="Serving" />
+                                                            <input type="hidden" name="newStatus" value="Reserved" />
                                                             <button type="submit" name="action" value="changeStatus" class="dropdown-item" ${fn:toLowerCase(table.status) == 'serving' ? 'disabled' : ''}>
-                                                                Set Serving
+                                                                Set Reserved
                                                             </button>
                                                         </form>
                                                     </li>

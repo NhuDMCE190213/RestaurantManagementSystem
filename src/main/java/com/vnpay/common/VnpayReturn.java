@@ -5,6 +5,7 @@
 package com.vnpay.common;
 
 import dao.ReservationDAO;
+import dao.TableDAO;
 import dao.VoucherDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -32,6 +33,7 @@ public class VnpayReturn extends HttpServlet {
     
     private final ReservationDAO reservationDAO = new ReservationDAO();
     private final VoucherDAO voucherDAO = new VoucherDAO();
+    private final TableDAO tableDAO = new TableDAO();
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -85,6 +87,7 @@ public class VnpayReturn extends HttpServlet {
                     
                     if (reservation.getStatus().equalsIgnoreCase("Serving")) {
                         reservationDAO.complete(reservationId, "Completed");
+                        tableDAO.updateStatus(reservation.getTable().getId(), "Cleaning");
                     } else if (reservation.getStatus().equalsIgnoreCase("waiting_deposit")) {
                         reservationDAO.deposit(reservationId, "Approved", deposit);
                         

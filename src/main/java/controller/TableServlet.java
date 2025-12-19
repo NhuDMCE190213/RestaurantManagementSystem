@@ -39,7 +39,7 @@ public class TableServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try ( PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
@@ -203,8 +203,8 @@ public class TableServlet extends HttpServlet {
                         // Kiểm tra nếu bàn đã từng được sử dụng
                         boolean used = tableDAO.isTableUsed(id);
                         if (used) {
-                                popupStatus = false;
-                                popupMessage = "The delete action is NOT successful. This table has been used. You can only delete a new table. ";
+                            popupStatus = false;
+                            popupMessage = "The delete action is NOT successful. This table has been used. You can only delete a new table. ";
 
                         } else {
                             // Nếu chưa từng dùng thì cho xóa bình thường (với điều kiện status = 'Available' đã được kiểm tra)
@@ -233,7 +233,7 @@ public class TableServlet extends HttpServlet {
                 if (!isValidInteger(id, false, false, true)
                         || newStatus == null
                         || !(newStatus.equalsIgnoreCase("Available")
-                        || newStatus.equalsIgnoreCase("Serving")
+                        || newStatus.equalsIgnoreCase("Reserved")
                         || newStatus.equalsIgnoreCase("Cleaning"))) {
                     popupStatus = false;
                     popupMessage = "Change status action is NOT successful. Invalid input.";
@@ -250,8 +250,6 @@ public class TableServlet extends HttpServlet {
                 }
             }
         }
-        
-        
 
         setPopup(request, popupStatus, popupMessage);
         response.sendRedirect(request.getContextPath() + "/table");
