@@ -475,7 +475,7 @@ public class ReservationServlet extends HttpServlet {
                             if ("unpaid".equalsIgnoreCase(action)) {
                                 try {
                                     int tableId = current.getTable().getId();
-                                    tableDAO.updateStatus(tableId, "Available");
+                                    tableDAO.updateStatus(tableId, "Cleaning");
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
